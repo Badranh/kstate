@@ -3,6 +3,8 @@ package dev.kstate.host.desktop
 import dev.kstate.host.record.RecordedSession
 import dev.kstate.host.record.SessionRecorder
 import dev.kstate.host.session.SessionEngine
+import dev.kstate.host.timeline.VideoSample
+import dev.kstate.host.timeline.VideoTimeline
 import dev.kstate.protocol.Encoding
 import dev.kstate.protocol.Envelope
 import dev.kstate.protocol.Hello
@@ -129,5 +131,27 @@ class ReplaySessionSourceTest {
             CommandOutcome.NotConnected,
             runBlocking { replay().freeze("emulator-5554/Counter-1", frozen = true) },
         )
+    }
+
+    @Test
+    fun theTimelineStartsWhenRecordingStartedEvenIfTheVideoReachesBack() {
+        val dir = Files.createTempDirectory("kstate-replay-video").resolve("v")
+        val engine = SessionEngine(clock = { 1_000 })
+        val video =
+            VideoTimeline().apply {
+                append(VideoSample(400, keyFrame = true, data = byteArrayOf(1)))
+            }
+        val recorder = SessionRecorder(dir, "v", engine, clock = { 1_000 }).apply { start() }
+        recorder.addVideo("emulator-5554", video)
+        recorder.stop()
+
+        val replay =
+            ReplaySessionSource(
+                RecordedSession.open(dir),
+                FakeLiveSource(emptyList()),
+                CoroutineScope(Dispatchers.Unconfined),
+            )
+
+        assertEquals(1_000L, replay.timeline().start)
     }
 }

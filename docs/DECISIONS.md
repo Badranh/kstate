@@ -249,3 +249,68 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   - Write-through restore of seq 1: the app shows 1 with no override, and the next tap makes 2.
   - SetState changing `/apiToken` is refused (`errorPath = /apiToken`) and the app is unchanged;
     an edit of `count` with the placeholder left in place shows 42.
+
+## 2026-11-05: A recording is the engine's inputs, replayed into a fresh engine
+- Every change to the session goes through `SessionEngine.apply(SessionInput, hostTs)`: an app
+  message, a disconnect, or an override mark. Observers are told under the engine's lock, so
+  `timeline.jsonl` is exactly what was applied, in order, and a replay builds the same `Session`
+  and the same `SourceHistories` with the same code as live. Nothing in the viewer knows the
+  difference except `SessionSource.kind`.
+- A recording starts with a baseline: the inputs that rebuild what was showing (Hello, each
+  source's registration, its latest snapshot, overrides, nav, offline apps), stamped with the start
+  time. Video starts at the key frame before the start, so the first moment can be decoded.
+  `onSubscribed` / `onStart` run under the engine's and the timeline's locks, so a live input can't
+  be written before the baseline.
+- `video/<device>.idx` entries are u64 host time | u64 offset | u8 flags, and the byte is a set of
+  flags (key frame, config) rather than the spec's keyframe-only byte, because config packets are
+  kept in the stream too. A config packet takes the time of the picture before it, so the index
+  never goes back in time. A device whose video restarts keeps writing into the same files.
+- Device ids become file stems by keeping `[A-Za-z0-9._-]`, so `192.168.1.5:5555` is a safe name;
+  the manifest maps devices to stems and the reader re-checks every stem.
+- Recordings live in `~/Documents/Kstate/Recordings`; opened `.kstate` files are extracted into
+  `~/Documents/Kstate/Imported`. Recording always captures the live session, even while a
+  recording is shown.
+
+## 2026-11-05: Opening someone else's .kstate
+- Import extracts by name only: `manifest.json`, `timeline.jsonl`, `video/<stem>.h264|.idx`.
+  Anything else (paths, hidden files, scripts) fails the whole import. Entries are capped (1,024)
+  and real bytes are counted while copying (16 GB), whatever the zip headers claim. Files are
+  created with CREATE_NEW, so a duplicated entry fails instead of overwriting.
+- Extraction goes to a hidden temporary folder that is moved into place last, and removed on any
+  failure; an existing folder is never replaced, a second import gets "name-2".
+- Timeline lines and the manifest have their nesting checked (128) before the recursive JSON
+  parser sees them, and lines are capped at 16 MB. The video index is checked for order and for
+  offsets inside the stream before any seek.
+- A manifest from a newer format version is refused with a message saying so.
+
+## 2026-11-05: Replay in the viewer, and injecting into a live app
+- A recording opens paused at its start. Space plays and pauses instead of going live; stepping
+  past the last change stops at the end. While playing, the tile decodes one moment at a time and
+  the newest request wins, because a GOP decode can't be interrupted.
+- A recorded source maps to the live source with the same name that is still live; source and
+  device ids differ between machines and runs, the name is what the app's code chose. The live
+  counterpart also decides the capabilities shown, so a recording of an app that is not running
+  offers nothing to inject.
+- Restore from a recording sends the recorded state as SetState, since live seqs mean nothing to
+  it. Redacted placeholders stay placeholders, so the SDK keeps the live app's own secrets.
+- Every command from a recording goes through `ConfirmingCommands`, which suspends on a dialog;
+  "no" (or dismissing it) is `CommandOutcome.Cancelled`.
+
+## 2026-11-05: M5 acceptance, measured
+- Emulator, sample counter, 10 minutes recorded through the same `DesktopSessions` the menu uses,
+  with 480 taps (+1, some -1, a reset every 25). The folder held 7.9 MB of H.264, a 295 KB index
+  (17,381 packets), a 197 KB timeline; the exported `.kstate` was 5.1 MB.
+- "Another Mac", approximated: the original folder was moved away and a separate JVM got only the
+  `.kstate`, imported it into a different library and opened it (111 ms). Not run on a second
+  machine: nothing in the files is machine-bound (relative names, the recording host's clock only
+  used for differences), but that part is unverified on real other hardware.
+- During recording, 480 live frames were hashed together with the state the host showed at each
+  frame's time. In the replay, all 480 frames decoded to identical pixels (SHA-256 of the RGBA)
+  and all 480 states (seq and JSON) matched; every snapshot recorded after the start was in the
+  replayed history. A seek took 204 ms on average and 504 ms at most, because it decodes from the
+  last key frame (the emulator's encoder sends one about every 10 s).
+- Injection: with the live app at 0, a recorded state (count 7) was restored through
+  `ConfirmingCommands`; saying no returned Cancelled and the app stayed at 0, saying yes made the
+  app show 7.
+- Found and fixed during the run: a replay opened at the video's key frame, about 9 s before the
+  recording began, with no state to show; its timeline now starts at the recording's start.

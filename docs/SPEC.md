@@ -463,9 +463,9 @@ Build in this order; each milestone ends with a working demo on the sample app a
 
 **M5: Recording and replay**
 
-- [ ] Recorder, session folder format, `.kstate` export/import, replay `SessionSource`.
-- [ ] Inject a state from a session file into a live app (with confirmation).
-- [ ] Accepted when a 10-minute recording replays with frame-accurate state on another Mac.
+- [x] Recorder, session folder format, `.kstate` export/import, replay `SessionSource`.
+- [x] Inject a state from a session file into a live app (with confirmation).
+- [x] Accepted when a 10-minute recording replays with frame-accurate state on another Mac. (Run with only the `.kstate` in a fresh process and library on the same Mac; see docs/DECISIONS.md.)
 
 **M6: Collaboration**
 

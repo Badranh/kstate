@@ -64,7 +64,8 @@ class ReplaySessionSource(
                         .minOrNull(),
                 now = manifest.endHostTs,
             )
-        return timeline.copy(start = minOf(timeline.start, manifest.startHostTs))
+        // The video reaches back to the key frame before the start, but nothing was recorded there yet.
+        return timeline.copy(start = manifest.startHostTs)
     }
 
     override suspend fun restore(
