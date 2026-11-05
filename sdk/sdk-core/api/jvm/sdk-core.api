@@ -1,0 +1,85 @@
+public final class dev/kstate/sdk/Kstate {
+	public static final field INSTANCE Ldev/kstate/sdk/Kstate;
+	public final fun event (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Ljava/lang/String;)V
+	public static synthetic fun event$default (Ldev/kstate/sdk/Kstate;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun start (Ldev/kstate/sdk/KstateConfig;)V
+	public static synthetic fun start$default (Ldev/kstate/sdk/Kstate;Ldev/kstate/sdk/KstateConfig;ILjava/lang/Object;)V
+	public final fun stop ()V
+	public final fun track (Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/coroutines/flow/Flow;Ldev/kstate/sdk/encoding/StateEncoder;)Ldev/kstate/sdk/SourceHandle;
+	public static synthetic fun track$default (Ldev/kstate/sdk/Kstate;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/coroutines/flow/Flow;Ldev/kstate/sdk/encoding/StateEncoder;ILjava/lang/Object;)Ldev/kstate/sdk/SourceHandle;
+}
+
+public final class dev/kstate/sdk/KstateConfig {
+	public fun <init> ()V
+	public fun <init> (ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;)V
+	public synthetic fun <init> (ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()J
+	public final fun component6 ()Ldev/kstate/sdk/redaction/Redaction;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun copy (ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;)Ldev/kstate/sdk/KstateConfig;
+	public static synthetic fun copy$default (Ldev/kstate/sdk/KstateConfig;ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;ILjava/lang/Object;)Ldev/kstate/sdk/KstateConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAppId ()Ljava/lang/String;
+	public final fun getEnabled ()Z
+	public final fun getHost ()Ljava/lang/String;
+	public final fun getMinEmitIntervalMs ()J
+	public final fun getPairingToken ()Ljava/lang/String;
+	public final fun getPort ()I
+	public final fun getRedaction ()Ldev/kstate/sdk/redaction/Redaction;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/kstate/sdk/KstateKt {
+	public static final fun inspect (Lkotlinx/coroutines/flow/StateFlow;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/serialization/KSerializer;)Lkotlinx/coroutines/flow/StateFlow;
+	public static synthetic fun inspect$default (Lkotlinx/coroutines/flow/StateFlow;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/serialization/KSerializer;ILjava/lang/Object;)Lkotlinx/coroutines/flow/StateFlow;
+}
+
+public abstract interface class dev/kstate/sdk/SourceHandle {
+	public static final field Companion Ldev/kstate/sdk/SourceHandle$Companion;
+	public abstract fun close ()V
+	public abstract fun getSourceId ()Ljava/lang/String;
+}
+
+public final class dev/kstate/sdk/SourceHandle$Companion {
+	public final fun getNone ()Ldev/kstate/sdk/SourceHandle;
+}
+
+public final class dev/kstate/sdk/encoding/EncodedState {
+	public fun <init> (Lkotlinx/serialization/json/JsonElement;Ldev/kstate/protocol/Encoding;)V
+	public final fun component1 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component2 ()Ldev/kstate/protocol/Encoding;
+	public final fun copy (Lkotlinx/serialization/json/JsonElement;Ldev/kstate/protocol/Encoding;)Ldev/kstate/sdk/encoding/EncodedState;
+	public static synthetic fun copy$default (Ldev/kstate/sdk/encoding/EncodedState;Lkotlinx/serialization/json/JsonElement;Ldev/kstate/protocol/Encoding;ILjava/lang/Object;)Ldev/kstate/sdk/encoding/EncodedState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEncoding ()Ldev/kstate/protocol/Encoding;
+	public final fun getJson ()Lkotlinx/serialization/json/JsonElement;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class dev/kstate/sdk/encoding/StateEncoder {
+	public static final field Companion Ldev/kstate/sdk/encoding/StateEncoder$Companion;
+	public abstract fun encode (Ljava/lang/Object;)Ldev/kstate/sdk/encoding/EncodedState;
+}
+
+public final class dev/kstate/sdk/encoding/StateEncoder$Companion {
+	public final fun auto ()Ldev/kstate/sdk/encoding/StateEncoder;
+	public final fun serializer (Lkotlinx/serialization/KSerializer;)Ldev/kstate/sdk/encoding/StateEncoder;
+}
+
+public final class dev/kstate/sdk/redaction/Redaction {
+	public static final field Companion Ldev/kstate/sdk/redaction/Redaction$Companion;
+	public synthetic fun <init> (Lkotlin/text/Regex;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class dev/kstate/sdk/redaction/Redaction$Companion {
+	public final fun getDefault ()Ldev/kstate/sdk/redaction/Redaction;
+	public final fun getDisabled ()Ldev/kstate/sdk/redaction/Redaction;
+	public final fun keys (Ljava/lang/String;)Ldev/kstate/sdk/redaction/Redaction;
+}
+

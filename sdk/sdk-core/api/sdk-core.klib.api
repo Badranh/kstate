@@ -1,0 +1,95 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <kstate.sdk:sdk-core>
+abstract fun interface <#A: in kotlin/Any?> dev.kstate.sdk.encoding/StateEncoder { // dev.kstate.sdk.encoding/StateEncoder|null[0]
+    abstract fun encode(#A): dev.kstate.sdk.encoding/EncodedState // dev.kstate.sdk.encoding/StateEncoder.encode|encode(1:0){}[0]
+
+    final object Companion { // dev.kstate.sdk.encoding/StateEncoder.Companion|null[0]
+        final fun <#A2: kotlin/Any?> auto(): dev.kstate.sdk.encoding/StateEncoder<#A2> // dev.kstate.sdk.encoding/StateEncoder.Companion.auto|auto(){0§<kotlin.Any?>}[0]
+        final fun <#A2: kotlin/Any?> serializer(kotlinx.serialization/KSerializer<#A2>): dev.kstate.sdk.encoding/StateEncoder<#A2> // dev.kstate.sdk.encoding/StateEncoder.Companion.serializer|serializer(kotlinx.serialization.KSerializer<0:0>){0§<kotlin.Any?>}[0]
+    }
+}
+
+abstract interface dev.kstate.sdk/SourceHandle { // dev.kstate.sdk/SourceHandle|null[0]
+    abstract val sourceId // dev.kstate.sdk/SourceHandle.sourceId|{}sourceId[0]
+        abstract fun <get-sourceId>(): kotlin/String // dev.kstate.sdk/SourceHandle.sourceId.<get-sourceId>|<get-sourceId>(){}[0]
+
+    abstract fun close() // dev.kstate.sdk/SourceHandle.close|close(){}[0]
+
+    final object Companion { // dev.kstate.sdk/SourceHandle.Companion|null[0]
+        final val None // dev.kstate.sdk/SourceHandle.Companion.None|{}None[0]
+            final fun <get-None>(): dev.kstate.sdk/SourceHandle // dev.kstate.sdk/SourceHandle.Companion.None.<get-None>|<get-None>(){}[0]
+    }
+}
+
+final class dev.kstate.sdk.encoding/EncodedState { // dev.kstate.sdk.encoding/EncodedState|null[0]
+    constructor <init>(kotlinx.serialization.json/JsonElement, dev.kstate.protocol/Encoding) // dev.kstate.sdk.encoding/EncodedState.<init>|<init>(kotlinx.serialization.json.JsonElement;dev.kstate.protocol.Encoding){}[0]
+
+    final val encoding // dev.kstate.sdk.encoding/EncodedState.encoding|{}encoding[0]
+        final fun <get-encoding>(): dev.kstate.protocol/Encoding // dev.kstate.sdk.encoding/EncodedState.encoding.<get-encoding>|<get-encoding>(){}[0]
+    final val json // dev.kstate.sdk.encoding/EncodedState.json|{}json[0]
+        final fun <get-json>(): kotlinx.serialization.json/JsonElement // dev.kstate.sdk.encoding/EncodedState.json.<get-json>|<get-json>(){}[0]
+
+    final fun component1(): kotlinx.serialization.json/JsonElement // dev.kstate.sdk.encoding/EncodedState.component1|component1(){}[0]
+    final fun component2(): dev.kstate.protocol/Encoding // dev.kstate.sdk.encoding/EncodedState.component2|component2(){}[0]
+    final fun copy(kotlinx.serialization.json/JsonElement = ..., dev.kstate.protocol/Encoding = ...): dev.kstate.sdk.encoding/EncodedState // dev.kstate.sdk.encoding/EncodedState.copy|copy(kotlinx.serialization.json.JsonElement;dev.kstate.protocol.Encoding){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.sdk.encoding/EncodedState.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.sdk.encoding/EncodedState.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.sdk.encoding/EncodedState.toString|toString(){}[0]
+}
+
+final class dev.kstate.sdk.redaction/Redaction { // dev.kstate.sdk.redaction/Redaction|null[0]
+    final object Companion { // dev.kstate.sdk.redaction/Redaction.Companion|null[0]
+        final val Default // dev.kstate.sdk.redaction/Redaction.Companion.Default|{}Default[0]
+            final fun <get-Default>(): dev.kstate.sdk.redaction/Redaction // dev.kstate.sdk.redaction/Redaction.Companion.Default.<get-Default>|<get-Default>(){}[0]
+        final val Disabled // dev.kstate.sdk.redaction/Redaction.Companion.Disabled|{}Disabled[0]
+            final fun <get-Disabled>(): dev.kstate.sdk.redaction/Redaction // dev.kstate.sdk.redaction/Redaction.Companion.Disabled.<get-Disabled>|<get-Disabled>(){}[0]
+
+        final fun keys(kotlin/String): dev.kstate.sdk.redaction/Redaction // dev.kstate.sdk.redaction/Redaction.Companion.keys|keys(kotlin.String){}[0]
+    }
+}
+
+final class dev.kstate.sdk/KstateConfig { // dev.kstate.sdk/KstateConfig|null[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/String = ..., kotlin/Int = ..., kotlin/String? = ..., kotlin/Long = ..., dev.kstate.sdk.redaction/Redaction = ..., kotlin/String? = ...) // dev.kstate.sdk/KstateConfig.<init>|<init>(kotlin.Boolean;kotlin.String;kotlin.Int;kotlin.String?;kotlin.Long;dev.kstate.sdk.redaction.Redaction;kotlin.String?){}[0]
+
+    final val appId // dev.kstate.sdk/KstateConfig.appId|{}appId[0]
+        final fun <get-appId>(): kotlin/String? // dev.kstate.sdk/KstateConfig.appId.<get-appId>|<get-appId>(){}[0]
+    final val enabled // dev.kstate.sdk/KstateConfig.enabled|{}enabled[0]
+        final fun <get-enabled>(): kotlin/Boolean // dev.kstate.sdk/KstateConfig.enabled.<get-enabled>|<get-enabled>(){}[0]
+    final val host // dev.kstate.sdk/KstateConfig.host|{}host[0]
+        final fun <get-host>(): kotlin/String // dev.kstate.sdk/KstateConfig.host.<get-host>|<get-host>(){}[0]
+    final val minEmitIntervalMs // dev.kstate.sdk/KstateConfig.minEmitIntervalMs|{}minEmitIntervalMs[0]
+        final fun <get-minEmitIntervalMs>(): kotlin/Long // dev.kstate.sdk/KstateConfig.minEmitIntervalMs.<get-minEmitIntervalMs>|<get-minEmitIntervalMs>(){}[0]
+    final val pairingToken // dev.kstate.sdk/KstateConfig.pairingToken|{}pairingToken[0]
+        final fun <get-pairingToken>(): kotlin/String? // dev.kstate.sdk/KstateConfig.pairingToken.<get-pairingToken>|<get-pairingToken>(){}[0]
+    final val port // dev.kstate.sdk/KstateConfig.port|{}port[0]
+        final fun <get-port>(): kotlin/Int // dev.kstate.sdk/KstateConfig.port.<get-port>|<get-port>(){}[0]
+    final val redaction // dev.kstate.sdk/KstateConfig.redaction|{}redaction[0]
+        final fun <get-redaction>(): dev.kstate.sdk.redaction/Redaction // dev.kstate.sdk/KstateConfig.redaction.<get-redaction>|<get-redaction>(){}[0]
+
+    final fun component1(): kotlin/Boolean // dev.kstate.sdk/KstateConfig.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.kstate.sdk/KstateConfig.component2|component2(){}[0]
+    final fun component3(): kotlin/Int // dev.kstate.sdk/KstateConfig.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // dev.kstate.sdk/KstateConfig.component4|component4(){}[0]
+    final fun component5(): kotlin/Long // dev.kstate.sdk/KstateConfig.component5|component5(){}[0]
+    final fun component6(): dev.kstate.sdk.redaction/Redaction // dev.kstate.sdk/KstateConfig.component6|component6(){}[0]
+    final fun component7(): kotlin/String? // dev.kstate.sdk/KstateConfig.component7|component7(){}[0]
+    final fun copy(kotlin/Boolean = ..., kotlin/String = ..., kotlin/Int = ..., kotlin/String? = ..., kotlin/Long = ..., dev.kstate.sdk.redaction/Redaction = ..., kotlin/String? = ...): dev.kstate.sdk/KstateConfig // dev.kstate.sdk/KstateConfig.copy|copy(kotlin.Boolean;kotlin.String;kotlin.Int;kotlin.String?;kotlin.Long;dev.kstate.sdk.redaction.Redaction;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.sdk/KstateConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.sdk/KstateConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.sdk/KstateConfig.toString|toString(){}[0]
+}
+
+final object dev.kstate.sdk/Kstate { // dev.kstate.sdk/Kstate|null[0]
+    final fun <#A1: kotlin/Any?> track(kotlinx.coroutines/CoroutineScope, kotlin/String, kotlinx.coroutines.flow/Flow<#A1>, dev.kstate.sdk.encoding/StateEncoder<#A1> = ...): dev.kstate.sdk/SourceHandle // dev.kstate.sdk/Kstate.track|track(kotlinx.coroutines.CoroutineScope;kotlin.String;kotlinx.coroutines.flow.Flow<0:0>;dev.kstate.sdk.encoding.StateEncoder<0:0>){0§<kotlin.Any?>}[0]
+    final fun event(kotlin/String, kotlinx.serialization.json/JsonElement? = ..., kotlin/String? = ...) // dev.kstate.sdk/Kstate.event|event(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.String?){}[0]
+    final fun start(dev.kstate.sdk/KstateConfig = ...) // dev.kstate.sdk/Kstate.start|start(dev.kstate.sdk.KstateConfig){}[0]
+    final fun stop() // dev.kstate.sdk/Kstate.stop|stop(){}[0]
+}
+
+final fun <#A: kotlin/Any?> (kotlinx.coroutines.flow/StateFlow<#A>).dev.kstate.sdk/inspect(kotlinx.coroutines/CoroutineScope, kotlin/String, kotlinx.serialization/KSerializer<#A>? = ...): kotlinx.coroutines.flow/StateFlow<#A> // dev.kstate.sdk/inspect|inspect@kotlinx.coroutines.flow.StateFlow<0:0>(kotlinx.coroutines.CoroutineScope;kotlin.String;kotlinx.serialization.KSerializer<0:0>?){0§<kotlin.Any?>}[0]
