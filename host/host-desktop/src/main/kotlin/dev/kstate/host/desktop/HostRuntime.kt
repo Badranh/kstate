@@ -8,6 +8,7 @@ import dev.kstate.host.gateway.GatewayFactory
 import dev.kstate.host.gateway.HostCommands
 import dev.kstate.host.session.HostClock
 import dev.kstate.host.session.SessionEngine
+import dev.kstate.host.timeline.VideoTimeline
 import dev.kstate.host.video.device.DeviceVideo
 import dev.kstate.host.video.device.DeviceVideos
 import dev.kstate.host.video.scrcpy.ScrcpyLauncher
@@ -16,7 +17,10 @@ import dev.kstate.viewer.client.SessionSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /** Whether the user's adb was found. */
 sealed interface AdbAvailability {
@@ -47,13 +51,21 @@ class HostRuntime(
             DeviceVideos(attached, launch = { serial -> launcher.start(serial, videoProfile) })
         }
     private var videoJob: Job? = null
+    private val deviceVideos: StateFlow<Map<String, DeviceVideo>> = videos?.videos ?: MutableStateFlow(emptyMap())
+
+    /** Each attached device's video timeline, for the recorder. */
+    val videoTimelines: StateFlow<Map<String, VideoTimeline>> =
+        deviceVideos
+            .map { current ->
+                current.mapValues { it.value.timeline }
+            }.stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
     val sessionSource: SessionSource =
         InProcessSessionSource(
             engine = engine,
             devices = attached,
             problem = deviceManager?.problem ?: MutableStateFlow<String?>(ADB_MISSING),
-            videos = videos?.videos ?: MutableStateFlow<Map<String, DeviceVideo>>(emptyMap()),
+            videos = deviceVideos,
             clock = clock,
             scope = scope,
             commands = commands,

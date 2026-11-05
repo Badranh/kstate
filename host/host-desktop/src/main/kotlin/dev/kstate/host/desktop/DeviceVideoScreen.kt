@@ -3,7 +3,6 @@ package dev.kstate.host.desktop
 import dev.kstate.host.video.control.InputTranslator
 import dev.kstate.host.video.decode.OutputSize
 import dev.kstate.host.video.device.DeviceVideo
-import dev.kstate.host.video.device.LiveFrame
 import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.TouchPhase
 import dev.kstate.viewer.client.VideoFrame
@@ -52,6 +51,4 @@ class DeviceVideoScreen(
     override fun key(keycode: Int) = input.key(keycode)
 
     override fun text(text: String) = input.text(text)
-
-    private fun LiveFrame.toViewer() = VideoFrame(frame.width, frame.height, frame.rgba, hostTs)
 }

@@ -35,4 +35,8 @@ fun hostModule() =
             AdbLocator().locate()?.let { AdbAvailability.Found(ProcessAdbClient(it)) } ?: AdbAvailability.Missing
         }
         single { HostRuntime(get(), get(), get(), get(), get(), get(), get()) }
+        single {
+            val runtime = get<HostRuntime>()
+            DesktopSessions(runtime.sessionSource, get(), runtime.videoTimelines, RecordingLibrary(), get())
+        }
     }
