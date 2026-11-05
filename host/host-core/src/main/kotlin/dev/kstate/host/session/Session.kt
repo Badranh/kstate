@@ -14,6 +14,8 @@ data class Session(
 
 data class AppConnection(
     val deviceId: String,
+    /** Which socket this app spoke through; a newer Hello on the same device replaces it. */
+    val connectionId: Long,
     val hello: Hello,
     val connected: Boolean,
     val nav: List<String> = emptyList(),

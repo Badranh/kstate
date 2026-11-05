@@ -98,3 +98,12 @@ spec's pipeline; M4's ring buffer keeps every conflated value.
 ## 2026-11-05: sdk-noop ships from M1 with an API parity check
 CLAUDE.md requires sdk-noop to keep sdk-core's exact public API. `:sdk:sdk-noop:verifyApiParity`
 (part of `check`) compares both modules' API dumps and fails on any difference.
+
+## 2026-11-05: Connection ids guard against late closes
+Every app socket gets a connection id. A newer Hello on the same device replaces the old
+connection; a late close or a stale message from the replaced socket is ignored. Without it an app
+restart could show the app as disconnected when the old socket's close arrives after the new Hello.
+
+## 2026-11-05: adb lookup falls back to Android Studio's default SDK
+After ANDROID_HOME, ANDROID_SDK_ROOT and PATH, the host tries `~/Library/Android/sdk`. An app
+started from Finder or the DMG doesn't inherit the shell's PATH.

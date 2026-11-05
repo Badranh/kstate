@@ -31,38 +31,32 @@ class SessionEngine(
 
     fun onMessage(
         deviceId: String,
+        connectionId: Long,
         envelope: Envelope,
     ) = lock.withLock {
         val hostTs = clock.nanos()
+        val msg = envelope.msg
+        if (msg !is Hello && !isCurrent(deviceId, connectionId)) return@withLock
         state.value =
-            when (val msg = envelope.msg) {
-                is Hello -> state.value.withApp(AppConnection(deviceId, msg, connected = true))
+            when (msg) {
+                is Hello -> state.value.withApp(AppConnection(deviceId, connectionId, msg, connected = true))
                 is SourceRegistered -> state.value.withRegistration(deviceId, msg)
                 is StateSnapshot -> withSnapshot(state.value, deviceId, msg, hostTs)
                 is SourceCleared -> state.value.withSource(SourceKey(deviceId, msg.sourceId)) { it.copy(live = false) }
-                is Event -> state.value.withEvent(TimedEvent(hostTs, deviceId, msg))
+                is Event -> state.value.withEvent(TimedEvent(hostTs, deviceId, msg), keep = recentEventLimit)
                 is Nav -> state.value.withAppUpdate(deviceId) { it.copy(nav = msg.stack) }
                 else -> state.value
             }
     }
 
-    fun onDisconnected(deviceId: String) =
-        lock.withLock {
-            val session = state.value.withAppUpdate(deviceId) { it.copy(connected = false) }
-            state.value =
-                session.copy(
-                    sources =
-                        session.sources.mapValues { (key, source) ->
-                            if (key.deviceId ==
-                                deviceId
-                            ) {
-                                source.copy(live = false)
-                            } else {
-                                source
-                            }
-                        },
-                )
-        }
+    /** Ignored when a newer connection of the same device already said Hello. */
+    fun onDisconnected(
+        deviceId: String,
+        connectionId: Long,
+    ) = lock.withLock {
+        if (!isCurrent(deviceId, connectionId)) return@withLock
+        state.value = state.value.withAppUpdate(deviceId) { it.copy(connected = false) }.withDeviceOffline(deviceId)
+    }
 
     /** Every snapshot of a source, oldest first. */
     fun history(key: SourceKey): List<TimedSnapshot> = lock.withLock { histories[key]?.toList().orEmpty() }
@@ -83,31 +77,10 @@ class SessionEngine(
         return session.copy(sources = session.sources + (key to source.copy(latest = timed, lastDiff = diff)))
     }
 
-    private fun Session.withApp(app: AppConnection) = copy(apps = apps + (app.deviceId to app))
-
-    private fun Session.withAppUpdate(
+    private fun isCurrent(
         deviceId: String,
-        update: (AppConnection) -> AppConnection,
-    ) = apps[deviceId]?.let { withApp(update(it)) } ?: this
-
-    private fun Session.withRegistration(
-        deviceId: String,
-        registration: SourceRegistered,
-    ): Session {
-        val key = SourceKey(deviceId, registration.sourceId)
-        val source =
-            sources[key]?.copy(name = registration.name, ownerType = registration.ownerType, live = true)
-                ?: SourceTrack(key, registration.name, registration.ownerType, live = true)
-        return copy(sources = sources + (key to source))
-    }
-
-    private fun Session.withSource(
-        key: SourceKey,
-        update: (SourceTrack) -> SourceTrack,
-    ) = sources[key]?.let { copy(sources = sources + (key to update(it))) } ?: this
-
-    private fun Session.withEvent(event: TimedEvent) =
-        copy(recentEvents = (recentEvents + event).takeLast(recentEventLimit))
+        connectionId: Long,
+    ): Boolean = state.value.apps[deviceId]?.connectionId == connectionId
 
     companion object {
         const val DEFAULT_RECENT_EVENTS: Int = 200

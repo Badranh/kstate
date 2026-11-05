@@ -27,7 +27,8 @@ class SessionEngineTest {
     private fun receive(
         msg: Msg,
         device: String = "emulator-5554",
-    ) = engine.onMessage(device, Envelope(id = "x", ts = 0, msg = msg))
+        connection: Long = 1,
+    ) = engine.onMessage(device, connection, Envelope(id = "x", ts = 0, msg = msg))
 
     private fun snapshot(
         seq: Long,
@@ -35,9 +36,9 @@ class SessionEngineTest {
         source: String = "Counter-1",
     ) = StateSnapshot(source, seq, JsonPrimitive(count), Encoding.SERIALIZER)
 
-    private fun connectCounter() {
-        receive(hello)
-        receive(SourceRegistered("Counter-1", "Counter", "StateFlow"))
+    private fun connectCounter(connection: Long = 1) {
+        receive(hello, connection = connection)
+        receive(SourceRegistered("Counter-1", "Counter", "StateFlow"), connection = connection)
     }
 
     @Test
@@ -45,7 +46,7 @@ class SessionEngineTest {
         receive(hello)
 
         assertEquals(
-            AppConnection("emulator-5554", hello, connected = true),
+            AppConnection("emulator-5554", connectionId = 1, hello = hello, connected = true),
             engine.session.value.apps["emulator-5554"],
         )
     }
@@ -104,9 +105,9 @@ class SessionEngineTest {
     fun anAppRestartContinuesTheSameSource() {
         connectCounter()
         receive(snapshot(4, 4))
-        engine.onDisconnected("emulator-5554")
-        connectCounter()
-        receive(snapshot(0, 0))
+        engine.onDisconnected("emulator-5554", connectionId = 1)
+        connectCounter(connection = 2)
+        receive(snapshot(0, 0), connection = 2)
 
         val source =
             engine.session.value.sources
@@ -136,9 +137,10 @@ class SessionEngineTest {
     @Test
     fun disconnectingTakesTheAppAndItsSourcesOffline() {
         connectCounter()
+        receive(hello, device = "emulator-5556")
         receive(SourceRegistered("Other-2", "Other", "Flow"), device = "emulator-5556")
 
-        engine.onDisconnected("emulator-5554")
+        engine.onDisconnected("emulator-5554", connectionId = 1)
 
         val session = engine.session.value
         assertFalse(session.apps.getValue("emulator-5554").connected)
@@ -149,6 +151,7 @@ class SessionEngineTest {
     @Test
     fun sameSourceIdOnTwoDevicesStaysApart() {
         connectCounter()
+        receive(hello, device = "emulator-5556")
         receive(SourceRegistered("Counter-1", "Counter", "StateFlow"), device = "emulator-5556")
         receive(snapshot(0, 9), device = "emulator-5556")
 
@@ -201,6 +204,40 @@ class SessionEngineTest {
             engine.session.value.sources
                 .getValue(SourceKey("emulator-5554", "Ghost-9"))
                 .name,
+        )
+    }
+
+    @Test
+    fun aLateCloseOfAnOlderConnectionLeavesTheNewOneConnected() {
+        connectCounter(connection = 1)
+        connectCounter(connection = 2)
+
+        engine.onDisconnected("emulator-5554", connectionId = 1)
+
+        assertTrue(
+            engine.session.value.apps
+                .getValue("emulator-5554")
+                .connected,
+        )
+        assertTrue(
+            engine.session.value.sources
+                .getValue(counter)
+                .live,
+        )
+    }
+
+    @Test
+    fun messagesFromAReplacedConnectionAreIgnored() {
+        connectCounter(connection = 1)
+        connectCounter(connection = 2)
+
+        receive(snapshot(9, 9), connection = 1)
+
+        assertEquals(
+            null,
+            engine.session.value.sources
+                .getValue(counter)
+                .latest,
         )
     }
 }
