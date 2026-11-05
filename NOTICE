@@ -1,0 +1,12 @@
+Kstate
+Copyright 2026 The Kstate authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+It bundles or uses the following third-party software:
+
+- scrcpy (https://github.com/Genymobile/scrcpy), Copyright Genymobile and Romain Vimont,
+  licensed under the Apache License, Version 2.0. The scrcpy-server binary is bundled
+  in host-video from milestone M2.
+- FFmpeg (https://ffmpeg.org), licensed under the GNU Lesser General Public License,
+  version 2.1 or later. Only LGPL builds are used, via JavaCV (https://github.com/bytedeco/javacv).
