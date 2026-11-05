@@ -26,6 +26,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -42,7 +43,7 @@ class WebSocketTransportTest {
     private fun transport(url: String): WebSocketTransport =
         WebSocketTransport(
             url = url,
-            client = client,
+            clientFactory = { client },
             replay = { listOf(envelope(hello)) },
             scope = scope,
             backoff = Backoff(initial = 50.milliseconds, max = 100.milliseconds),
@@ -61,6 +62,24 @@ class WebSocketTransportTest {
         client.close()
         closeables.forEach { it.close() }
     }
+
+    @Test
+    fun theHttpClientIsCreatedOffTheCallersThread() =
+        runBlocking {
+            val host = host()
+            val caller = Thread.currentThread()
+            var creator: Thread? = null
+
+            WebSocketTransport(
+                url = host.url,
+                clientFactory = { client.also { creator = Thread.currentThread() } },
+                replay = { listOf(envelope(hello)) },
+                scope = scope,
+            )
+            host.next()
+
+            assertNotEquals(caller, creator)
+        }
 
     @Test
     fun sendsTheReplayFirstThenWhatWasQueued() =

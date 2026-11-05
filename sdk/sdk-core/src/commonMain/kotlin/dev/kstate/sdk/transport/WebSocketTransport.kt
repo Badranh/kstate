@@ -29,10 +29,12 @@ import kotlin.time.Duration.Companion.seconds
  * One WebSocket to the host, reconnecting with [backoff] until closed or rejected.
  * Every (re)connect sends the [replay] first, then whatever is still buffered.
  * The connection loop owns the [OutboundBuffer]; [send] only hands envelopes to it.
+ * The HTTP client is built inside that loop: building a Ktor engine reads from disk,
+ * which must not happen on the thread that called Kstate.start() (often the main thread).
  */
 internal class WebSocketTransport(
     private val url: String,
-    private val client: HttpClient,
+    private val clientFactory: () -> HttpClient,
     private val replay: ReplaySource,
     scope: CoroutineScope,
     private val backoff: Backoff = Backoff(),
@@ -58,9 +60,10 @@ internal class WebSocketTransport(
     }
 
     private suspend fun run() {
+        val client = clientFactory()
         while (true) {
             state.value = ConnectionState.Connecting
-            val rejection = connectOnce()
+            val rejection = connectOnce(client)
             if (rejection != null) {
                 state.value = ConnectionState.Rejected(rejection)
                 return
@@ -71,7 +74,7 @@ internal class WebSocketTransport(
     }
 
     /** Returns the host's reason when it refused us for good, null when we should retry. */
-    private suspend fun connectOnce(): String? {
+    private suspend fun connectOnce(client: HttpClient): String? {
         var rejection: String? = null
         try {
             client.webSocket(url) {

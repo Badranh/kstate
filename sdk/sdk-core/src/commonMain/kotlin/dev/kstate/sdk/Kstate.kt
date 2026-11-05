@@ -65,7 +65,7 @@ public object Kstate {
             transportFactory = { replay ->
                 WebSocketTransport(
                     url = "ws://${config.host}:${config.port}/ws/app",
-                    client = createHttpClient(),
+                    clientFactory = ::createHttpClient,
                     replay = replay,
                     scope = transportScope,
                 )
