@@ -12,14 +12,15 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class VideoStreamReaderTest {
+    /** The recording starts with the forward tunnel's dummy byte; the launcher consumes it, not the reader. */
     private fun fixture() =
         checkNotNull(javaClass.getResourceAsStream("/fixtures/scrcpy-v5.0.1-h264-142x320.bin")) { "missing fixture" }
+            .also { check(it.read() == 0) { "fixture must start with the dummy byte" } }
 
     private fun bytes(write: DataOutputStream.() -> Unit): ByteArrayInputStream =
         ByteArrayInputStream(ByteArrayOutputStream().also { DataOutputStream(it).write() }.toByteArray())
 
     private fun DataOutputStream.header(name: String = "Pixel") {
-        writeByte(0)
         write(name.toByteArray().copyOf(64))
         writeInt(0x68323634)
     }
@@ -95,7 +96,6 @@ class VideoStreamReaderTest {
         val reader =
             VideoStreamReader(
                 bytes {
-                    writeByte(0)
                     write(ByteArray(64))
                     writeInt(1)
                 },
@@ -110,7 +110,6 @@ class VideoStreamReaderTest {
         val reader =
             VideoStreamReader(
                 bytes {
-                    writeByte(0)
                     write(ByteArray(64))
                     writeInt(0x00617631)
                 },

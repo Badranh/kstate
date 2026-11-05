@@ -4,8 +4,8 @@ import java.io.DataInputStream
 import java.io.InputStream
 
 /**
- * Reads a scrcpy v5.0.1 video socket opened through a forward tunnel: dummy byte, 64-byte device
- * name, codec id, then session packets and media packets (see docs/DECISIONS.md for the layout).
+ * Reads a scrcpy v5.0.1 video socket after the tunnel's dummy byte: 64-byte device name, codec id,
+ * then session packets and media packets (see docs/DECISIONS.md for the layout).
  * Blocking: run it on the device's own video thread.
  */
 class VideoStreamReader(
@@ -15,7 +15,6 @@ class VideoStreamReader(
     private val data = DataInputStream(input.buffered())
 
     fun readHeader(): VideoStreamHeader {
-        data.readUnsignedByte()
         val name = ByteArray(DEVICE_NAME_LENGTH).also { data.readFully(it) }
         val codecId = data.readInt()
         disabledReason(codecId)?.let { throw VideoStreamException("The device refused to stream: $it") }

@@ -82,4 +82,64 @@ class ProcessAdbClientTest {
 
             assertEquals("adb reverse failed: error: device offline", failure.message)
         }
+
+    @Test
+    fun pushCopiesAFileToTheDevice() =
+        runTest {
+            client.push("emulator-5554", File("/tmp/server.jar"), "/data/local/tmp/kstate-scrcpy.jar")
+
+            assertEquals(
+                listOf(
+                    "/sdk/adb",
+                    "-s",
+                    "emulator-5554",
+                    "push",
+                    "/tmp/server.jar",
+                    "/data/local/tmp/kstate-scrcpy.jar",
+                ),
+                commands.single(),
+            )
+        }
+
+    @Test
+    fun forwardMapsAHostPortToADeviceSocket() =
+        runTest {
+            client.forward("emulator-5554", hostPort = 27183, deviceSocket = "localabstract:scrcpy_0000abcd")
+
+            assertEquals(
+                listOf("/sdk/adb", "-s", "emulator-5554", "forward", "tcp:27183", "localabstract:scrcpy_0000abcd"),
+                commands.single(),
+            )
+        }
+
+    @Test
+    fun removeForwardDropsTheRule() =
+        runTest {
+            client.removeForward("emulator-5554", hostPort = 27183)
+
+            assertEquals(
+                listOf("/sdk/adb", "-s", "emulator-5554", "forward", "--remove", "tcp:27183"),
+                commands.single(),
+            )
+        }
+
+    @Test
+    fun shellReturnsTheOutput() =
+        runTest {
+            result = ProcessResult(0, "abc  /data/local/tmp/x\n", "")
+
+            assertEquals("abc  /data/local/tmp/x\n", client.shell("emulator-5554", "sha256sum /data/local/tmp/x"))
+            assertEquals(
+                listOf("/sdk/adb", "-s", "emulator-5554", "shell", "sha256sum /data/local/tmp/x"),
+                commands.single(),
+            )
+        }
+
+    @Test
+    fun shellCommandLineOfALongRunningProcess() {
+        assertEquals(
+            listOf("/sdk/adb", "-s", "emulator-5554", "shell", "CLASSPATH=/x app_process"),
+            client.shellCommand("emulator-5554", "CLASSPATH=/x app_process"),
+        )
+    }
 }

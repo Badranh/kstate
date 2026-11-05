@@ -19,7 +19,11 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg)
             packageName = "Kstate"
             packageVersion = "0.1.0"
-            macOS { bundleID = "dev.kstate.host" }
+            macOS {
+                bundleID = "dev.kstate.host"
+                // jpackage rejects macOS versions starting with 0; see docs/DECISIONS.md.
+                packageVersion = "1.0.0"
+            }
         }
     }
 }

@@ -6,7 +6,8 @@ import java.io.File
 class ProcessAdbClient(
     private val adb: File,
     private val runner: ProcessRunner = SystemProcessRunner(),
-) : AdbClient {
+) : AdbClient,
+    AdbDeviceTools {
     override suspend fun devices(): List<AdbDevice> =
         run("devices", "devices", "-l")
             .lineSequence()
@@ -28,6 +29,39 @@ class ProcessAdbClient(
     ) {
         run("reverse --remove", "-s", serial, "reverse", "--remove", "tcp:$devicePort")
     }
+
+    override suspend fun push(
+        serial: String,
+        local: File,
+        remote: String,
+    ) {
+        run("push", "-s", serial, "push", local.path, remote)
+    }
+
+    override suspend fun forward(
+        serial: String,
+        hostPort: Int,
+        deviceSocket: String,
+    ) {
+        run("forward", "-s", serial, "forward", "tcp:$hostPort", deviceSocket)
+    }
+
+    override suspend fun removeForward(
+        serial: String,
+        hostPort: Int,
+    ) {
+        run("forward --remove", "-s", serial, "forward", "--remove", "tcp:$hostPort")
+    }
+
+    override suspend fun shell(
+        serial: String,
+        command: String,
+    ): String = run("shell", "-s", serial, "shell", command)
+
+    override fun shellCommand(
+        serial: String,
+        command: String,
+    ): List<String> = listOf(adb.path, "-s", serial, "shell", command)
 
     private suspend fun run(
         what: String,
