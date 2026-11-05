@@ -10,10 +10,13 @@ import kotlinx.serialization.json.JsonElement
 interface SessionSource {
     val session: StateFlow<SessionView>
 
+    /** A live session, or a recording being replayed: what the viewer offers depends on it. */
+    val kind: SessionKind get() = SessionKind.Live
+
     /** Device screens by device id. */
     val screens: StateFlow<Map<String, DeviceScreen>>
 
-    /** The host clock, in the same units as every timestamp the source reports. */
+    /** The host clock, in the same units as every timestamp the source reports; a recording's end. */
     fun now(): Long
 
     /** The session as it was at [hostTs]: each source's state then, highlighted against the one before. */
@@ -48,6 +51,15 @@ interface SessionSource {
 
 enum class ApplyMode { OVERLAY, WRITE_THROUGH }
 
+sealed interface SessionKind {
+    data object Live : SessionKind
+
+    /** Commands send the recording's states to the matching source of the live session. */
+    data class Recording(
+        val name: String,
+    ) : SessionKind
+}
+
 sealed interface CommandOutcome {
     data object Ok : CommandOutcome
 
@@ -60,6 +72,9 @@ sealed interface CommandOutcome {
     data object TimedOut : CommandOutcome
 
     data object NotConnected : CommandOutcome
+
+    /** The person said no when asked to confirm. */
+    data object Cancelled : CommandOutcome
 }
 
 /** What a source lets the viewer do. */

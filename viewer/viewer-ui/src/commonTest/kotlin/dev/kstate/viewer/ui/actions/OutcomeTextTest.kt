@@ -14,6 +14,7 @@ class OutcomeTextTest {
                 "Refused: write-through not supported",
                 "The app didn't answer within 3 seconds.",
                 "No app is connected.",
+                "Cancelled.",
             ),
             listOf(
                 CommandOutcome.Ok,
@@ -21,6 +22,7 @@ class OutcomeTextTest {
                 CommandOutcome.Refused("write-through not supported", null),
                 CommandOutcome.TimedOut,
                 CommandOutcome.NotConnected,
+                CommandOutcome.Cancelled,
             ).map(::outcomeText),
         )
     }

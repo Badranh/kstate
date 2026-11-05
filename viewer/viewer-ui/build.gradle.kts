@@ -11,6 +11,9 @@ kotlin {
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
         }
+        commonTest.dependencies {
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }
 

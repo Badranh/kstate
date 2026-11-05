@@ -45,4 +45,38 @@ class PlayheadTest {
         assertEquals(500L, Playhead.Live.timeAt(now = 500))
         assertEquals(250L, Playhead.Paused(250).timeAt(now = 500))
     }
+
+    @Test
+    fun aRecordingPlaysFromWhereItIsAndPausesWhereItGot() {
+        assertEquals(Playhead.Playing(250), Playhead.Paused(250).togglePlay(start = 100, end = 900))
+        assertEquals(Playhead.Paused(400), Playhead.Playing(400).togglePlay(start = 100, end = 900))
+    }
+
+    @Test
+    fun playingAtTheEndStartsOver() {
+        assertEquals(Playhead.Playing(100), Playhead.Paused(900).togglePlay(start = 100, end = 900))
+    }
+
+    @Test
+    fun playingMovesWithTheClockAndStopsAtTheEnd() {
+        assertEquals(Playhead.Playing(350), Playhead.Playing(250).advance(elapsed = 100, end = 900))
+        assertEquals(Playhead.Paused(900), Playhead.Playing(850).advance(elapsed = 100, end = 900))
+        assertEquals(Playhead.Paused(250), Playhead.Paused(250).advance(elapsed = 100, end = 900))
+    }
+
+    @Test
+    fun steppingWhilePlayingPausesOnTheChange() {
+        assertEquals(Playhead.Paused(200), Playhead.Playing(250).step(Direction.BACK, changes))
+        assertEquals(Playhead.Paused(300), Playhead.Playing(250).step(Direction.FORWARD, changes))
+    }
+
+    @Test
+    fun theMomentShownIsNullOnlyWhenLive() {
+        assertEquals(
+            listOf(null, 250L, 300L),
+            listOf(Playhead.Live, Playhead.Paused(250), Playhead.Playing(300)).map {
+                it.shownAt
+            },
+        )
+    }
 }

@@ -40,6 +40,10 @@ fun outcomeText(outcome: CommandOutcome): String =
         CommandOutcome.NotConnected -> {
             "No app is connected."
         }
+
+        CommandOutcome.Cancelled -> {
+            "Cancelled."
+        }
     }
 
 /**

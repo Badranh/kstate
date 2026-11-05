@@ -29,6 +29,9 @@ import androidx.compose.ui.unit.dp
 import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.SessionView
+import dev.kstate.viewer.ui.actions.ConfirmingCommands
+import dev.kstate.viewer.ui.actions.InjectionDialog
+import dev.kstate.viewer.ui.actions.InjectionGate
 import dev.kstate.viewer.ui.screen.DeviceTile
 import dev.kstate.viewer.ui.timeline.Playback
 import dev.kstate.viewer.ui.timeline.Playhead
@@ -49,9 +52,11 @@ fun KstateApp(
     val keys = remember { FocusRequester() }
     LaunchedEffect(Unit) { keys.requestFocus() }
 
-    val paused = (playback.playhead as? Playhead.Paused)?.at
+    val paused = playback.playhead.shownAt
     val session = remember(live, paused) { paused?.let(source::sessionAt) ?: live }
     val timeline = remember(live, playback.now) { source.timeline() }
+    val gate = remember(source) { InjectionGate() }
+    val commands = remember(source, gate) { ConfirmingCommands(source, gate) }
 
     MaterialTheme {
         Surface(modifier.fillMaxSize()) {
@@ -69,7 +74,7 @@ fun KstateApp(
                     session,
                     screenFor(session, screens),
                     paused,
-                    source,
+                    commands,
                     tab,
                     { tab = it },
                     Modifier.weight(1f).fillMaxWidth(),
@@ -77,6 +82,7 @@ fun KstateApp(
                 HorizontalDivider()
                 TimelineBar(timeline, playback.playhead, playback.now, onSeek = playback::seek)
             }
+            gate.pending?.let { InjectionDialog(it.question, onAnswer = gate::answer) }
         }
     }
 }
@@ -124,10 +130,19 @@ private fun screenFor(
 private fun ModeBar(playback: Playback) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(playback.label(), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-        Text("Space: pause/live   ←/→: previous/next change", style = MaterialTheme.typography.labelSmall)
-        TextButton(onClick = playback::toggle) { Text(if (playback.playhead == Playhead.Live) "Pause" else "Go live") }
+        val space = if (playback.replaying) "play/pause" else "pause/live"
+        Text("Space: $space   ←/→: previous/next change", style = MaterialTheme.typography.labelSmall)
+        TextButton(onClick = playback::toggle) { Text(playback.toggleLabel()) }
     }
 }
+
+private fun Playback.toggleLabel(): String =
+    when {
+        replaying && playhead is Playhead.Playing -> "Pause"
+        replaying -> "Play"
+        playhead == Playhead.Live -> "Pause"
+        else -> "Go live"
+    }
 
 private val SIDEBAR_WIDTH = 260.dp
 private val TILE_WIDTH = 360.dp
