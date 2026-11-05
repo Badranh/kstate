@@ -192,3 +192,12 @@ inspecting is never a UI subscriber. adapter-rx also targets the JVM, where its 
 A small unpublished JVM module (`:sdk:sdk-testing`) with a localhost WebSocket host. Adapter tests
 start the real SDK against it and assert the registration and the state that arrive. LiveData has
 no such test: it needs Android's main looper, so it is only compiled.
+
+## 2026-11-05: The release guard covers Android; iOS relies on the runtime check
+`dev.kstate.guard` fails any Android release variant whose runtime classpath has sdk-core, and
+`kstateGuard { releaseUsesNoop = true }` substitutes sdk-noop on release compile and runtime
+classpaths. Checked on the sample: without the swap, assembleRelease fails naming
+`project :sdk:sdk-core`; with it, the APK holds the no-op Kstate and none of KstateClient,
+WebSocketTransport, ReflectionStrategy, KstateInitProvider or Ktor. A KMP module's iOS frameworks
+share one dependency set for Debug and Release, so there is no build-time swap for iOS; the SDK
+refuses to start on a physical device unless `allowPhysicalDevice` is set.

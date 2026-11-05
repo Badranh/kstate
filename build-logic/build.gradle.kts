@@ -11,7 +11,12 @@ dependencies {
     implementation(libs.gradle.detekt)
     implementation(libs.gradle.ktlint)
     implementation(libs.gradle.bcv)
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
+
+tasks.test { useJUnitPlatform() }
 
 gradlePlugin {
     plugins {
@@ -42,6 +47,10 @@ gradlePlugin {
         register("jvmLibrary") {
             id = "kstate.jvm-library"
             implementationClass = "dev.kstate.buildlogic.JvmLibraryPlugin"
+        }
+        register("guard") {
+            id = "dev.kstate.guard"
+            implementationClass = "dev.kstate.buildlogic.GuardPlugin"
         }
         register("jvmApp") {
             id = "kstate.jvm-app"

@@ -7,3 +7,9 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.compose.multiplatform) apply false
 }
+
+// build-logic is an included build: run its tests (e.g. the release guard) as part of check.
+apply(plugin = "base")
+tasks.named("check") {
+    dependsOn(gradle.includedBuild("build-logic").task(":test"))
+}

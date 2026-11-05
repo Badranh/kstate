@@ -2,6 +2,12 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kstate.compose)
     alias(libs.plugins.kstate.lint)
+    alias(libs.plugins.kstate.guard)
+}
+
+// Release builds get sdk-noop. -Pkstate.demo.sdkCoreInRelease shows the guard failing without the swap.
+kstateGuard {
+    releaseUsesNoop = !providers.gradleProperty("kstate.demo.sdkCoreInRelease").isPresent
 }
 
 android {

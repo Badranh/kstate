@@ -112,3 +112,4 @@ kstate-kmp-sdk = { id = "kstate.kmp-sdk" }
 kstate-compose = { id = "kstate.compose" }
 kstate-jvm-library = { id = "kstate.jvm-library" }
 kstate-jvm-app = { id = "kstate.jvm-app" }
+kstate-guard = { id = "dev.kstate.guard" }
