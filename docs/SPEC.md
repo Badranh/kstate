@@ -457,9 +457,9 @@ Build in this order; each milestone ends with a working demo on the sample app a
 
 **M4: Revert and edit**
 
-- [ ] Ring buffer, `inspectable()` overlay, freeze/release, write-through, `CommandResult` handling and UI.
-- [ ] Form editor generated from the `schema`, with a raw JSON fallback; validation before send.
-- [ ] Accepted when you can restore any earlier counter state in both modes, a real emission during overlay shows as suppressed, and editing a redacted path is rejected.
+- [x] Ring buffer, `inspectable()` overlay, freeze/release, write-through, `CommandResult` handling and UI.
+- [x] Form editor generated from the `schema`, with a raw JSON fallback; validation before send.
+- [x] Accepted when you can restore any earlier counter state in both modes, a real emission during overlay shows as suppressed, and editing a redacted path is rejected.
 
 **M5: Recording and replay**
 

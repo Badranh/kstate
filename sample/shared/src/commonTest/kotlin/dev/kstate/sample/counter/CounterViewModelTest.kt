@@ -42,4 +42,13 @@ class CounterViewModelTest {
 
         assertEquals(0, viewModel.state.value.count)
     }
+
+    @Test
+    fun resetKeepsTheSession() {
+        val token = viewModel.state.value.apiToken
+        viewModel.increment()
+        viewModel.reset()
+
+        assertEquals(token, viewModel.state.value.apiToken)
+    }
 }

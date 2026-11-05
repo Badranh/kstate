@@ -228,3 +228,24 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   advertises `decode = false`.
 - The schema for the form editor comes from the serializer's descriptor, or kotlin-reflect, and
   is built on the SDK dispatcher because reflection is slow the first time.
+
+## 2026-11-05: How the host and viewer drive restore and edit
+- `CommandBus` keeps one connection a device (the newer one wins), matches CommandResult to its
+  `cmdId` and gives up after 3 s. The session marks a source overridden only after an OK result,
+  and a new registration clears it, since a restarted app shows its own state again.
+- Suppressed snapshots are kept in the history but never shown: scrubbing and previous/next skip
+  them, and the timeline draws them as their own (red) ticks.
+- Paused on a past state, the detail pane offers "Show this state" (overlay) and "Write this
+  state" (write-through); live, Freeze or Release. Only what the source advertises is offered.
+- The Edit tab (⌘E) builds a form from the schema (text, numbers, booleans, enums; nested values
+  and lists as JSON fields) and falls back to raw JSON without one. Redacted fields are read-only,
+  input is validated before sending, and the app's refusal is shown with its path.
+
+## 2026-11-05: M4 acceptance, measured
+- Emulator, sample counter made `inspectable` with write-through and an `apiToken` field, read
+  back from the device's own UI (uiautomator), not from the host's view of it:
+  - Overlay restore of seq 1 at count 3: the app shows 1; a real tap during the overlay is sent
+    with `suppressed = true` (count 4) while the app keeps showing 1; Release shows 4.
+  - Write-through restore of seq 1: the app shows 1 with no override, and the next tap makes 2.
+  - SetState changing `/apiToken` is refused (`errorPath = /apiToken`) and the app is unchanged;
+    an edit of `count` with the placeholder left in place shows 42.
