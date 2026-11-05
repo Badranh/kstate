@@ -147,3 +147,6 @@ Server: `scrcpy-server-v5.0.1`, SHA-256 `764eb6f79811d5211fe9df341120882ba9994c7
 Only `org.bytedeco:ffmpeg` and `javacpp` with the `macosx-arm64` classifier, not
 `javacv-platform` (which pulls every native library) and never the `-gpl` classifiers. A test
 asserts `avutil_license()` reports LGPL.
+bytedeco's LGPL build reports `avutil_license()` = "LGPL version 3 or later" (checked by
+`theFfmpegBuildIsLgpl`), so NOTICE says LGPL v3+, not 2.1. FFmpeg stays in its own dylibs inside
+the jar, so users can swap it, as the LGPL requires.
