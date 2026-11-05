@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Build, test, lint, API check
+        run: ./gradlew check apiCheck
+      - name: Android sample
+        run: ./gradlew :sample:androidApp:assembleDebug
+      - name: Web viewer (wasm)
+        run: ./gradlew :viewer:viewer-web:wasmJsBrowserDistribution
+      - name: Upload reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports
+          path: "**/build/reports/"
+
+  nightly-dmg:
+    if: github.event_name == 'schedule'
+    needs: check
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Package unsigned DMG
+        run: ./gradlew :host:host-desktop:packageDmg
+      - uses: actions/upload-artifact@v7
+        with:
+          name: kstate-dmg
+          path: host/host-desktop/build/compose/binaries/main/dmg/*.dmg
