@@ -357,4 +357,72 @@ class SessionEngineTest {
         assertEquals(listOf(100L), engine.timeline.stateChangeTimes())
         assertEquals(listOf(200L), engine.timeline.suppressedTimes(counter))
     }
+
+    @Test
+    fun observersSeeEveryAppliedInputWithItsHostTime() {
+        val seen = mutableListOf<Pair<SessionInput, Long>>()
+        engine.subscribe { input, hostTs -> seen += input to hostTs }
+        connectCounter()
+        now = 2_000
+        engine.markOverride(counter, active = true)
+
+        assertEquals(listOf(1_000L, 1_000L, 2_000L), seen.map { it.second })
+        assertEquals(SessionInput.Override(counter, active = true), seen.last().first)
+    }
+
+    @Test
+    fun ignoredInputsAreNotObserved() {
+        connectCounter(connection = 2)
+        val seen = mutableListOf<SessionInput>()
+        engine.subscribe { input, _ -> seen += input }
+
+        receive(snapshot(1, 1), connection = 1)
+        engine.onDisconnected("emulator-5554", connectionId = 1)
+
+        assertEquals(emptyList(), seen)
+    }
+
+    @Test
+    fun aSubscriptionStartsFromTheSessionAsItWasAndStopsWhenClosed() {
+        connectCounter()
+        val seen = mutableListOf<SessionInput>()
+        var started: Session? = null
+        val subscription =
+            engine.subscribe(
+                object : SessionObserver {
+                    override fun onSubscribed(session: Session) {
+                        started = session
+                    }
+
+                    override fun onApplied(
+                        input: SessionInput,
+                        hostTs: Long,
+                    ) {
+                        seen += input
+                    }
+                },
+            )
+
+        assertEquals(setOf(counter), started?.sources?.keys)
+        subscription.close()
+        receive(snapshot(1, 1))
+        assertEquals(emptyList(), seen)
+    }
+
+    @Test
+    fun applyingRecordedInputsRebuildsTheSameSession() {
+        val recorded = mutableListOf<Pair<SessionInput, Long>>()
+        engine.subscribe { input, hostTs -> recorded += input to hostTs }
+        connectCounter()
+        now = 1_500
+        receive(snapshot(1, 1))
+        now = 1_700
+        receive(Event(sourceId = "Counter-1", name = "tap", args = null))
+
+        val replay = SessionEngine(clock = { error("a replay uses the recorded times") })
+        recorded.forEach { (input, hostTs) -> replay.apply(input, hostTs) }
+
+        assertEquals(engine.session.value, replay.session.value)
+        assertEquals(engine.timeline.history(counter), replay.timeline.history(counter))
+    }
 }

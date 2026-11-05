@@ -11,6 +11,7 @@ import dev.kstate.protocol.StateSnapshot
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
@@ -31,41 +32,88 @@ class SessionEngine(
     /** Every snapshot by source and host time: scrubbing, stepping and the timeline's marks. */
     val timeline: SourceHistories = SourceHistories()
 
+    private val observers = CopyOnWriteArrayList<SessionObserver>()
+
     fun onMessage(
         deviceId: String,
         connectionId: Long,
         envelope: Envelope,
-    ) = lock.withLock {
-        val hostTs = clock.nanos()
-        val msg = envelope.msg
-        if (msg !is Hello && !isCurrent(deviceId, connectionId)) return@withLock
-        state.value =
-            when (msg) {
-                is Hello -> state.value.withApp(AppConnection(deviceId, connectionId, msg, connected = true))
-                is SourceRegistered -> state.value.withRegistration(deviceId, msg)
-                is StateSnapshot -> withSnapshot(state.value, deviceId, msg, hostTs)
-                is SourceCleared -> state.value.withSource(SourceKey(deviceId, msg.sourceId)) { it.copy(live = false) }
-                is Event -> state.value.withEvent(TimedEvent(hostTs, deviceId, msg), keep = recentEventLimit)
-                is Nav -> state.value.withAppUpdate(deviceId) { it.copy(nav = msg.stack) }
-                else -> state.value
-            }
-    }
+    ) = stamped(SessionInput.Message(deviceId, connectionId, envelope))
 
     /** Ignored when a newer connection of the same device already said Hello. */
     fun onDisconnected(
         deviceId: String,
         connectionId: Long,
-    ) = lock.withLock {
-        if (!isCurrent(deviceId, connectionId)) return@withLock
-        state.value = state.value.withAppUpdate(deviceId) { it.copy(connected = false) }.withDeviceOffline(deviceId)
-    }
+    ) = stamped(SessionInput.Disconnected(deviceId, connectionId))
 
     /** Records whether the host's override (overlay or freeze) is active, after the app accepted the command. */
     fun markOverride(
         key: SourceKey,
         active: Boolean,
+    ) = stamped(SessionInput.Override(key, active))
+
+    /** Applies [input] as if it arrived at [hostTs]: how a replay rebuilds a recorded session. */
+    fun apply(
+        input: SessionInput,
+        hostTs: Long,
     ) = lock.withLock {
-        state.value = state.value.withSource(key) { it.copy(overridden = active) }
+        if (!accepts(input)) return@withLock
+        state.value = transition(state.value, input, hostTs)
+        observers.forEach { it.onApplied(input, hostTs) }
+    }
+
+    /** Observes every input applied from now on, starting with [SessionObserver.onSubscribed]. */
+    fun subscribe(observer: SessionObserver): SessionSubscription =
+        lock.withLock {
+            observer.onSubscribed(state.value)
+            observers += observer
+            SessionSubscription { lock.withLock { observers -= observer } }
+        }
+
+    // Stamped under the lock, so host times grow in the order inputs are applied.
+    private fun stamped(input: SessionInput) = lock.withLock { apply(input, clock.nanos()) }
+
+    private fun accepts(input: SessionInput): Boolean =
+        when (input) {
+            is SessionInput.Message -> input.envelope.msg is Hello || isCurrent(input.deviceId, input.connectionId)
+            is SessionInput.Disconnected -> isCurrent(input.deviceId, input.connectionId)
+            is SessionInput.Override -> true
+        }
+
+    private fun transition(
+        session: Session,
+        input: SessionInput,
+        hostTs: Long,
+    ): Session =
+        when (input) {
+            is SessionInput.Message -> {
+                onMessage(session, input, hostTs)
+            }
+
+            is SessionInput.Disconnected -> {
+                session.withAppUpdate(input.deviceId) { it.copy(connected = false) }.withDeviceOffline(input.deviceId)
+            }
+
+            is SessionInput.Override -> {
+                session.withSource(input.key) { it.copy(overridden = input.active) }
+            }
+        }
+
+    private fun onMessage(
+        session: Session,
+        input: SessionInput.Message,
+        hostTs: Long,
+    ): Session {
+        val deviceId = input.deviceId
+        return when (val msg = input.envelope.msg) {
+            is Hello -> session.withApp(AppConnection(deviceId, input.connectionId, msg, connected = true))
+            is SourceRegistered -> session.withRegistration(deviceId, msg)
+            is StateSnapshot -> withSnapshot(session, deviceId, msg, hostTs)
+            is SourceCleared -> session.withSource(SourceKey(deviceId, msg.sourceId)) { it.copy(live = false) }
+            is Event -> session.withEvent(TimedEvent(hostTs, deviceId, msg), keep = recentEventLimit)
+            is Nav -> session.withAppUpdate(deviceId) { it.copy(nav = msg.stack) }
+            else -> session
+        }
     }
 
     private fun withSnapshot(

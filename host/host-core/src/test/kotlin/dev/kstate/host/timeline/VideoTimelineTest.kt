@@ -80,4 +80,52 @@ class VideoTimelineTest {
 
         assertEquals(20L, timeline.latest)
     }
+
+    private class Recording : VideoListener {
+        var started: Gop? = null
+        val configs = mutableListOf<ByteArray>()
+        val samples = mutableListOf<Long>()
+
+        override fun onStart(current: Gop?) {
+            started = current
+        }
+
+        override fun onConfig(data: ByteArray) {
+            configs += data
+        }
+
+        override fun onSample(sample: VideoSample) {
+            samples += sample.hostTs
+        }
+    }
+
+    @Test
+    fun aSubscriptionStartsWithTheCurrentGopAndThenSeesEveryAcceptedPacket() {
+        timeline.setConfig(config)
+        key(10)
+        delta(20)
+        val recording = Recording()
+
+        val subscription = timeline.subscribe(recording)
+        timeline.setConfig(byteArrayOf(9))
+        key(30)
+        subscription.close()
+        delta(40)
+
+        assertEquals(listOf(10L, 20L), recording.started?.samples?.map { it.hostTs })
+        assertContentEquals(config, recording.started?.config)
+        assertEquals(listOf(30L), recording.samples)
+        assertContentEquals(byteArrayOf(9), recording.configs.single())
+    }
+
+    @Test
+    fun aSubscriptionBeforeAnyKeyFrameStartsEmptyAndSkipsWhatTheTimelineDrops() {
+        val recording = Recording()
+        timeline.subscribe(recording)
+        delta(5)
+        key(10)
+
+        assertNull(recording.started)
+        assertEquals(listOf(10L), recording.samples)
+    }
 }

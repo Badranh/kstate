@@ -86,21 +86,10 @@ class DeviceVideo(
             }
     }
 
+    private val scrubbing = GopFrames(decoders)
+
     /** The picture showing at [hostTs]: decoded from the key frame before it. Null before the first one. */
-    fun frameAt(hostTs: Long): LiveFrame? {
-        val gop = timeline.gopAt(hostTs) ?: return null
-        return decoders().use { decoder ->
-            decoder.outputSize = outputSize
-            val config = gop.config ?: ByteArray(0)
-            var shown: LiveFrame? = null
-            gop.samples.forEachIndexed { index, sample ->
-                val data = if (index == 0) config + sample.data else sample.data
-                decoder.decode(data, sample.hostTs).lastOrNull()?.let { shown = LiveFrame(sample.hostTs, it) }
-            }
-            decoder.flush().lastOrNull()?.let { shown = LiveFrame(gop.samples.last().hostTs, it) }
-            shown
-        }
-    }
+    fun frameAt(hostTs: Long): LiveFrame? = scrubbing.frameAt(timeline, hostTs, outputSize)
 
     /** Sends input to the device. Dropped when the connection is already gone. */
     fun send(message: ControlMessage) {
