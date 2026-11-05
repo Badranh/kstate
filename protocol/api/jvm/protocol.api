@@ -258,6 +258,9 @@ public final class dev/kstate/protocol/JsonPointer {
 	public static final field ROOT Ljava/lang/String;
 	public final fun child (Ljava/lang/String;I)Ljava/lang/String;
 	public final fun child (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public final fun get (Lkotlinx/serialization/json/JsonElement;Ljava/lang/String;)Lkotlinx/serialization/json/JsonElement;
+	public final fun replace (Lkotlinx/serialization/json/JsonElement;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)Lkotlinx/serialization/json/JsonElement;
+	public final fun segments (Ljava/lang/String;)Ljava/util/List;
 }
 
 public abstract interface class dev/kstate/protocol/Msg {

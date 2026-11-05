@@ -700,6 +700,9 @@ final object dev.kstate.protocol/JsonPointer { // dev.kstate.protocol/JsonPointe
 
     final fun (kotlin/String).child(kotlin/Int): kotlin/String // dev.kstate.protocol/JsonPointer.child|child@kotlin.String(kotlin.Int){}[0]
     final fun (kotlin/String).child(kotlin/String): kotlin/String // dev.kstate.protocol/JsonPointer.child|child@kotlin.String(kotlin.String){}[0]
+    final fun get(kotlinx.serialization.json/JsonElement, kotlin/String): kotlinx.serialization.json/JsonElement? // dev.kstate.protocol/JsonPointer.get|get(kotlinx.serialization.json.JsonElement;kotlin.String){}[0]
+    final fun replace(kotlinx.serialization.json/JsonElement, kotlin/String, kotlinx.serialization.json/JsonElement): kotlinx.serialization.json/JsonElement // dev.kstate.protocol/JsonPointer.replace|replace(kotlinx.serialization.json.JsonElement;kotlin.String;kotlinx.serialization.json.JsonElement){}[0]
+    final fun segments(kotlin/String): kotlin.collections/List<kotlin/String> // dev.kstate.protocol/JsonPointer.segments|segments(kotlin.String){}[0]
 }
 
 final object dev.kstate.protocol/Ulid { // dev.kstate.protocol/Ulid|null[0]

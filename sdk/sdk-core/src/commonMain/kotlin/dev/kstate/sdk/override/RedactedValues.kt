@@ -1,5 +1,6 @@
 package dev.kstate.sdk.override
 
+import dev.kstate.protocol.JsonPointer
 import dev.kstate.sdk.redaction.Redactor
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -26,14 +27,14 @@ internal object RedactedValues {
     ): Outcome {
         val changed =
             redactedPaths.firstOrNull { path ->
-                JsonPaths.get(edited, path) != PLACEHOLDER ||
-                    JsonPaths.get(current, path) == null
+                JsonPointer.get(edited, path) != PLACEHOLDER ||
+                    JsonPointer.get(current, path) == null
             }
         return changed?.let { Outcome.Rejected(it) }
             ?: Outcome.Merged(
                 redactedPaths.fold(
                     edited,
-                ) { merged, path -> JsonPaths.replace(merged, path, checkNotNull(JsonPaths.get(current, path))) },
+                ) { merged, path -> JsonPointer.replace(merged, path, checkNotNull(JsonPointer.get(current, path))) },
             )
     }
 
