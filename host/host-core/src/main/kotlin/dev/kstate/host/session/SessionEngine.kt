@@ -24,10 +24,12 @@ class SessionEngine(
     private val recentEventLimit: Int = DEFAULT_RECENT_EVENTS,
 ) {
     private val lock = ReentrantLock()
-    private val histories = mutableMapOf<SourceKey, MutableList<TimedSnapshot>>()
     private val state = MutableStateFlow(Session())
 
     val session: StateFlow<Session> = state.asStateFlow()
+
+    /** Every snapshot by source and host time: scrubbing, stepping and the timeline's marks. */
+    val timeline: SourceHistories = SourceHistories()
 
     fun onMessage(
         deviceId: String,
@@ -58,28 +60,13 @@ class SessionEngine(
         state.value = state.value.withAppUpdate(deviceId) { it.copy(connected = false) }.withDeviceOffline(deviceId)
     }
 
-    /** The source's last snapshot at or before [hostTs]; null if it had none yet. */
-    fun stateAt(
+    /** Records whether the host's override (overlay or freeze) is active, after the app accepted the command. */
+    fun markOverride(
         key: SourceKey,
-        hostTs: Long,
-    ): ScrubbedState? =
-        lock.withLock {
-            val history = histories[key] ?: return@withLock null
-            val index = history.lastIndexAtOrBefore(hostTs)
-            if (index < 0) null else ScrubbedState(history[index], history.getOrNull(index - 1))
-        }
-
-    /** When any source's state changed, oldest first: the stops for stepping through the timeline. */
-    fun stateChangeTimes(): List<Long> =
-        lock.withLock {
-            histories.values
-                .flatMap { list ->
-                    list.map { it.hostTs }
-                }.sorted()
-        }
-
-    /** Every snapshot of a source, oldest first. */
-    fun history(key: SourceKey): List<TimedSnapshot> = lock.withLock { histories[key]?.toList().orEmpty() }
+        active: Boolean,
+    ) = lock.withLock {
+        state.value = state.value.withSource(key) { it.copy(overridden = active) }
+    }
 
     private fun withSnapshot(
         session: Session,
@@ -92,26 +79,15 @@ class SessionEngine(
             session.sources[key] ?: SourceTrack(key, name = snapshot.sourceId, ownerType = UNKNOWN_OWNER, live = true)
         if (source.latest?.snapshot == snapshot) return session
         val timed = TimedSnapshot(hostTs, snapshot)
-        histories.getOrPut(key) { mutableListOf() } += timed
-        val diff = diffEngine.diff(source.latest?.snapshot?.state, snapshot.state)
-        return session.copy(sources = session.sources + (key to source.copy(latest = timed, lastDiff = diff)))
-    }
-
-    /** Binary search over a list sorted by host time; -1 when every entry is later. */
-    private fun List<TimedSnapshot>.lastIndexAtOrBefore(hostTs: Long): Int {
-        var low = 0
-        var high = size - 1
-        var found = -1
-        while (low <= high) {
-            val middle = (low + high) ushr 1
-            if (this[middle].hostTs <= hostTs) {
-                found = middle
-                low = middle + 1
+        timeline.append(key, timed)
+        // A suppressed emission is the app's real state hidden behind an override: kept, not shown.
+        val shown =
+            if (snapshot.suppressed) {
+                source
             } else {
-                high = middle - 1
+                source.copy(latest = timed, lastDiff = diffEngine.diff(source.latest?.snapshot?.state, snapshot.state))
             }
-        }
-        return found
+        return session.copy(sources = session.sources + (key to shown))
     }
 
     private fun isCurrent(

@@ -2,6 +2,7 @@ package dev.kstate.host.gateway
 
 import dev.kstate.host.session.SessionEngine
 import dev.kstate.protocol.CloseCodes
+import dev.kstate.protocol.CommandResult
 import dev.kstate.protocol.Envelope
 import dev.kstate.protocol.EnvelopeCodec
 import dev.kstate.protocol.Hello
@@ -9,6 +10,7 @@ import dev.kstate.protocol.Msg
 import dev.kstate.protocol.Ping
 import dev.kstate.protocol.Platform
 import dev.kstate.protocol.ProtocolVersion
+import dev.kstate.protocol.Release
 import dev.kstate.protocol.SourceCleared
 import dev.kstate.protocol.SourceRegistered
 import dev.kstate.protocol.Welcome
@@ -22,6 +24,7 @@ import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
@@ -37,6 +40,8 @@ class AppConnectionHandlerTest {
     private val engine = SessionEngine(clock = { 42 })
     private val hello = Hello("dev.kstate.sample", "0.1.0", Platform.ANDROID, "16", "Pixel", "0.1.0")
 
+    private val bus = CommandBus(newCommandId = { "cmd-1" })
+
     private fun gateway(
         pingIntervalMillis: Long = 60_000,
         test: suspend ApplicationTestBuilder.() -> Unit,
@@ -49,6 +54,7 @@ class AppConnectionHandlerTest {
                 clock = { 7 },
                 connectionIds = ConnectionIds(),
                 pingInterval = pingIntervalMillis.milliseconds,
+                commands = bus,
             )
         application {
             install(WebSockets)
@@ -192,4 +198,22 @@ class AppConnectionHandlerTest {
     private companion object {
         const val VIOLATED_POLICY: Short = 1008
     }
+
+    @Test
+    fun commandsGoToTheAppAndTheirResultsComeBack() =
+        gateway {
+            appClient().webSocket("/ws/app") {
+                sendMsg(hello)
+                receiveMsg()
+
+                val outcome = async { bus.send("emulator-5554") { id -> Release(id, "Counter-1") } }
+                assertEquals(Release("cmd-1", "Counter-1"), receiveMsg())
+                sendMsg(CommandResult("cmd-1", ok = true))
+
+                assertEquals(
+                    CommandOutcome.Done(CommandResult("cmd-1", ok = true)),
+                    withTimeout(5.seconds) { outcome.await() },
+                )
+            }
+        }
 }

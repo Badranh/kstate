@@ -33,6 +33,8 @@ data class SourceTrack(
     val live: Boolean,
     val latest: TimedSnapshot? = null,
     val lastDiff: Diff = Diff.NONE,
+    /** The host set an override (overlay or freeze) the app still shows. */
+    val overridden: Boolean = false,
 )
 
 data class TimedSnapshot(

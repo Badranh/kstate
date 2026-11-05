@@ -54,12 +54,12 @@ class InProcessSessionSource(
     override fun now(): Long = clock.nanos()
 
     override fun sessionAt(hostTs: Long): SessionView =
-        SessionViewMapper.mapAt(engine.session.value, devices.value, problem.value, hostTs, engine::stateAt)
+        SessionViewMapper.mapAt(engine.session.value, devices.value, problem.value, hostTs, engine.timeline::stateAt)
 
     override fun timeline(): TimelineView =
         SessionViewMapper.timeline(
             session = engine.session.value,
-            history = { key -> engine.history(key).map { it.hostTs } },
+            history = { key -> engine.timeline.history(key).map { it.hostTs } },
             videoStart =
                 videos.value.values
                     .mapNotNull { it.timeline.earliest }

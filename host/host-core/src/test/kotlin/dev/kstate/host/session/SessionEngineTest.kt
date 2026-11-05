@@ -74,7 +74,7 @@ class SessionEngineTest {
                 .getValue(counter)
         assertEquals(TimedSnapshot(2_000, snapshot(1, 2)), source.latest)
         assertEquals(listOf(DiffOp(DiffOp.Kind.REPLACE, "", JsonPrimitive(1), JsonPrimitive(2))), source.lastDiff.ops)
-        assertEquals(listOf(1_000L, 2_000L), engine.history(counter).map { it.hostTs })
+        assertEquals(listOf(1_000L, 2_000L), engine.timeline.history(counter).map { it.hostTs })
     }
 
     @Test
@@ -98,7 +98,7 @@ class SessionEngineTest {
         receive(snapshot(3, 7))
         receive(snapshot(3, 7))
 
-        assertEquals(1, engine.history(counter).size)
+        assertEquals(1, engine.timeline.history(counter).size)
     }
 
     @Test
@@ -113,7 +113,7 @@ class SessionEngineTest {
             engine.session.value.sources
                 .getValue(counter)
         assertTrue(source.live)
-        assertEquals(2, engine.history(counter).size)
+        assertEquals(2, engine.timeline.history(counter).size)
         assertEquals(
             JsonPrimitive(4),
             source.lastDiff.ops
@@ -161,7 +161,7 @@ class SessionEngineTest {
                 .getValue(counter)
                 .latest,
         )
-        assertEquals(1, engine.history(SourceKey("emulator-5556", "Counter-1")).size)
+        assertEquals(1, engine.timeline.history(SourceKey("emulator-5556", "Counter-1")).size)
     }
 
     @Test
@@ -251,12 +251,36 @@ class SessionEngineTest {
         now = 300
         receive(snapshot(2, 2))
 
-        assertEquals(snapshot(1, 1), engine.stateAt(counter, 250)?.current?.snapshot)
-        assertEquals(snapshot(0, 0), engine.stateAt(counter, 250)?.previous?.snapshot)
-        assertEquals(snapshot(1, 1), engine.stateAt(counter, 200)?.current?.snapshot)
-        assertEquals(null, engine.stateAt(counter, 99))
-        assertEquals(snapshot(0, 0), engine.stateAt(counter, 150)?.current?.snapshot)
-        assertEquals(null, engine.stateAt(counter, 150)?.previous)
+        assertEquals(
+            snapshot(1, 1),
+            engine.timeline
+                .stateAt(counter, 250)
+                ?.current
+                ?.snapshot,
+        )
+        assertEquals(
+            snapshot(0, 0),
+            engine.timeline
+                .stateAt(counter, 250)
+                ?.previous
+                ?.snapshot,
+        )
+        assertEquals(
+            snapshot(1, 1),
+            engine.timeline
+                .stateAt(counter, 200)
+                ?.current
+                ?.snapshot,
+        )
+        assertEquals(null, engine.timeline.stateAt(counter, 99))
+        assertEquals(
+            snapshot(0, 0),
+            engine.timeline
+                .stateAt(counter, 150)
+                ?.current
+                ?.snapshot,
+        )
+        assertEquals(null, engine.timeline.stateAt(counter, 150)?.previous)
     }
 
     @Test
@@ -271,6 +295,66 @@ class SessionEngineTest {
         now = 200
         receive(snapshot(1, 1))
 
-        assertEquals(listOf(100L, 150L, 200L), engine.stateChangeTimes())
+        assertEquals(listOf(100L, 150L, 200L), engine.timeline.stateChangeTimes())
+    }
+
+    @Test
+    fun aSuppressedSnapshotIsKeptButDoesNotReplaceWhatTheUiShows() {
+        connectCounter()
+        receive(snapshot(0, 1))
+        receive(StateSnapshot("Counter-1", 1, JsonPrimitive(2), Encoding.SERIALIZER, suppressed = true))
+
+        val source =
+            engine.session.value.sources
+                .getValue(counter)
+        assertEquals(JsonPrimitive(1), source.latest?.snapshot?.state)
+        assertEquals(listOf(false, true), engine.timeline.history(counter).map { it.snapshot.suppressed })
+    }
+
+    @Test
+    fun anOverrideIsTrackedUntilReleasedOrTheAppReconnects() {
+        connectCounter()
+
+        engine.markOverride(counter, active = true)
+        assertTrue(
+            engine.session.value.sources
+                .getValue(counter)
+                .overridden,
+        )
+
+        engine.markOverride(counter, active = false)
+        assertFalse(
+            engine.session.value.sources
+                .getValue(counter)
+                .overridden,
+        )
+
+        engine.markOverride(counter, active = true)
+        connectCounter(connection = 2)
+        assertFalse(
+            engine.session.value.sources
+                .getValue(counter)
+                .overridden,
+        )
+    }
+
+    @Test
+    fun scrubbingShowsWhatTheUiShowedNotTheSuppressedRealState() {
+        connectCounter()
+        now = 100
+        receive(snapshot(0, 1))
+        now = 200
+        receive(StateSnapshot("Counter-1", 1, JsonPrimitive(2), Encoding.SERIALIZER, suppressed = true))
+
+        assertEquals(
+            JsonPrimitive(1),
+            engine.timeline
+                .stateAt(counter, 250)
+                ?.current
+                ?.snapshot
+                ?.state,
+        )
+        assertEquals(listOf(100L), engine.timeline.stateChangeTimes())
+        assertEquals(listOf(200L), engine.timeline.suppressedTimes(counter))
     }
 }

@@ -15,12 +15,13 @@ class KtorGatewayFactory(
     private val sessionId: String,
     private val clock: HostClock = HostClock.System,
     private val connectionIds: ConnectionIds = ConnectionIds(),
+    private val commands: CommandBus = CommandBus(),
 ) : GatewayFactory {
     override fun start(
         deviceId: String,
         port: Int,
     ): Gateway {
-        val handler = AppConnectionHandler(deviceId, engine, sessionId, clock, connectionIds)
+        val handler = AppConnectionHandler(deviceId, engine, sessionId, clock, connectionIds, commands = commands)
         val server =
             embeddedServer(CIO, port = port, host = LOOPBACK) {
                 install(WebSockets)

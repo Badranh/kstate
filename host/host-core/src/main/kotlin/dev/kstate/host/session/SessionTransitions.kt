@@ -22,7 +22,12 @@ internal fun Session.withRegistration(
 ): Session {
     val key = SourceKey(deviceId, registration.sourceId)
     val source =
-        sources[key]?.copy(name = registration.name, ownerType = registration.ownerType, live = true)
+        sources[key]?.copy(
+            name = registration.name,
+            ownerType = registration.ownerType,
+            live = true,
+            overridden = false,
+        )
             ?: SourceTrack(key, registration.name, registration.ownerType, live = true)
     return copy(sources = sources + (key to source))
 }

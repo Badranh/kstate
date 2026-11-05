@@ -3,6 +3,7 @@ package dev.kstate.host.gateway
 import dev.kstate.host.session.HostClock
 import dev.kstate.host.session.SessionEngine
 import dev.kstate.protocol.CloseCodes
+import dev.kstate.protocol.CommandResult
 import dev.kstate.protocol.Envelope
 import dev.kstate.protocol.EnvelopeCodec
 import dev.kstate.protocol.Hello
@@ -43,6 +44,7 @@ class AppConnectionHandler(
     private val clock: HostClock = HostClock.System,
     private val connectionIds: ConnectionIds = ConnectionIds(),
     private val pingInterval: Duration = 5.seconds,
+    private val commands: CommandBus = CommandBus(),
 ) {
     suspend fun handle(socket: WebSocketSession) {
         val first = socket.nextEnvelope()
@@ -56,8 +58,10 @@ class AppConnectionHandler(
         engine.onMessage(deviceId, connectionId, first)
         try {
             socket.sendMsg(Welcome(sessionId = sessionId, hostVersion = HOST_VERSION, serverTimeNanos = clock.nanos()))
+            commands.attach(deviceId, connectionId) { socket.sendMsg(it) }
             exchange(socket, connectionId)
         } finally {
+            commands.detach(deviceId, connectionId)
             engine.onDisconnected(deviceId, connectionId)
         }
     }
@@ -68,13 +72,17 @@ class AppConnectionHandler(
     ) = coroutineScope {
         val pinger = launch { pingForever(socket) }
         for (frame in socket.incoming) {
-            if (frame is Frame.Text) {
-                EnvelopeCodec.decodeOrNull(frame.readText())?.let {
-                    engine.onMessage(deviceId, connectionId, it)
-                }
-            }
+            if (frame is Frame.Text) EnvelopeCodec.decodeOrNull(frame.readText())?.let { receive(it, connectionId) }
         }
         pinger.cancel()
+    }
+
+    private fun receive(
+        envelope: Envelope,
+        connectionId: Long,
+    ) {
+        val msg = envelope.msg
+        if (msg is CommandResult) commands.onResult(msg) else engine.onMessage(deviceId, connectionId, envelope)
     }
 
     private suspend fun pingForever(socket: WebSocketSession) {
