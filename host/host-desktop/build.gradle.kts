@@ -9,6 +9,7 @@ dependencies {
     implementation(projects.viewer.viewerUi)
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutines.swing)
+    implementation(libs.koin.core)
 }
 
 compose.desktop {
