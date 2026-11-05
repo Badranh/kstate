@@ -436,11 +436,11 @@ Build in this order; each milestone ends with a working demo on the sample app a
 
 **M1: State pipeline, one device, no video**
 
-- [ ] `protocol` with all M1 messages and round-trip serialization tests.
-- [ ] `sdk-core`: `Kstate.start`, `track`, `inspect`, serializer encoder, `WebSocketTransport` with reconnect and buffer rules.
-- [ ] Host: DeviceManager (adb reverse, per-device port), AppGateway, SessionEngine, DiffEngine.
-- [ ] Desktop UI: source list, JSON tree with diff highlight, events list.
-- [ ] Accepted when a tap on the sample counter shows the new state in the tree within 100 ms on an emulator, an app restart reconnects without restarting the host, and Android StrictMode reports no main-thread work from the SDK.
+- [x] `protocol` with all M1 messages and round-trip serialization tests.
+- [x] `sdk-core`: `Kstate.start`, `track`, `inspect`, serializer encoder, `WebSocketTransport` with reconnect and buffer rules.
+- [x] Host: DeviceManager (adb reverse, per-device port), AppGateway, SessionEngine, DiffEngine.
+- [x] Desktop UI: source list, JSON tree with diff highlight, events list.
+- [x] Accepted when a tap on the sample counter shows the new state in the tree within 100 ms on an emulator, an app restart reconnects without restarting the host, and Android StrictMode reports no main-thread work from the SDK.
 
 **M2: Video and synced timeline**
 

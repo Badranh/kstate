@@ -112,3 +112,14 @@ started from Finder or the DMG doesn't inherit the shell's PATH.
 M1 wires `sdk-core` straight into the sample. M3 swaps release builds to `sdk-noop` and adds the
 guard plugin and the runtime debuggable check. The sample's debug build turns on StrictMode
 (detectAll, penaltyLog) for the M1 "no main-thread work" check.
+
+## 2026-11-05: M1 acceptance, measured
+On a Pixel 9a emulator (Android 16) with the desktop host running:
+- Tap to host: 27-48 ms over 6 taps, measured from just before `adb shell input tap` to the
+  host's arrival stamp (KSTATE_TRACE=1), so adb's own overhead is included. The UI recomposes on
+  the next frame.
+- `am force-stop` plus relaunch, and a reinstall, both reconnected to the same host process.
+- StrictMode (detectAll) showed 4 DiskReadViolations from Kstate.start() building the Ktor
+  engine on the main thread; fixed in 27e3122, then 0 violations.
+The desktop window couldn't be screenshotted (no Screen Recording permission in this session), so
+the tree was checked by rendering `KstateApp` offscreen with the same data.
