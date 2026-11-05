@@ -7,11 +7,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 /**
- * Golden files pin the v1 wire format. A failure here means the format changed:
- * that is a major bump, or the change must be made additive.
+ * Golden files pin the wire format. The current version's files must encode and decode exactly;
+ * every older minor version's files must still decode. A failure means the format changed:
+ * make the change additive (a minor bump with new golden files) or bump the major.
  */
-class GoldenV1Test {
-    private val goldens: Map<String, Envelope> =
+class GoldenFilesTest {
+    private fun goldens(version: ProtocolVersion): Map<String, Envelope> =
         mapOf(
             "hello" to
                 Envelope(
@@ -25,6 +26,7 @@ class GoldenV1Test {
                             osVersion = "16",
                             deviceHint = "Pixel 9a",
                             sdkVersion = "0.1.0",
+                            protocolVersion = version,
                         ),
                 ),
             "source-registered" to
@@ -66,23 +68,41 @@ class GoldenV1Test {
         )
 
     @Test
-    fun goldenFilesDecodeToTheExpectedMessages() {
-        goldens.forEach { (name, expected) ->
-            assertEquals(expected, EnvelopeCodec.decode(golden(name)), "golden '$name'")
+    fun theCurrentVersionHasGoldenFiles() {
+        assertEquals(ProtocolVersion(1, 1), ProtocolVersion.CURRENT)
+    }
+
+    @Test
+    fun currentGoldenFilesDecodeToTheExpectedMessages() {
+        goldens(ProtocolVersion.CURRENT).forEach { (name, expected) ->
+            assertEquals(expected, EnvelopeCodec.decode(golden(ProtocolVersion.CURRENT, name)), "golden '$name'")
         }
     }
 
     @Test
-    fun messagesEncodeToTheGoldenJson() {
-        goldens.forEach { (name, envelope) ->
+    fun messagesEncodeToTheCurrentGoldenJson() {
+        goldens(ProtocolVersion.CURRENT).forEach { (name, envelope) ->
             assertEquals(
-                EnvelopeCodec.json.parseToJsonElement(golden(name)),
+                EnvelopeCodec.json.parseToJsonElement(golden(ProtocolVersion.CURRENT, name)),
                 EnvelopeCodec.json.parseToJsonElement(EnvelopeCodec.encode(envelope)),
                 "golden '$name'",
             )
         }
     }
 
-    private fun golden(name: String): String =
-        checkNotNull(javaClass.getResource("/golden/v1/$name.json")) { "missing golden $name" }.readText()
+    @Test
+    fun olderMinorVersionsStillDecode() {
+        val old = ProtocolVersion(1, 0)
+        goldens(old).forEach { (name, expected) ->
+            assertEquals(expected, EnvelopeCodec.decode(golden(old, name)), "golden 1.0 '$name'")
+        }
+    }
+
+    private fun golden(
+        version: ProtocolVersion,
+        name: String,
+    ): String =
+        checkNotNull(javaClass.getResource("/golden/$version/$name.json")) {
+            "missing golden $version/$name"
+        }.readText()
 }

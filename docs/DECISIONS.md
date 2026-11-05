@@ -171,3 +171,12 @@ Pixel 9a AVD (Android 16, 2.4 GB RAM), cold-booted, on this Mac; host runtime dr
 The tile letterboxes the video and sends touch and scroll in normalised [0, 1] coordinates, as the
 spec requires for remote viewers. The host clamps to the frame and maps to pixels against the
 current session size, so local and remote input share one path.
+
+## 2026-11-05: M3 keeps one device
+Owner's call: M3 does the "any architecture" work (encoders, adapters, @Sensitive, guard plugin,
+debuggable check) but not the grid of up to 4 devices. The desktop keeps one device tile.
+
+## 2026-11-05: Protocol 1.1 adds StateSnapshot.partial
+An additive field (default false), so a minor bump. Golden files live per version
+(`golden/1.0`, `golden/1.1`): the current version's must encode and decode exactly, older minor
+versions' must still decode.

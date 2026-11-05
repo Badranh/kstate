@@ -39,6 +39,7 @@ class EnvelopeCodecTest {
                 encoding = Encoding.SERIALIZER,
                 suppressed = true,
                 redacted = listOf("/token"),
+                partial = true,
             ),
             Event(sourceId = "Counter-1", name = "increment", args = buildJsonObject { put("by", 1) }),
             SourceCleared(sourceId = "Counter-1"),
@@ -85,7 +86,7 @@ class EnvelopeCodecTest {
                 .jsonObject
                 .getValue("msg")
                 .jsonObject
-        assertEquals(JsonPrimitive("1.0"), hello.getValue("protocolVersion"))
+        assertEquals(JsonPrimitive("1.1"), hello.getValue("protocolVersion"))
     }
 
     @Test

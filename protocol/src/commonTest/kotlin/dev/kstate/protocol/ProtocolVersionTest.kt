@@ -8,8 +8,8 @@ import kotlin.test.assertTrue
 
 class ProtocolVersionTest {
     @Test
-    fun currentVersionStartsAtOneZero() {
-        assertEquals(ProtocolVersion(major = 1, minor = 0), ProtocolVersion.CURRENT)
+    fun currentVersionIsOneOne() {
+        assertEquals(ProtocolVersion(major = 1, minor = 1), ProtocolVersion.CURRENT)
     }
 
     @Test

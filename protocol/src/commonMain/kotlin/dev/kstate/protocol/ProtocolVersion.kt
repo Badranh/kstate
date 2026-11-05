@@ -26,7 +26,7 @@ public data class ProtocolVersion(
     override fun toString(): String = "$major.$minor"
 
     public companion object {
-        public val CURRENT: ProtocolVersion = ProtocolVersion(major = 1, minor = 0)
+        public val CURRENT: ProtocolVersion = ProtocolVersion(major = 1, minor = 1)
 
         // Up to 9 digits per part, so every match fits in an Int.
         private val PATTERN = Regex("""(\d{1,9})\.(\d{1,9})""")

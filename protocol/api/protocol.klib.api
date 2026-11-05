@@ -381,10 +381,12 @@ final class dev.kstate.protocol/SourceRegistered : dev.kstate.protocol/AppToHost
 }
 
 final class dev.kstate.protocol/StateSnapshot : dev.kstate.protocol/AppToHost { // dev.kstate.protocol/StateSnapshot|null[0]
-    constructor <init>(kotlin/String, kotlin/Long, kotlinx.serialization.json/JsonElement, dev.kstate.protocol/Encoding, kotlin/Boolean = ..., kotlin.collections/List<kotlin/String> = ...) // dev.kstate.protocol/StateSnapshot.<init>|<init>(kotlin.String;kotlin.Long;kotlinx.serialization.json.JsonElement;dev.kstate.protocol.Encoding;kotlin.Boolean;kotlin.collections.List<kotlin.String>){}[0]
+    constructor <init>(kotlin/String, kotlin/Long, kotlinx.serialization.json/JsonElement, dev.kstate.protocol/Encoding, kotlin/Boolean = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Boolean = ...) // dev.kstate.protocol/StateSnapshot.<init>|<init>(kotlin.String;kotlin.Long;kotlinx.serialization.json.JsonElement;dev.kstate.protocol.Encoding;kotlin.Boolean;kotlin.collections.List<kotlin.String>;kotlin.Boolean){}[0]
 
     final val encoding // dev.kstate.protocol/StateSnapshot.encoding|{}encoding[0]
         final fun <get-encoding>(): dev.kstate.protocol/Encoding // dev.kstate.protocol/StateSnapshot.encoding.<get-encoding>|<get-encoding>(){}[0]
+    final val partial // dev.kstate.protocol/StateSnapshot.partial|{}partial[0]
+        final fun <get-partial>(): kotlin/Boolean // dev.kstate.protocol/StateSnapshot.partial.<get-partial>|<get-partial>(){}[0]
     final val redacted // dev.kstate.protocol/StateSnapshot.redacted|{}redacted[0]
         final fun <get-redacted>(): kotlin.collections/List<kotlin/String> // dev.kstate.protocol/StateSnapshot.redacted.<get-redacted>|<get-redacted>(){}[0]
     final val seq // dev.kstate.protocol/StateSnapshot.seq|{}seq[0]
@@ -402,7 +404,8 @@ final class dev.kstate.protocol/StateSnapshot : dev.kstate.protocol/AppToHost { 
     final fun component4(): dev.kstate.protocol/Encoding // dev.kstate.protocol/StateSnapshot.component4|component4(){}[0]
     final fun component5(): kotlin/Boolean // dev.kstate.protocol/StateSnapshot.component5|component5(){}[0]
     final fun component6(): kotlin.collections/List<kotlin/String> // dev.kstate.protocol/StateSnapshot.component6|component6(){}[0]
-    final fun copy(kotlin/String = ..., kotlin/Long = ..., kotlinx.serialization.json/JsonElement = ..., dev.kstate.protocol/Encoding = ..., kotlin/Boolean = ..., kotlin.collections/List<kotlin/String> = ...): dev.kstate.protocol/StateSnapshot // dev.kstate.protocol/StateSnapshot.copy|copy(kotlin.String;kotlin.Long;kotlinx.serialization.json.JsonElement;dev.kstate.protocol.Encoding;kotlin.Boolean;kotlin.collections.List<kotlin.String>){}[0]
+    final fun component7(): kotlin/Boolean // dev.kstate.protocol/StateSnapshot.component7|component7(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Long = ..., kotlinx.serialization.json/JsonElement = ..., dev.kstate.protocol/Encoding = ..., kotlin/Boolean = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Boolean = ...): dev.kstate.protocol/StateSnapshot // dev.kstate.protocol/StateSnapshot.copy|copy(kotlin.String;kotlin.Long;kotlinx.serialization.json.JsonElement;dev.kstate.protocol.Encoding;kotlin.Boolean;kotlin.collections.List<kotlin.String>;kotlin.Boolean){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.protocol/StateSnapshot.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.kstate.protocol/StateSnapshot.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.kstate.protocol/StateSnapshot.toString|toString(){}[0]

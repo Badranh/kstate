@@ -90,6 +90,8 @@ public data class StateSnapshot(
     val suppressed: Boolean = false,
     /** JSON Pointers of the values replaced by redaction. */
     val redacted: List<String> = emptyList(),
+    /** True when part of the state could only be shown as raw text (since 1.1). */
+    val partial: Boolean = false,
 ) : AppToHost
 
 /** An intent or a manual Kstate.event() call. */

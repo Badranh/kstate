@@ -115,7 +115,10 @@ class AppConnectionHandlerTest {
 
                 val reason = withTimeout(5.seconds) { closeReason.await() }
                 assertEquals(CloseCodes.VERSION_MISMATCH, reason?.code)
-                assertEquals("Host speaks protocol 1.0, app speaks 2.0. Update one of them.", reason?.message)
+                assertEquals(
+                    "Host speaks protocol ${ProtocolVersion.CURRENT}, app speaks 2.0. Update one of them.",
+                    reason?.message,
+                )
             }
 
             assertTrue(
