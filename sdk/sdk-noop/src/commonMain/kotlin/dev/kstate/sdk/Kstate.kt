@@ -22,6 +22,8 @@ public object Kstate {
         sourceId: String? = null,
     ): Unit = Unit
 
+    public fun navigation(stack: List<String>): Unit = Unit
+
     public fun <T> track(
         scope: CoroutineScope,
         name: String,

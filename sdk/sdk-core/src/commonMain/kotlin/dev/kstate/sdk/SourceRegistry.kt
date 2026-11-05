@@ -1,9 +1,14 @@
 package dev.kstate.sdk
 
+import dev.kstate.protocol.Msg
+import dev.kstate.protocol.Nav
 import dev.kstate.protocol.SourceRegistered
 import dev.kstate.protocol.StateSnapshot
 
-/** Live sources and their latest snapshot. Confined to the SDK dispatcher. */
+/**
+ * What a reconnect must re-send: live sources, their latest snapshot, the latest navigation.
+ * Confined to the SDK dispatcher.
+ */
 internal class SourceRegistry {
     data class Entry(
         val registration: SourceRegistered,
@@ -24,5 +29,11 @@ internal class SourceRegistry {
         entries.remove(sourceId)
     }
 
+    var navigation: Nav? = null
+
     fun live(): List<Entry> = entries.values.toList()
+
+    /** Registrations and latest states in registration order, then the latest navigation. */
+    fun replayMessages(): List<Msg> =
+        entries.values.flatMap { listOfNotNull(it.registration, it.latest) } + listOfNotNull(navigation)
 }

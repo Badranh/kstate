@@ -4,6 +4,7 @@ import dev.kstate.protocol.Envelope
 import dev.kstate.protocol.Event
 import dev.kstate.protocol.Hello
 import dev.kstate.protocol.Msg
+import dev.kstate.protocol.Nav
 import dev.kstate.protocol.Ping
 import dev.kstate.protocol.Pong
 import dev.kstate.protocol.SourceCleared
@@ -81,6 +82,14 @@ internal class KstateClient(
         send(Event(sourceId = sourceId, name = name, args = args))
     }
 
+    fun navigation(stack: List<String>) {
+        scope.launch {
+            val nav = Nav(stack)
+            registry.navigation = nav
+            send(nav)
+        }
+    }
+
     private suspend fun <T> observe(
         registration: SourceRegistered,
         states: Flow<T>,
@@ -136,18 +145,7 @@ internal class KstateClient(
     }
 
     private fun replay(): List<Envelope> =
-        (listOf(hello()) + registry.live().flatMap { listOfNotNull(it.registration, it.latest) }).map(::envelope)
-
-    private fun hello(): Hello =
-        Hello(
-            appId = config.appId ?: platform.appId,
-            appVersion = platform.appVersion,
-            platform = platform.platform,
-            osVersion = platform.osVersion,
-            deviceHint = platform.deviceHint,
-            sdkVersion = SDK_VERSION,
-            pairingToken = config.pairingToken,
-        )
+        (listOf(helloFor(config, platform)) + registry.replayMessages()).map(::envelope)
 
     private fun send(msg: Msg) = transport.send(envelope(msg))
 
@@ -164,3 +162,17 @@ internal class KstateClient(
         const val SDK_VERSION: String = "0.1.0"
     }
 }
+
+private fun helloFor(
+    config: KstateConfig,
+    platform: PlatformInfo,
+): Hello =
+    Hello(
+        appId = config.appId ?: platform.appId,
+        appVersion = platform.appVersion,
+        platform = platform.platform,
+        osVersion = platform.osVersion,
+        deviceHint = platform.deviceHint,
+        sdkVersion = KstateClient.SDK_VERSION,
+        pairingToken = config.pairingToken,
+    )

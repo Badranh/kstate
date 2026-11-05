@@ -2,6 +2,7 @@ public final class dev/kstate/sdk/Kstate {
 	public static final field INSTANCE Ldev/kstate/sdk/Kstate;
 	public final fun event (Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Ljava/lang/String;)V
 	public static synthetic fun event$default (Ldev/kstate/sdk/Kstate;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun navigation (Ljava/util/List;)V
 	public final fun start (Ldev/kstate/sdk/KstateConfig;)V
 	public static synthetic fun start$default (Ldev/kstate/sdk/Kstate;Ldev/kstate/sdk/KstateConfig;ILjava/lang/Object;)V
 	public final fun stop ()V
@@ -11,8 +12,8 @@ public final class dev/kstate/sdk/Kstate {
 
 public final class dev/kstate/sdk/KstateConfig {
 	public fun <init> ()V
-	public fun <init> (ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;)V
-	public synthetic fun <init> (ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;Z)V
+	public synthetic fun <init> (ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()I
@@ -20,9 +21,11 @@ public final class dev/kstate/sdk/KstateConfig {
 	public final fun component5 ()J
 	public final fun component6 ()Ldev/kstate/sdk/redaction/Redaction;
 	public final fun component7 ()Ljava/lang/String;
-	public final fun copy (ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;)Ldev/kstate/sdk/KstateConfig;
-	public static synthetic fun copy$default (Ldev/kstate/sdk/KstateConfig;ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;ILjava/lang/Object;)Ldev/kstate/sdk/KstateConfig;
+	public final fun component8 ()Z
+	public final fun copy (ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;Z)Ldev/kstate/sdk/KstateConfig;
+	public static synthetic fun copy$default (Ldev/kstate/sdk/KstateConfig;ZLjava/lang/String;ILjava/lang/String;JLdev/kstate/sdk/redaction/Redaction;Ljava/lang/String;ZILjava/lang/Object;)Ldev/kstate/sdk/KstateConfig;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAllowPhysicalDevice ()Z
 	public final fun getAppId ()Ljava/lang/String;
 	public final fun getEnabled ()Z
 	public final fun getHost ()Ljava/lang/String;

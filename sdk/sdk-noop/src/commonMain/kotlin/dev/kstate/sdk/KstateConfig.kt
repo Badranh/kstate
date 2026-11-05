@@ -12,4 +12,6 @@ public data class KstateConfig(
     val minEmitIntervalMs: Long = 33,
     val redaction: Redaction = Redaction.Default,
     val pairingToken: String? = null,
+    /** iOS only: also run on physical devices, not just Simulators. */
+    val allowPhysicalDevice: Boolean = false,
 )

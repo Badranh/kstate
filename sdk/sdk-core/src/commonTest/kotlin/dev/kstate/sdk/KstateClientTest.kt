@@ -4,6 +4,7 @@ import dev.kstate.protocol.Encoding
 import dev.kstate.protocol.Envelope
 import dev.kstate.protocol.Event
 import dev.kstate.protocol.Hello
+import dev.kstate.protocol.Nav
 import dev.kstate.protocol.Ping
 import dev.kstate.protocol.Platform
 import dev.kstate.protocol.Pong
@@ -229,6 +230,36 @@ class KstateClientTest {
                     .filterIsInstance<StateSnapshot>()
                     .single()
                     .partial,
+            )
+        }
+    }
+
+    @Test
+    fun navigationIsSent() {
+        runTest {
+            val (client, transport) = client()
+
+            client.navigation(listOf("Home", "Counter"))
+            runCurrent()
+
+            assertEquals(Nav(listOf("Home", "Counter")), transport.sentMessages.last())
+        }
+    }
+
+    @Test
+    fun replayIncludesTheLatestNavigation() {
+        runTest {
+            val (client, transport) = client()
+            client.navigation(listOf("Home"))
+            client.navigation(listOf("Home", "Form"))
+            runCurrent()
+
+            assertEquals(
+                Nav(listOf("Home", "Form")),
+                transport.replay
+                    .replay()
+                    .last()
+                    .msg,
             )
         }
     }

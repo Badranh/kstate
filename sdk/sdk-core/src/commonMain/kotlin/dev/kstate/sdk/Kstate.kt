@@ -19,9 +19,19 @@ public object Kstate {
 
     internal val isRunning: Boolean get() = client != null
 
-    /** Connects to the Kstate host. Calling it again while running does nothing. */
+    /** Where start() learns if it may run; tests replace it. */
+    internal var runtimeFacts: () -> RuntimeFacts = ::currentRuntimeFacts
+
+    /**
+     * Connects to the Kstate host. Does nothing when already running, when disabled, or outside
+     * a debuggable build (and, on iOS, outside the Simulator unless allowed).
+     */
     public fun start(config: KstateConfig = KstateConfig()) {
         if (!config.enabled || client != null) return
+        StartGate.refusal(runtimeFacts(), config)?.let { reason ->
+            println("Kstate is not starting: $reason")
+            return
+        }
         client = createClient(config).also { it.start() }
     }
 
@@ -36,6 +46,11 @@ public object Kstate {
         sourceId: String? = null,
     ) {
         client?.event(name, args, sourceId)
+    }
+
+    /** Reports the app's current back stack, root first, so the host can group sources by screen. */
+    public fun navigation(stack: List<String>) {
+        client?.navigation(stack)
     }
 
     /** Sends every conflated state of [states] to the host until [scope] is cancelled. */
