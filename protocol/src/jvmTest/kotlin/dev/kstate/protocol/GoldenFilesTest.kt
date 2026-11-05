@@ -13,6 +13,41 @@ import kotlin.test.assertEquals
  */
 class GoldenFilesTest {
     private fun goldens(version: ProtocolVersion): Map<String, Envelope> =
+        baseGoldens(version) + if (version.minor >= 2) commandGoldens else emptyMap()
+
+    /** Messages added in 1.2: commands and their results. */
+    private val commandGoldens: Map<String, Envelope> =
+        mapOf(
+            "restore" to
+                Envelope(
+                    id = "01ARZ3NDEKTSV4RRFFQ69G5FB4",
+                    ts = 10,
+                    msg = Restore(cmdId = "c1", sourceId = "Counter-1", seq = 4, mode = OverrideMode.OVERLAY),
+                ),
+            "set-state" to
+                Envelope(
+                    id = "01ARZ3NDEKTSV4RRFFQ69G5FB5",
+                    ts = 11,
+                    msg = SetState("c2", "Counter-1", buildJsonObject { put("count", 9) }, OverrideMode.WRITE_THROUGH),
+                ),
+            "freeze" to
+                Envelope(id = "01ARZ3NDEKTSV4RRFFQ69G5FB6", ts = 12, msg = Freeze("c3", "Counter-1", frozen = true)),
+            "release" to Envelope(id = "01ARZ3NDEKTSV4RRFFQ69G5FB7", ts = 13, msg = Release("c4", "Counter-1")),
+            "command-result" to
+                Envelope(
+                    id = "01ARZ3NDEKTSV4RRFFQ69G5FB8",
+                    ts = 14,
+                    msg =
+                        CommandResult(
+                            "c2",
+                            ok = false,
+                            errorPath = "/token",
+                            error = "redacted values can not be edited",
+                        ),
+                ),
+        )
+
+    private fun baseGoldens(version: ProtocolVersion): Map<String, Envelope> =
         mapOf(
             "hello" to
                 Envelope(
@@ -69,7 +104,7 @@ class GoldenFilesTest {
 
     @Test
     fun theCurrentVersionHasGoldenFiles() {
-        assertEquals(ProtocolVersion(1, 1), ProtocolVersion.CURRENT)
+        assertEquals(ProtocolVersion(1, 2), ProtocolVersion.CURRENT)
     }
 
     @Test
@@ -92,9 +127,10 @@ class GoldenFilesTest {
 
     @Test
     fun olderMinorVersionsStillDecode() {
-        val old = ProtocolVersion(1, 0)
-        goldens(old).forEach { (name, expected) ->
-            assertEquals(expected, EnvelopeCodec.decode(golden(old, name)), "golden 1.0 '$name'")
+        listOf(ProtocolVersion(1, 0), ProtocolVersion(1, 1)).forEach { old ->
+            goldens(old).forEach { (name, expected) ->
+                assertEquals(expected, EnvelopeCodec.decode(golden(old, name)), "golden $old '$name'")
+            }
         }
     }
 

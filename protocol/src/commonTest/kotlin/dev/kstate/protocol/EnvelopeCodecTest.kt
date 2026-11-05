@@ -47,6 +47,16 @@ class EnvelopeCodecTest {
             Pong(nonce = 42),
             Welcome(sessionId = "s-1", hostVersion = "0.1.0", serverTimeNanos = 123_456_789),
             Ping(nonce = 42),
+            Restore(cmdId = "c", sourceId = "s", seq = 3, mode = OverrideMode.OVERLAY),
+            SetState(
+                cmdId = "c",
+                sourceId = "s",
+                state = buildJsonObject { put("a", 1) },
+                mode = OverrideMode.WRITE_THROUGH,
+            ),
+            Freeze(cmdId = "c", sourceId = "s", frozen = false),
+            Release(cmdId = "c", sourceId = "s"),
+            CommandResult(cmdId = "c", ok = true),
         )
 
     @Test
@@ -86,7 +96,7 @@ class EnvelopeCodecTest {
                 .jsonObject
                 .getValue("msg")
                 .jsonObject
-        assertEquals(JsonPrimitive("1.1"), hello.getValue("protocolVersion"))
+        assertEquals(JsonPrimitive("1.2"), hello.getValue("protocolVersion"))
     }
 
     @Test

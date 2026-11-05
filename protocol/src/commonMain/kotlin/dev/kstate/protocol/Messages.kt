@@ -139,6 +139,69 @@ public data class Ping(
     val nonce: Long,
 ) : HostToApp
 
+/** How a command changes a source: shown only (overlay), or written into the app (write-through). */
+@Serializable
+public enum class OverrideMode {
+    /** The UI shows the value; the app's real state keeps running underneath, its emissions suppressed. */
+    OVERLAY,
+
+    /** The value goes into the app through its write-through callback; no override remains. */
+    WRITE_THROUGH,
+}
+
+/** Host commands: each gets exactly one [CommandResult] with the same [cmdId] (since 1.2). */
+public sealed interface Command : HostToApp {
+    public val cmdId: String
+    public val sourceId: String
+}
+
+/** Apply the ring-buffer value with sequence number [seq]. */
+@Serializable
+@SerialName("Restore")
+public data class Restore(
+    override val cmdId: String,
+    override val sourceId: String,
+    val seq: Long,
+    val mode: OverrideMode,
+) : Command
+
+/** Decode [state] and apply it. Redacted values must come back unchanged. */
+@Serializable
+@SerialName("SetState")
+public data class SetState(
+    override val cmdId: String,
+    override val sourceId: String,
+    val state: JsonElement,
+    val mode: OverrideMode,
+) : Command
+
+/** Hold the UI on its current value ([frozen] = true) or let real emissions through again. */
+@Serializable
+@SerialName("Freeze")
+public data class Freeze(
+    override val cmdId: String,
+    override val sourceId: String,
+    val frozen: Boolean,
+) : Command
+
+/** Drop the override; the latest real state shows again. */
+@Serializable
+@SerialName("Release")
+public data class Release(
+    override val cmdId: String,
+    override val sourceId: String,
+) : Command
+
+/** The answer to one command. [errorPath] is the JSON Pointer a rejected edit failed at. */
+@Serializable
+@SerialName("CommandResult")
+public data class CommandResult(
+    val cmdId: String,
+    val ok: Boolean,
+    val errorPath: String? = null,
+    val error: String? = null,
+) : AppToHost
+
 /** A message type this build doesn't know. Receivers ignore it. */
 @Serializable
 @SerialName("Unknown")
