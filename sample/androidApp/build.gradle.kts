@@ -37,5 +37,6 @@ kotlin {
 
 dependencies {
     implementation(projects.sample.shared)
+    implementation(projects.sdk.sdkCore)
     implementation(libs.androidx.activity.compose)
 }

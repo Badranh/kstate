@@ -107,3 +107,8 @@ restart could show the app as disconnected when the old socket's close arrives a
 ## 2026-11-05: adb lookup falls back to Android Studio's default SDK
 After ANDROID_HOME, ANDROID_SDK_ROOT and PATH, the host tries `~/Library/Android/sdk`. An app
 started from Finder or the DMG doesn't inherit the shell's PATH.
+
+## 2026-11-05: The sample uses sdk-core in every build type until M3
+M1 wires `sdk-core` straight into the sample. M3 swaps release builds to `sdk-noop` and adds the
+guard plugin and the runtime debuggable check. The sample's debug build turns on StrictMode
+(detectAll, penaltyLog) for the M1 "no main-thread work" check.
