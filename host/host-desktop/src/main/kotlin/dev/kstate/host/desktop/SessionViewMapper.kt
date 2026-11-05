@@ -12,6 +12,7 @@ import dev.kstate.host.session.TimedEvent
 import dev.kstate.viewer.client.DeviceView
 import dev.kstate.viewer.client.EventView
 import dev.kstate.viewer.client.SessionView
+import dev.kstate.viewer.client.SourceCapabilities
 import dev.kstate.viewer.client.SourceView
 import dev.kstate.viewer.client.TimelineLane
 import dev.kstate.viewer.client.TimelineView
@@ -67,11 +68,20 @@ object SessionViewMapper {
 
     fun timeline(
         session: Session,
-        history: (SourceKey) -> List<Long>,
+        shown: (SourceKey) -> List<Long>,
+        suppressed: (SourceKey) -> List<Long>,
         videoStart: Long?,
         now: Long,
     ): TimelineView {
-        val lanes = session.sources.values.map { TimelineLane(it.key.label(), it.name, history(it.key)) }
+        val lanes =
+            session.sources.values.map {
+                TimelineLane(
+                    it.key.label(),
+                    it.name,
+                    shown(it.key),
+                    suppressed(it.key),
+                )
+            }
         val eventTimes = session.recentEvents.map { it.hostTs }
         val start =
             listOfNotNull(videoStart, lanes.flatMap { it.ticks }.minOrNull(), eventTimes.minOrNull()).minOrNull() ?: now
@@ -105,6 +115,14 @@ object SessionViewMapper {
                     .map { it.path }
                     .toSet(),
             seq = track.latest?.snapshot?.seq,
+            capabilities = track.capabilities.let { SourceCapabilities(it.overlay, it.writeThrough, it.decode) },
+            schema = track.schema,
+            redactedPaths =
+                track.latest
+                    ?.snapshot
+                    ?.redacted
+                    .orEmpty(),
+            overridden = track.overridden,
         )
 
     private fun event(timed: TimedEvent) =

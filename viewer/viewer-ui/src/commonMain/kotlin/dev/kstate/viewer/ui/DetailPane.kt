@@ -9,42 +9,62 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.kstate.viewer.client.EventView
+import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.SourceView
+import dev.kstate.viewer.ui.actions.SourceActions
+import dev.kstate.viewer.ui.edit.StateEditor
 import dev.kstate.viewer.ui.tree.StateTree
 
 @Composable
 internal fun DetailPane(
     source: SourceView?,
     events: List<EventView>,
+    paused: Boolean,
+    commands: SessionSource,
+    tab: DetailTab,
+    onTab: (DetailTab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var tab by remember { mutableIntStateOf(0) }
     Column(modifier) {
-        PrimaryTabRow(selectedTabIndex = tab) {
-            Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text("State") })
-            Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text("Events (${events.size})") })
+        PrimaryTabRow(selectedTabIndex = tab.ordinal) {
+            DetailTab.entries.forEach { entry ->
+                val title = if (entry == DetailTab.EVENTS) "${entry.title} (${events.size})" else entry.title
+                Tab(selected = tab == entry, onClick = { onTab(entry) }, text = { Text(title) })
+            }
         }
-        when (tab) {
-            0 -> StatePane(source)
-            else -> EventList(events)
-        }
-    }
-}
+        val state = source?.state
+        when {
+            tab == DetailTab.EVENTS -> {
+                EventList(events)
+            }
 
-@Composable
-private fun StatePane(source: SourceView?) {
-    val state = source?.state
-    when {
-        source == null -> Hint("No state source yet.", Modifier.padding(16.dp))
-        state == null -> Hint("${source.name} has not sent a state yet.", Modifier.padding(16.dp))
-        else -> StateTree(source.key, state, source.changedPaths)
+            source == null -> {
+                Hint("No state source yet.", Modifier.padding(16.dp))
+            }
+
+            state == null -> {
+                Hint("${source.name} has not sent a state yet.", Modifier.padding(16.dp))
+            }
+
+            tab == DetailTab.EDIT && source.capabilities.decode -> {
+                StateEditor(source, state, send = { json, mode -> commands.setState(source.key, json, mode) })
+            }
+
+            tab == DetailTab.EDIT -> {
+                Hint(
+                    "${source.name} can't be edited: the app didn't register a way to decode it.",
+                    Modifier.padding(16.dp),
+                )
+            }
+
+            else -> {
+                SourceActions(source, paused, commands, onEdit = { onTab(DetailTab.EDIT) })
+                StateTree(source.key, state, source.changedPaths)
+            }
+        }
     }
 }
 

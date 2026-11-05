@@ -10,6 +10,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
@@ -85,6 +87,15 @@ fun Modifier.playbackShortcuts(
             else -> return@onKeyEvent false
         }
         true
+    }
+
+/** ⌘E (Ctrl+E elsewhere) opens the editor for the selected source. */
+fun Modifier.editShortcut(onEdit: () -> Unit): Modifier =
+    onKeyEvent { event ->
+        val edit =
+            event.type == KeyEventType.KeyDown && event.key == Key.E && (event.isMetaPressed || event.isCtrlPressed)
+        if (edit) onEdit()
+        edit
     }
 
 private const val CLOCK_TICK_MILLIS = 250L

@@ -1,9 +1,11 @@
 package dev.kstate.host.session
 
 import dev.kstate.host.diff.Diff
+import dev.kstate.protocol.Capabilities
 import dev.kstate.protocol.Event
 import dev.kstate.protocol.Hello
 import dev.kstate.protocol.StateSnapshot
+import kotlinx.serialization.json.JsonElement
 
 /** Everything the UI shows about the running session, as one immutable value. */
 data class Session(
@@ -35,6 +37,9 @@ data class SourceTrack(
     val lastDiff: Diff = Diff.NONE,
     /** The host set an override (overlay or freeze) the app still shows. */
     val overridden: Boolean = false,
+    val capabilities: Capabilities = Capabilities(),
+    /** The state's shape, from the app's registration, for the form editor. */
+    val schema: JsonElement? = null,
 )
 
 data class TimedSnapshot(

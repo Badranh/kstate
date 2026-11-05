@@ -5,6 +5,7 @@ import dev.kstate.host.device.AttachedDevice
 import dev.kstate.host.device.DeviceManager
 import dev.kstate.host.device.PortAllocator
 import dev.kstate.host.gateway.GatewayFactory
+import dev.kstate.host.gateway.HostCommands
 import dev.kstate.host.session.HostClock
 import dev.kstate.host.session.SessionEngine
 import dev.kstate.host.video.device.DeviceVideo
@@ -34,6 +35,7 @@ class HostRuntime(
     gateways: GatewayFactory,
     clock: HostClock,
     private val scope: CoroutineScope,
+    commands: HostCommands,
     videoProfile: VideoProfile = VideoProfile(),
 ) {
     private val found = adb as? AdbAvailability.Found
@@ -54,6 +56,7 @@ class HostRuntime(
             videos = videos?.videos ?: MutableStateFlow<Map<String, DeviceVideo>>(emptyMap()),
             clock = clock,
             scope = scope,
+            commands = commands,
         )
 
     fun start() {

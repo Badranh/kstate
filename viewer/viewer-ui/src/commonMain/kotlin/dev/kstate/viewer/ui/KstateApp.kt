@@ -33,6 +33,7 @@ import dev.kstate.viewer.ui.screen.DeviceTile
 import dev.kstate.viewer.ui.timeline.Playback
 import dev.kstate.viewer.ui.timeline.Playhead
 import dev.kstate.viewer.ui.timeline.TimelineBar
+import dev.kstate.viewer.ui.timeline.editShortcut
 import dev.kstate.viewer.ui.timeline.playbackShortcuts
 import dev.kstate.viewer.ui.timeline.rememberPlayback
 
@@ -54,11 +55,25 @@ fun KstateApp(
 
     MaterialTheme {
         Surface(modifier.fillMaxSize()) {
-            Column(Modifier.focusRequester(keys).focusable().playbackShortcuts(playback, timeline)) {
+            var tab by remember { mutableStateOf(DetailTab.STATE) }
+            Column(
+                Modifier.focusRequester(keys).focusable().playbackShortcuts(playback, timeline).editShortcut {
+                    tab =
+                        DetailTab.EDIT
+                },
+            ) {
                 session.problem?.let { ProblemBanner(it) }
                 ModeBar(playback)
                 HorizontalDivider()
-                MainPanes(session, screenFor(session, screens), paused, Modifier.weight(1f).fillMaxWidth())
+                MainPanes(
+                    session,
+                    screenFor(session, screens),
+                    paused,
+                    source,
+                    tab,
+                    { tab = it },
+                    Modifier.weight(1f).fillMaxWidth(),
+                )
                 HorizontalDivider()
                 TimelineBar(timeline, playback.playhead, playback.now, onSeek = playback::seek)
             }
@@ -71,6 +86,9 @@ private fun MainPanes(
     session: SessionView,
     screen: DeviceScreen?,
     pausedAt: Long?,
+    commands: SessionSource,
+    tab: DetailTab,
+    onTab: (DetailTab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var chosen by remember { mutableStateOf<String?>(null) }
@@ -82,7 +100,17 @@ private fun MainPanes(
             chosen = it
         }, modifier = Modifier.width(SIDEBAR_WIDTH).fillMaxHeight())
         VerticalDivider()
-        DetailPane(sources.firstOrNull { it.key == selected }, session.events, Modifier.weight(1f))
+        DetailPane(
+            sources.firstOrNull {
+                it.key == selected
+            },
+            session.events,
+            pausedAt != null,
+            commands,
+            tab,
+            onTab,
+            Modifier.weight(1f),
+        )
     }
 }
 

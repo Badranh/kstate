@@ -26,6 +26,8 @@ private class Lane(
     val name: String,
     val ticks: List<Long>,
     val color: Color,
+    /** Red marks: real emissions hidden behind an override. */
+    val suppressed: List<Long> = emptyList(),
 )
 
 /** One lane per source with a tick per snapshot, an events row, and a playhead you can click or drag. */
@@ -39,7 +41,7 @@ fun TimelineBar(
 ) {
     val colors = MaterialTheme.colorScheme
     val lanes =
-        timeline.lanes.map { Lane(it.name, it.ticks, colors.primary) } +
+        timeline.lanes.map { Lane(it.name, it.ticks, colors.primary, it.suppressedTicks) } +
             Lane("Events", timeline.eventTimes, colors.tertiary)
     val head = if (playhead == Playhead.Live) colors.error.copy(alpha = LIVE_HEAD_ALPHA) else colors.error
     Row(modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -59,7 +61,7 @@ fun TimelineBar(
                 .seekGestures(timeline, onSeek),
         ) {
             val scale = TimelineScale(timeline.start, timeline.end, size.width)
-            drawLanes(lanes, scale, colors.surfaceVariant)
+            drawLanes(lanes, scale, colors.surfaceVariant, suppressedColor = colors.error)
             val x = scale.x(playhead.timeAt(now))
             drawLine(head, Offset(x, 0f), Offset(x, size.height), strokeWidth = LINE_WIDTH)
         }
@@ -85,6 +87,7 @@ private fun DrawScope.drawLanes(
     lanes: List<Lane>,
     scale: TimelineScale,
     track: Color,
+    suppressedColor: Color,
 ) {
     val height = size.height / lanes.size
     lanes.forEachIndexed { index, lane ->
@@ -98,15 +101,26 @@ private fun DrawScope.drawLanes(
                     height * (1 - 2 * TRACK_INSET),
                 ),
         )
-        lane.ticks.forEach { tick ->
-            val x = scale.x(tick)
-            drawLine(
-                lane.color,
-                Offset(x, top + height * TICK_INSET),
-                Offset(x, top + height * (1 - TICK_INSET)),
-                strokeWidth = LINE_WIDTH,
-            )
-        }
+        drawTicks(lane.ticks, lane.color, scale, top, height)
+        drawTicks(lane.suppressed, suppressedColor, scale, top, height)
+    }
+}
+
+private fun DrawScope.drawTicks(
+    ticks: List<Long>,
+    color: Color,
+    scale: TimelineScale,
+    top: Float,
+    height: Float,
+) {
+    ticks.forEach { tick ->
+        val x = scale.x(tick)
+        drawLine(
+            color,
+            Offset(x, top + height * TICK_INSET),
+            Offset(x, top + height * (1 - TICK_INSET)),
+            strokeWidth = LINE_WIDTH,
+        )
     }
 }
 

@@ -10,6 +10,7 @@ import dev.kstate.host.session.SourceKey
 import dev.kstate.host.session.SourceTrack
 import dev.kstate.host.session.TimedEvent
 import dev.kstate.host.session.TimedSnapshot
+import dev.kstate.protocol.Capabilities
 import dev.kstate.protocol.Encoding
 import dev.kstate.protocol.Event
 import dev.kstate.protocol.Hello
@@ -17,6 +18,7 @@ import dev.kstate.protocol.Platform
 import dev.kstate.protocol.StateSnapshot
 import dev.kstate.viewer.client.DeviceView
 import dev.kstate.viewer.client.EventView
+import dev.kstate.viewer.client.SourceCapabilities
 import dev.kstate.viewer.client.SourceView
 import dev.kstate.viewer.client.TimelineLane
 import dev.kstate.viewer.client.TimelineView
@@ -229,9 +231,9 @@ class SessionViewMapperTest {
             )
 
         val timeline =
-            SessionViewMapper.timeline(session, history = {
+            SessionViewMapper.timeline(session, shown = {
                 history.map { it.hostTs }
-            }, videoStart = 80, now = 1_000)
+            }, suppressed = { emptyList() }, videoStart = 80, now = 1_000)
 
         assertEquals(
             TimelineView(
@@ -248,9 +250,57 @@ class SessionViewMapperTest {
     fun anEmptyTimelineStartsNow() {
         assertEquals(
             TimelineView(1_000, 1_000, emptyList(), emptyList()),
-            SessionViewMapper.timeline(Session(), {
+            SessionViewMapper.timeline(Session(), shown = {
                 emptyList()
-            }, null, 1_000),
+            }, suppressed = { emptyList() }, videoStart = null, now = 1_000),
         )
+    }
+
+    @Test
+    fun aSourceCarriesWhatTheEditorNeeds() {
+        val schema = buildJsonObject { put("kind", "CLASS") }
+        val redacted =
+            StateSnapshot(
+                "Counter-1",
+                2,
+                buildJsonObject {
+                    put("token", "<redacted>")
+                },
+                Encoding.SERIALIZER,
+                redacted = listOf("/token"),
+            )
+        val editable =
+            track.copy(
+                latest = TimedSnapshot(10, redacted),
+                capabilities = Capabilities(overlay = true, writeThrough = true, decode = false),
+                schema = schema,
+                overridden = true,
+            )
+
+        val view =
+            SessionViewMapper
+                .map(
+                    Session(sources = mapOf(key to editable)),
+                    emptyList(),
+                    null,
+                ).devices
+                .single()
+                .sources
+                .single()
+
+        assertEquals(SourceCapabilities(overlay = true, writeThrough = true, decode = false), view.capabilities)
+        assertEquals(schema, view.schema)
+        assertEquals(listOf("/token"), view.redactedPaths)
+        assertEquals(true, view.overridden)
+    }
+
+    @Test
+    fun suppressedEmissionsGetTheirOwnMarks() {
+        val timeline =
+            SessionViewMapper.timeline(Session(sources = mapOf(key to track)), shown = {
+                listOf(100)
+            }, suppressed = { listOf(150, 160) }, null, 1_000)
+
+        assertEquals(listOf(150L, 160L), timeline.lanes.single().suppressedTicks)
     }
 }
