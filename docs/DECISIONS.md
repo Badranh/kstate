@@ -66,3 +66,35 @@ only add a build to maintain.
 Compose refuses wasm UI tests in a module without an executable binary (CMP-4906), and Skiko
 can't load under Node anyway. viewer-ui disables its wasm test tasks; its UI is tested on the
 JVM. Revisit during the M6 viewer-web spike.
+
+## 2026-11-05: Redaction matches whole words of a key
+The default pattern (`token|password|...|pin|pan|...`) is matched against each word of a key,
+split at camelCase, snake_case and kebab-case boundaries, ignoring case. A substring match would
+redact `company` (pan), `spinner` and `shipping` (pin). `authToken`, `card_cvv` and `sessionId`
+are redacted. Redaction is on from M1, not M3, because CLAUDE.md says it is on by default. The
+`@Sensitive` annotation arrives with the reflection encoder in M3.
+
+## 2026-11-05: The SDK runs on one confined dispatcher
+All SDK state (source registry, outbound buffer, sequence numbers) lives on
+`Dispatchers.Default.limitedParallelism(1)`. `track()` only launches on it, so the app's main
+thread never encodes, redacts or touches the socket. Platform info is read lazily on that
+dispatcher, because on Android it asks the package manager.
+
+## 2026-11-05: Ktor reports a host-closed socket as CancellationException
+Sending on a socket the host just closed throws `CancellationException("Channel was cancelled")`.
+Rethrowing every CancellationException silently killed the reconnect loop (caught by
+`keepsReconnectingWhenTheHostClosesWhileWeAreStillSending`). The transport now treats it as a
+broken socket unless its own coroutine is cancelled (`ensureActive()`).
+
+## 2026-11-05: The transport interface is internal
+The spec shows a transport interface; nothing outside the SDK needs it yet, so it stays internal
+until the desktop split-pane mode needs an in-memory transport.
+
+## 2026-11-05: Spec API not added before its milestone
+`KstateConfig.ringBufferSize`/`ringBufferMaxBytes`, `track(writeThrough =)` and `inspectable()`
+arrive with M4, where they do something. Snapshot `seq` is assigned after the throttle, as in the
+spec's pipeline; M4's ring buffer keeps every conflated value.
+
+## 2026-11-05: sdk-noop ships from M1 with an API parity check
+CLAUDE.md requires sdk-noop to keep sdk-core's exact public API. `:sdk:sdk-noop:verifyApiParity`
+(part of `check`) compares both modules' API dumps and fails on any difference.
