@@ -32,14 +32,20 @@ data class ConnectRetry(
     val interval: Duration = 100.milliseconds,
 )
 
-/** A running scrcpy session: the video stream (after the dummy byte) and the control channel. */
+/** A device's video stream (after the dummy byte) and its control channel. */
+interface VideoConnection : Closeable {
+    val video: InputStream
+    val control: OutputStream
+}
+
+/** A running scrcpy session. */
 class ScrcpyConnection internal constructor(
     private val videoSocket: Socket,
     private val controlSocket: Socket,
     private val onClose: () -> Unit,
-) : Closeable {
-    val video: InputStream get() = videoSocket.getInputStream()
-    val control: OutputStream get() = controlSocket.getOutputStream()
+) : VideoConnection {
+    override val video: InputStream get() = videoSocket.getInputStream()
+    override val control: OutputStream get() = controlSocket.getOutputStream()
 
     override fun close() {
         runCatching { videoSocket.close() }
