@@ -1,0 +1,32 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <kstate:protocol>
+final class dev.kstate.protocol/ProtocolVersion { // dev.kstate.protocol/ProtocolVersion|null[0]
+    constructor <init>(kotlin/Int, kotlin/Int) // dev.kstate.protocol/ProtocolVersion.<init>|<init>(kotlin.Int;kotlin.Int){}[0]
+
+    final val major // dev.kstate.protocol/ProtocolVersion.major|{}major[0]
+        final fun <get-major>(): kotlin/Int // dev.kstate.protocol/ProtocolVersion.major.<get-major>|<get-major>(){}[0]
+    final val minor // dev.kstate.protocol/ProtocolVersion.minor|{}minor[0]
+        final fun <get-minor>(): kotlin/Int // dev.kstate.protocol/ProtocolVersion.minor.<get-minor>|<get-minor>(){}[0]
+
+    final fun component1(): kotlin/Int // dev.kstate.protocol/ProtocolVersion.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // dev.kstate.protocol/ProtocolVersion.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/Int = ...): dev.kstate.protocol/ProtocolVersion // dev.kstate.protocol/ProtocolVersion.copy|copy(kotlin.Int;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.protocol/ProtocolVersion.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.protocol/ProtocolVersion.hashCode|hashCode(){}[0]
+    final fun isCompatibleWith(dev.kstate.protocol/ProtocolVersion): kotlin/Boolean // dev.kstate.protocol/ProtocolVersion.isCompatibleWith|isCompatibleWith(dev.kstate.protocol.ProtocolVersion){}[0]
+    final fun toString(): kotlin/String // dev.kstate.protocol/ProtocolVersion.toString|toString(){}[0]
+
+    final object Companion { // dev.kstate.protocol/ProtocolVersion.Companion|null[0]
+        final val CURRENT // dev.kstate.protocol/ProtocolVersion.Companion.CURRENT|{}CURRENT[0]
+            final fun <get-CURRENT>(): dev.kstate.protocol/ProtocolVersion // dev.kstate.protocol/ProtocolVersion.Companion.CURRENT.<get-CURRENT>|<get-CURRENT>(){}[0]
+
+        final fun parse(kotlin/String): dev.kstate.protocol/ProtocolVersion // dev.kstate.protocol/ProtocolVersion.Companion.parse|parse(kotlin.String){}[0]
+        final fun parseOrNull(kotlin/String): dev.kstate.protocol/ProtocolVersion? // dev.kstate.protocol/ProtocolVersion.Companion.parseOrNull|parseOrNull(kotlin.String){}[0]
+    }
+}
