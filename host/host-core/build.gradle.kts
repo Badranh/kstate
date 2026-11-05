@@ -3,5 +3,11 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.protocol)
+    api(projects.protocol)
+    api(libs.kotlinx.coroutines.core)
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.cio)
+    implementation(libs.ktor.server.websockets)
+    testImplementation(libs.ktor.client.cio)
+    testImplementation(libs.ktor.client.websockets)
 }
