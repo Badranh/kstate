@@ -34,6 +34,7 @@ class HostRuntime(
     gateways: GatewayFactory,
     clock: HostClock,
     private val scope: CoroutineScope,
+    videoProfile: VideoProfile = VideoProfile(),
 ) {
     private val found = adb as? AdbAvailability.Found
     private val deviceManager = found?.let { DeviceManager(it.adb, ports, gateways) }
@@ -41,7 +42,7 @@ class HostRuntime(
     private val videos =
         found?.let { available ->
             val launcher = ScrcpyLauncher(available.adb)
-            DeviceVideos(attached, launch = { serial -> launcher.start(serial, VideoProfile()) })
+            DeviceVideos(attached, launch = { serial -> launcher.start(serial, videoProfile) })
         }
     private var videoJob: Job? = null
 

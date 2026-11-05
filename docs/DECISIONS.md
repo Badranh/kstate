@@ -150,3 +150,24 @@ asserts `avutil_license()` reports LGPL.
 bytedeco's LGPL build reports `avutil_license()` = "LGPL version 3 or later" (checked by
 `theFfmpegBuildIsLgpl`), so NOTICE says LGPL v3+, not 2.1. FFmpeg stays in its own dylibs inside
 the jar, so users can swap it, as the LGPL requires.
+
+## 2026-11-05: M2 acceptance, measured (60 fps not shown: emulator-bound)
+Pixel 9a AVD (Android 16, 2.4 GB RAM), cold-booted, on this Mac; host runtime driven in process:
+- Input to state: 6-24 ms for taps sent through the device screen (scrcpy touch).
+- Input to a decoded frame that shows the change: 77-128 ms on the host. Drawing happens on the
+  next display frame, at most 16.7 ms later, so glass to glass is about 94-145 ms: under 150 ms.
+  The display step itself was not measured.
+- Scrubbing: paused renders of the real KstateApp at two state changes showed the video frame and
+  the state tree agreeing (15 and 17). Frame and state are both looked up by host time, and the
+  frame decoded for the newest time is byte-identical to the last live frame (DeviceVideoTest).
+- 60 fps: not shown. The emulator only has software encoders (`c2.android.avc.encoder`), which
+  deliver 11-36 fps during flings; the official scrcpy client gets the same. On the host, decode
+  plus RGBA conversion runs at about 1,450 fps for 576x1280 H.264 (0.58 ms a frame). Retest on a
+  physical device or a faster emulator.
+- A worn-out emulator (hours of swapping) pushed even plain adb taps to 0.3-2 s. Cold-booting it
+  restored 36-75 ms. Measure on a fresh emulator.
+
+## 2026-11-05: The viewer sends input as fractions of the video
+The tile letterboxes the video and sends touch and scroll in normalised [0, 1] coordinates, as the
+spec requires for remote viewers. The host clamps to the frame and maps to pixels against the
+current session size, so local and remote input share one path.

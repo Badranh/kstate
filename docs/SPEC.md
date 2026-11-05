@@ -444,8 +444,8 @@ Build in this order; each milestone ends with a working demo on the sample app a
 
 **M2: Video and synced timeline**
 
-- [ ] scrcpy pipeline, FFmpeg decode, device tile, input injection (touch, scroll, keys).
-- [ ] Timeline lanes, scrubbing across the in-memory buffer (last 10 min), video and state moving together.
+- [x] scrcpy pipeline, FFmpeg decode, device tile, input injection (touch, scroll, keys).
+- [x] Timeline lanes, scrubbing across the in-memory buffer (last 10 min), video and state moving together.
 - [ ] Accepted when one emulator renders at 60 fps on an M1 with under 150 ms glass-to-glass latency, and scrubbing shows the matching state for every frame.
 
 **M3: Any architecture, multiple devices**
