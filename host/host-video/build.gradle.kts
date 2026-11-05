@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
     implementation(projects.protocol)
+    api(projects.host.hostCore)
 }

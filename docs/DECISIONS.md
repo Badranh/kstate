@@ -123,3 +123,27 @@ On a Pixel 9a emulator (Android 16) with the desktop host running:
   engine on the main thread; fixed in 27e3122, then 0 violations.
 The desktop window couldn't be screenshotted (no Screen Recording permission in this session), so
 the tree was checked by rendering `KstateApp` offscreen with the same data.
+
+## 2026-11-05: The macOS bundle version starts at 1.0.0
+jpackage refuses a macOS app version whose first number is 0, so the bundle says 1.0.0 while the
+project and protocol are 0.1.0. Decide the public numbering before M8.
+
+## 2026-11-05: scrcpy pinned to v5.0.1; the spec's byte layout was for an older version
+Checked against v5.0.1's `doc/develop.md`, `Streamer.java`, `DesktopConnection.java`,
+`ControlMessageReader.java` and its tests, then against a stream recorded from the emulator
+(`host-video/src/test/resources/fixtures/scrcpy-v5.0.1-h264-142x320.bin`). Differences from the spec:
+- After the 4-byte codec id there is no width/height block. A 12-byte session packet (MSB set,
+  bit 0 = client resized, then u32 width and u32 height) starts every capture session, so each
+  rotation sends a new one. Media packets have the MSB clear, bit 62 = config, bit 61 = keyframe,
+  then a u61 PTS and a u32 size.
+- `video_bit_rate` takes a plain integer (4000000); `4M` is a feature of scrcpy's own client.
+- `scid` is parsed as hex.
+Kept as in the spec: forward tunnel to `localabstract:scrcpy_<scid 8 hex>`, video socket then
+control socket, a dummy byte on the first one, and a 64-byte NUL-padded device name.
+Server: `scrcpy-server-v5.0.1`, SHA-256 `764eb6f79811d5211fe9df341120882ba9994c7a61b897d7bf3fb662e53bc536`
+(matches the release's SHA256SUMS.txt), bundled in host-video and checked before every push.
+
+## 2026-11-05: FFmpeg comes from bytedeco ffmpeg 8.1.2-1.5.14, LGPL classifier
+Only `org.bytedeco:ffmpeg` and `javacpp` with the `macosx-arm64` classifier, not
+`javacv-platform` (which pulls every native library) and never the `-gpl` classifiers. A test
+asserts `avutil_license()` reports LGPL.
