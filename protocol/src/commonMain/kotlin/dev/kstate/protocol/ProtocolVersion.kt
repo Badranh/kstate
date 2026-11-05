@@ -1,9 +1,18 @@
 package dev.kstate.protocol
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
 /**
  * Version of the wire protocol, sent in every handshake.
  * Minor bumps are additive and compatible; a major mismatch closes the connection.
  */
+@Serializable(with = ProtocolVersionSerializer::class)
 public data class ProtocolVersion(
     val major: Int,
     val minor: Int,
@@ -32,4 +41,17 @@ public data class ProtocolVersion(
                 ProtocolVersion(major.toInt(), minor.toInt())
             }
     }
+}
+
+/** Writes a version as its "major.minor" text. */
+internal object ProtocolVersionSerializer : KSerializer<ProtocolVersion> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("dev.kstate.protocol.ProtocolVersion", PrimitiveKind.STRING)
+
+    override fun serialize(
+        encoder: Encoder,
+        value: ProtocolVersion,
+    ): Unit = encoder.encodeString(value.toString())
+
+    override fun deserialize(decoder: Decoder): ProtocolVersion = ProtocolVersion.parse(decoder.decodeString())
 }

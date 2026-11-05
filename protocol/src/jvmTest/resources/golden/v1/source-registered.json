@@ -1,0 +1,1 @@
+{"v":1,"id":"01ARZ3NDEKTSV4RRFFQ69G5FAW","ts":2,"msg":{"t":"SourceRegistered","sourceId":"Counter-1","name":"Counter","ownerType":"StateFlow","capabilities":{"overlay":false,"writeThrough":false,"decode":true}}}
