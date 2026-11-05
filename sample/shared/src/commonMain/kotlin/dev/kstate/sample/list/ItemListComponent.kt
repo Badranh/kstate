@@ -4,6 +4,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
+import dev.kstate.adapter.decompose.inspect
 
 data class ListItem(
     val id: Long,
@@ -33,6 +34,10 @@ class DefaultItemListComponent(
     private val mutableModel =
         MutableValue(ItemListComponent.Model(query = "", visibleItems = items, doneIds = emptySet()))
     override val model: Value<ItemListComponent.Model> = mutableModel
+
+    init {
+        model.inspect(lifecycle, "List")
+    }
 
     override fun onQueryChanged(query: String) {
         mutableModel.update { model ->

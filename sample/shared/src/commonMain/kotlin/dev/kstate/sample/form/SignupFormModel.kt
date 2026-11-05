@@ -1,5 +1,6 @@
 package dev.kstate.sample.form
 
+import dev.kstate.adapter.orbit.inspect
 import kotlinx.coroutines.CoroutineScope
 import org.orbitmvi.orbit.OrbitContainerHost
 import org.orbitmvi.orbit.orbitContainer
@@ -22,6 +23,10 @@ class SignupFormModel(
     private val validator: SignupValidator = SignupValidator(),
 ) : OrbitContainerHost<SignupFormState, SignupFormState, SignupFormEffect> {
     override val container = scope.orbitContainer<SignupFormState, SignupFormEffect>(SignupFormState())
+
+    init {
+        inspect("Signup")
+    }
 
     fun onNameChanged(name: String) =
         intent {

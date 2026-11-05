@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.kstate.kmp.library)
     alias(libs.plugins.kstate.compose)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -17,6 +16,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.sdk.sdkCore)
+            implementation(projects.sdk.adapters.adapterOrbit)
+            implementation(projects.sdk.adapters.adapterDecompose)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.ui)

@@ -7,9 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.serialization.Serializable
 
-@Serializable
+/** No @Serializable: Android shows it through reflection, iOS through its toString(). */
 data class CounterUiState(
     val count: Int = 0,
 )
@@ -18,7 +17,7 @@ data class CounterUiState(
 class CounterViewModel : ViewModel() {
     private val mutableState = MutableStateFlow(CounterUiState())
     val state: StateFlow<CounterUiState> =
-        mutableState.asStateFlow().inspect(viewModelScope, "Counter", CounterUiState.serializer())
+        mutableState.asStateFlow().inspect(viewModelScope, "Counter")
 
     fun increment() = mutableState.update { it.copy(count = it.count + 1) }
 

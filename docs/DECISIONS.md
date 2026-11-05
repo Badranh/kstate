@@ -201,3 +201,13 @@ classpaths. Checked on the sample: without the swap, assembleRelease fails namin
 WebSocketTransport, ReflectionStrategy, KstateInitProvider or Ktor. A KMP module's iOS frameworks
 share one dependency set for Debug and Release, so there is no build-time swap for iOS; the SDK
 refuses to start on a physical device unless `allowPhysicalDevice` is set.
+
+## 2026-11-05: M3 acceptance, measured
+- Android, no `@Serializable` in the sample: Counter (StateFlow), Signup (Orbit adapter) and List
+  (Decompose adapter) all reached the host encoded by REFLECTION, with typed input ("Ada") and a
+  ticked item showing up. A form leaving the screen ends its source, as its scope ends.
+- iOS through toString: `IosEncodingTest` on the iOS Simulator target encodes an unannotated data
+  class as TO_STRING with the right JSON. Not yet seen end to end: iOS apps reach the host only
+  with the shared iOS gateway (M7).
+- Release guard: assembleRelease fails with sdk-core in the classpath and passes with the swap; the
+  release APK holds only the no-op Kstate.

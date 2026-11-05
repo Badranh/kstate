@@ -450,10 +450,10 @@ Build in this order; each milestone ends with a working demo on the sample app a
 
 **M3: Any architecture, multiple devices**
 
-- [ ] Grid of up to 4 devices; reflection encoder (Android), toString parser (all), raw fallback.
-- [ ] Adapters: Orbit, MVIKotlin, Decompose, LiveData, Rx. `Kstate.event`, `Nav`.
-- [ ] Redaction defaults, `sdk-noop`, guard Gradle plugin, runtime debuggable check.
-- [ ] Accepted when all three sample screens work without `@Serializable` on Android, iOS state shows through toString, and a release build of the sample fails if `sdk-core` is wired in.
+- [x] Reflection encoder (Android), toString parser (all), raw fallback. (Grid of up to 4 devices: dropped by the owner; one device tile, see DECISIONS.)
+- [x] Adapters: Orbit, MVIKotlin, Decompose, LiveData, Rx. `Kstate.event`, `Nav`.
+- [x] Redaction defaults, `sdk-noop`, guard Gradle plugin, runtime debuggable check.
+- [x] Accepted when all three sample screens work without `@Serializable` on Android, iOS state shows through toString, and a release build of the sample fails if `sdk-core` is wired in.
 
 **M4: Revert and edit**
 
