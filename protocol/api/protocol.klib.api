@@ -498,6 +498,14 @@ final object dev.kstate.protocol/EnvelopeCodec { // dev.kstate.protocol/Envelope
     final fun encode(dev.kstate.protocol/Envelope): kotlin/String // dev.kstate.protocol/EnvelopeCodec.encode|encode(dev.kstate.protocol.Envelope){}[0]
 }
 
+final object dev.kstate.protocol/JsonPointer { // dev.kstate.protocol/JsonPointer|null[0]
+    final const val ROOT // dev.kstate.protocol/JsonPointer.ROOT|{}ROOT[0]
+        final fun <get-ROOT>(): kotlin/String // dev.kstate.protocol/JsonPointer.ROOT.<get-ROOT>|<get-ROOT>(){}[0]
+
+    final fun (kotlin/String).child(kotlin/Int): kotlin/String // dev.kstate.protocol/JsonPointer.child|child@kotlin.String(kotlin.Int){}[0]
+    final fun (kotlin/String).child(kotlin/String): kotlin/String // dev.kstate.protocol/JsonPointer.child|child@kotlin.String(kotlin.String){}[0]
+}
+
 final object dev.kstate.protocol/Ulid { // dev.kstate.protocol/Ulid|null[0]
     final fun generate(kotlin/Long, kotlin.random/Random = ...): kotlin/String // dev.kstate.protocol/Ulid.generate|generate(kotlin.Long;kotlin.random.Random){}[0]
 }

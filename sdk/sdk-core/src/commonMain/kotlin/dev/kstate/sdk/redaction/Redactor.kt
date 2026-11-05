@@ -1,5 +1,7 @@
 package dev.kstate.sdk.redaction
 
+import dev.kstate.protocol.JsonPointer
+import dev.kstate.protocol.JsonPointer.child
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -18,7 +20,7 @@ internal class Redactor(
     fun redact(json: JsonElement): RedactedState {
         val pattern = redaction.pattern ?: return RedactedState(json, emptyList())
         val paths = mutableListOf<String>()
-        val redacted = Walk(pattern, paths).visit(json, pointer = "")
+        val redacted = Walk(pattern, paths).visit(json, pointer = JsonPointer.ROOT)
         return RedactedState(redacted, paths)
     }
 
@@ -32,7 +34,7 @@ internal class Redactor(
         ): JsonElement =
             when (element) {
                 is JsonObject -> JsonObject(element.mapValues { (key, value) -> visitEntry(key, value, pointer) })
-                is JsonArray -> JsonArray(element.mapIndexed { index, value -> visit(value, "$pointer/$index") })
+                is JsonArray -> JsonArray(element.mapIndexed { index, value -> visit(value, pointer.child(index)) })
                 else -> element
             }
 
@@ -41,7 +43,7 @@ internal class Redactor(
             value: JsonElement,
             parent: String,
         ): JsonElement {
-            val pointer = "$parent/${key.escapePointer()}"
+            val pointer = parent.child(key)
             return if (key.isSensitive()) {
                 paths += pointer
                 JsonPrimitive(PLACEHOLDER)
@@ -57,7 +59,5 @@ internal class Redactor(
         const val PLACEHOLDER: String = "<redacted>"
 
         private val WORD_BOUNDARY = Regex("(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|[_\\-\\s.]+")
-
-        private fun String.escapePointer(): String = replace("~", "~0").replace("/", "~1")
     }
 }

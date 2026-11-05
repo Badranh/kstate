@@ -183,6 +183,13 @@ public final class dev/kstate/protocol/HostToApp$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class dev/kstate/protocol/JsonPointer {
+	public static final field INSTANCE Ldev/kstate/protocol/JsonPointer;
+	public static final field ROOT Ljava/lang/String;
+	public final fun child (Ljava/lang/String;I)Ljava/lang/String;
+	public final fun child (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
 public abstract interface class dev/kstate/protocol/Msg {
 	public static final field Companion Ldev/kstate/protocol/Msg$Companion;
 }
