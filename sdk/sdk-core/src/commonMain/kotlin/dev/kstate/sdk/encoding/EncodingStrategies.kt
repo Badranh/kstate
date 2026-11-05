@@ -22,11 +22,21 @@ internal class ChainEncoder<in T>(
             ?: RawStrategy.encode(value)
 }
 
+/** Encoders only some platforms have, tried after the serializer: reflection on Android and the JVM. */
+internal expect val platformStrategies: List<EncodingStrategy<Any?>>
+
 internal class SerializerStrategy<T>(
     private val serializer: KSerializer<T>,
 ) : EncodingStrategy<T> {
-    override fun tryEncode(value: T): EncodedState =
-        EncodedState(StateJson.encodeToJsonElement(serializer, value), Encoding.SERIALIZER)
+    override fun tryEncode(value: T): EncodedState = encodeWith(serializer, value)
+}
+
+private fun <T> encodeWith(
+    serializer: KSerializer<T>,
+    value: T,
+): EncodedState {
+    val json = StateJson.encodeToJsonElement(serializer, value)
+    return EncodedState(json, Encoding.SERIALIZER, sensitivePaths = SensitivePaths.find(serializer.descriptor, json))
 }
 
 /** Finds the serializer generated for the value's runtime class, if there is one. */
@@ -44,6 +54,12 @@ internal object RuntimeSerializerStrategy : EncodingStrategy<Any?> {
     @OptIn(InternalSerializationApi::class)
     @Suppress("UNCHECKED_CAST")
     private fun Any.generatedSerializer(): KSerializer<Any>? = this::class.serializerOrNull() as KSerializer<Any>?
+}
+
+/** Reads the data-class toString() format; works on every platform, no annotations needed. */
+internal object ToStringStrategy : EncodingStrategy<Any?> {
+    override fun tryEncode(value: Any?): EncodedState? =
+        value?.toString()?.let(ToStringParser::parse)?.let { EncodedState(it.json, Encoding.TO_STRING, it.partial) }
 }
 
 internal object RawStrategy {

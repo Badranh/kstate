@@ -97,4 +97,25 @@ class RedactorTest {
         assertEquals(state, result.json)
         assertEquals(emptyList(), result.paths)
     }
+
+    @Test
+    fun pathsTheEncoderMarkedSensitiveAreRedactedToo() {
+        val state =
+            buildJsonObject {
+                put("user", "ada")
+                put("favouriteColour", "blue")
+            }
+
+        val result = redactor.redact(state, sensitivePaths = listOf("/favouriteColour"))
+
+        assertEquals(JsonPrimitive(Redactor.PLACEHOLDER), result.json.jsonObject["favouriteColour"])
+        assertEquals(listOf("/favouriteColour"), result.paths)
+    }
+
+    @Test
+    fun encoderMarkedPathsAreRedactedEvenWhenKeyRulesAreOff() {
+        val result = Redactor(Redaction.Disabled).redact(buildJsonObject { put("a", 1) }, sensitivePaths = listOf("/a"))
+
+        assertEquals(listOf("/a"), result.paths)
+    }
 }

@@ -10,6 +10,7 @@ import dev.kstate.protocol.Pong
 import dev.kstate.protocol.SourceCleared
 import dev.kstate.protocol.SourceRegistered
 import dev.kstate.protocol.StateSnapshot
+import dev.kstate.sdk.encoding.EncodedState
 import dev.kstate.sdk.encoding.StateEncoder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -212,4 +213,23 @@ class KstateClientTest {
 
             assertEquals(listOf("List-1", "List-2"), listOf(first.sourceId, second.sourceId))
         }
+
+    @Test
+    fun aPartialEncodingIsFlaggedOnTheSnapshot() {
+        runTest {
+            val (client, transport) = client()
+            val partial = StateEncoder<Int> { EncodedState(JsonPrimitive(it), Encoding.TO_STRING, partial = true) }
+
+            client.track(ownerScope(), "Counter", MutableStateFlow(1), partial)
+            runCurrent()
+
+            assertEquals(
+                true,
+                transport.sentMessages
+                    .filterIsInstance<StateSnapshot>()
+                    .single()
+                    .partial,
+            )
+        }
+    }
 }

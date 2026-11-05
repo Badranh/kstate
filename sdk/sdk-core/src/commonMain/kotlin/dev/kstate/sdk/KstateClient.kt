@@ -117,8 +117,15 @@ internal class KstateClient(
             } catch (_: Exception) {
                 RawStrategy.encode(value)
             }
-        val redacted = redactor.redact(encoded.json)
-        return StateSnapshot(sourceId, seq, redacted.json, encoded.encoding, redacted = redacted.paths)
+        val redacted = redactor.redact(encoded.json, encoded.sensitivePaths)
+        return StateSnapshot(
+            sourceId,
+            seq,
+            redacted.json,
+            encoded.encoding,
+            redacted = redacted.paths,
+            partial = encoded.partial,
+        )
     }
 
     private fun handle(envelope: Envelope) {

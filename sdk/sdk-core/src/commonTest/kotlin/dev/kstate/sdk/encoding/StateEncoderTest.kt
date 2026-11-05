@@ -69,9 +69,39 @@ class StateEncoderTest {
     }
 
     @Test
-    fun aFailingSerializerFallsBackToRaw() {
+    fun aFailingSerializerFallsBackToTheNextEncoder() {
         val encoded = StateEncoder.serializer(BrokenSerializer).encode(Counter(2))
 
-        assertEquals(EncodedState(JsonPrimitive("Counter(count=2)"), Encoding.RAW), encoded)
+        assertEquals(true, encoded.encoding != Encoding.SERIALIZER, "got ${encoded.encoding}")
+        assertEquals(true, "2" in encoded.json.toString())
+    }
+
+    data class Unannotated(
+        val count: Int,
+        val label: String,
+    )
+
+    @Test
+    fun theToStringStrategyReadsADataClass() {
+        val encoded = ChainEncoder(listOf(ToStringStrategy)).encode(Unannotated(2, "hi"))
+
+        assertEquals(Encoding.TO_STRING, encoded.encoding)
+        assertEquals(
+            kotlinx.serialization.json.Json.parseToJsonElement(
+                """{"${'$'}type":"Unannotated","count":2,"label":"hi"}""",
+            ),
+            encoded.json,
+        )
+        assertEquals(false, encoded.partial)
+    }
+
+    @Test
+    fun aPartlyReadableToStringIsFlaggedPartial() {
+        val broken =
+            object {
+                override fun toString() = "User(name=Ada, address=Address(city=London"
+            }
+
+        assertEquals(true, ChainEncoder(listOf(ToStringStrategy)).encode(broken).partial)
     }
 }

@@ -17,15 +17,19 @@ internal data class RedactedState(
 internal class Redactor(
     private val redaction: Redaction,
 ) {
-    fun redact(json: JsonElement): RedactedState {
-        val pattern = redaction.pattern ?: return RedactedState(json, emptyList())
+    /** Applies the key rules and also redacts [sensitivePaths], which encoders report from `@Sensitive`. */
+    fun redact(
+        json: JsonElement,
+        sensitivePaths: List<String> = emptyList(),
+    ): RedactedState {
         val paths = mutableListOf<String>()
-        val redacted = Walk(pattern, paths).visit(json, pointer = JsonPointer.ROOT)
+        val redacted = Walk(redaction.pattern, sensitivePaths.toSet(), paths).visit(json, pointer = JsonPointer.ROOT)
         return RedactedState(redacted, paths)
     }
 
     private class Walk(
-        private val pattern: Regex,
+        private val pattern: Regex?,
+        private val sensitive: Set<String>,
         private val paths: MutableList<String>,
     ) {
         fun visit(
@@ -44,7 +48,7 @@ internal class Redactor(
             parent: String,
         ): JsonElement {
             val pointer = parent.child(key)
-            return if (key.isSensitive()) {
+            return if (pointer in sensitive || key.isSensitive()) {
                 paths += pointer
                 JsonPrimitive(PLACEHOLDER)
             } else {
@@ -52,7 +56,8 @@ internal class Redactor(
             }
         }
 
-        private fun String.isSensitive(): Boolean = split(WORD_BOUNDARY).any { word -> pattern.matches(word) }
+        private fun String.isSensitive(): Boolean =
+            pattern != null && split(WORD_BOUNDARY).any { word -> pattern.matches(word) }
     }
 
     companion object {

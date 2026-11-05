@@ -11,6 +11,10 @@ import kotlinx.serialization.json.JsonNull
 public data class EncodedState(
     val json: JsonElement,
     val encoding: Encoding,
+    /** Part of the state could only be kept as raw text. */
+    val partial: Boolean = false,
+    /** JSON Pointers the encoder knows are sensitive (e.g. `@Sensitive`); they are always redacted. */
+    val sensitivePaths: List<String> = emptyList(),
 )
 
 public fun interface StateEncoder<in T> {
