@@ -83,4 +83,12 @@ class KstateTest {
 
         assertFalse(Kstate.isRunning)
     }
+
+    @Test
+    fun inspectableHandsBackTheRealFlowWhileNotStarted() {
+        Kstate.stop()
+        val flow = MutableStateFlow(0)
+
+        assertSame(flow, flow.inspectable(scope, "Counter"))
+    }
 }

@@ -1,5 +1,6 @@
 package dev.kstate.sdk
 
+import dev.kstate.protocol.Command
 import dev.kstate.protocol.Envelope
 import dev.kstate.protocol.Event
 import dev.kstate.protocol.Hello
@@ -11,10 +12,11 @@ import dev.kstate.protocol.SourceCleared
 import dev.kstate.protocol.SourceRegistered
 import dev.kstate.protocol.StateSnapshot
 import dev.kstate.protocol.Ulid
-import dev.kstate.sdk.encoding.RawStrategy
 import dev.kstate.sdk.encoding.StateEncoder
 import dev.kstate.sdk.flow.throttleLatest
-import dev.kstate.sdk.redaction.Redactor
+import dev.kstate.sdk.override.Override
+import dev.kstate.sdk.override.StateDecoder
+import dev.kstate.sdk.override.TrackedSource
 import dev.kstate.sdk.transport.KstateTransport
 import dev.kstate.sdk.transport.ReplaySource
 import kotlinx.coroutines.CancellationException
@@ -24,6 +26,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement
 import kotlin.concurrent.atomics.AtomicInt
@@ -46,7 +55,7 @@ internal class KstateClient(
     private val platform by lazy(platformInfo)
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
     private val registry = SourceRegistry()
-    private val redactor = Redactor(config.redaction)
+    private val directory = SourceDirectory(config)
     private val sourceNumbers = AtomicInt(0)
     private val transport = transportFactory(ReplaySource(::replay))
 
@@ -65,13 +74,40 @@ internal class KstateClient(
         states: Flow<T>,
         encoder: StateEncoder<T>,
         ownerType: String = "Flow",
+        decoder: StateDecoder<T>? = null,
+        schema: () -> JsonElement? = { null },
+        writeThrough: ((T) -> Unit)? = null,
     ): SourceHandle {
         val sourceId = "$name-${sourceNumbers.incrementAndFetch()}"
+        val source = directory.create(sourceId, encoder, decoder, writeThrough, override = null)
         val job =
             ownerScope.launch(
                 dispatcher,
-            ) { observe(SourceRegistered(sourceId, name, ownerType), states, encoder) }
+            ) { observe(directory.add(source, name, ownerType, schema), states, source) }
         return JobSourceHandle(sourceId, job)
+    }
+
+    /**
+     * Like [track], plus an override the host can set: the returned flow shows the override while
+     * one is active and [real] otherwise. Real emissions during an override are sent as suppressed.
+     */
+    fun <T> inspectable(
+        ownerScope: CoroutineScope,
+        name: String,
+        real: StateFlow<T>,
+        encoder: StateEncoder<T>,
+        decoder: StateDecoder<T>?,
+        schema: () -> JsonElement? = { null },
+        writeThrough: ((T) -> Unit)? = null,
+    ): StateFlow<T> {
+        val override = MutableStateFlow<Override<T>?>(null)
+        val sourceId = "$name-${sourceNumbers.incrementAndFetch()}"
+        val source = directory.create(sourceId, encoder, decoder, writeThrough, override)
+        ownerScope.launch(dispatcher) { observe(directory.add(source, name, "StateFlow", schema), real, source) }
+        return combine(
+            real,
+            override,
+        ) { value, shown -> shown?.value ?: value }.stateIn(ownerScope, SharingStarted.Eagerly, real.value)
     }
 
     fun event(
@@ -93,55 +129,36 @@ internal class KstateClient(
     private suspend fun <T> observe(
         registration: SourceRegistered,
         states: Flow<T>,
-        encoder: StateEncoder<T>,
+        source: TrackedSource<T>,
     ) {
         registry.register(registration)
         send(registration)
         try {
-            var seq = 0L
-            states.throttleLatest(config.minEmitIntervalMs).collect { value ->
-                val snapshot = snapshotOf(registration.sourceId, seq++, value, encoder)
-                registry.update(snapshot)
-                send(snapshot)
-            }
+            source
+                .observed(states)
+                .conflate()
+                .map(source::record)
+                .throttleLatest(config.minEmitIntervalMs)
+                .collect { recorded ->
+                    val snapshot = source.snapshot(recorded)
+                    registry.update(snapshot)
+                    send(snapshot)
+                }
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (_: Exception) {
             // The app's own flow failed. That is the app's business; we just stop observing it.
         } finally {
             registry.remove(registration.sourceId)
+            directory.remove(registration.sourceId)
             send(SourceCleared(registration.sourceId))
         }
     }
 
-    private fun <T> snapshotOf(
-        sourceId: String,
-        seq: Long,
-        value: T,
-        encoder: StateEncoder<T>,
-    ): StateSnapshot {
-        val encoded =
-            try {
-                encoder.encode(value)
-            } catch (_: Exception) {
-                RawStrategy.encode(value)
-            }
-        val redacted = redactor.redact(encoded.json, encoded.sensitivePaths)
-        return StateSnapshot(
-            sourceId,
-            seq,
-            redacted.json,
-            encoded.encoding,
-            redacted = redacted.paths,
-            partial = encoded.partial,
-        )
-    }
-
     private fun handle(envelope: Envelope) {
-        when (val msg = envelope.msg) {
-            is Ping -> send(Pong(msg.nonce))
-            else -> Unit
-        }
+        val msg = envelope.msg
+        if (msg is Ping) send(Pong(msg.nonce))
+        if (msg is Command) send(directory.execute(msg))
     }
 
     private fun replay(): List<Envelope> =

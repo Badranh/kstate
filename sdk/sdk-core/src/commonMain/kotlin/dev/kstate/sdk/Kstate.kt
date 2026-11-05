@@ -1,6 +1,10 @@
 package dev.kstate.sdk
 
 import dev.kstate.sdk.encoding.StateEncoder
+import dev.kstate.sdk.override.StateDecoder
+import dev.kstate.sdk.override.StateSchema
+import dev.kstate.sdk.override.platformDecoder
+import dev.kstate.sdk.override.platformSchema
 import dev.kstate.sdk.transport.WebSocketTransport
 import dev.kstate.sdk.transport.createHttpClient
 import kotlinx.coroutines.CoroutineScope
@@ -63,7 +67,26 @@ public object Kstate {
         states: Flow<T>,
         encoder: StateEncoder<T> = StateEncoder.auto(),
         ownerType: String = "Flow",
-    ): SourceHandle = client?.track(scope, name, states, encoder, ownerType) ?: SourceHandle.None
+        writeThrough: ((T) -> Unit)? = null,
+    ): SourceHandle =
+        client?.track(scope, name, states, encoder, ownerType, writeThrough = writeThrough) ?: SourceHandle.None
+
+    internal fun <T> inspectable(
+        scope: CoroutineScope,
+        name: String,
+        real: StateFlow<T>,
+        serializer: KSerializer<T>?,
+        writeThrough: ((T) -> Unit)?,
+    ): StateFlow<T> =
+        client?.inspectable(
+            ownerScope = scope,
+            name = name,
+            real = real,
+            encoder = StateEncoder.serializerOrAuto(serializer),
+            decoder = serializer?.let { StateDecoder.serializer(it) } ?: platformDecoder(real.value),
+            schema = { serializer?.let { StateSchema.of(it.descriptor) } ?: platformSchema(real.value) },
+            writeThrough = writeThrough,
+        ) ?: real
 
     private fun createClient(config: KstateConfig): KstateClient {
         val dispatcher = Dispatchers.Default.limitedParallelism(1)
@@ -94,3 +117,15 @@ public fun <T> StateFlow<T>.inspect(
     Kstate.track(scope, name, this, StateEncoder.serializerOrAuto(serializer), ownerType = "StateFlow")
     return this
 }
+
+/**
+ * Inspection with control: the host can restore earlier states and edit the current one. Collect the
+ * returned flow in the UI: it shows the host's override while one is active, this flow otherwise.
+ * [writeThrough] lets the host write a state into the app for real (e.g. `{ mutableState.value = it }`).
+ */
+public fun <T> StateFlow<T>.inspectable(
+    scope: CoroutineScope,
+    name: String,
+    serializer: KSerializer<T>? = null,
+    writeThrough: ((T) -> Unit)? = null,
+): StateFlow<T> = Kstate.inspectable(scope, name, this, serializer, writeThrough)

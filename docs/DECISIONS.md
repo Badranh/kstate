@@ -211,3 +211,20 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   with the shared iOS gateway (M7).
 - Release guard: assembleRelease fails with sdk-core in the classpath and passes with the swap; the
   release APK holds only the no-op Kstate.
+
+## 2026-11-05: How restore and edit behave in the SDK
+- Every conflated value gets a `seq` and a ring slot (200 values / 8 MB a source by default); the
+  throttle only limits what is sent, so the host can restore values it never received.
+- `inspectable()` returns `combine(real, override)`. While an override shows, real emissions are
+  still sent, marked `suppressed`; Release (and `Freeze(false)`) brings the latest real value back.
+  `Freeze(true)` holds the current real value as the override.
+- Write-through calls the app's callback on the SDK's background dispatcher and clears any
+  override. Commands that throw in app code (write-through, decoding) become a failed
+  CommandResult; nothing escapes into the SDK.
+- SetState and redaction: a `<redacted>` value left unchanged gets the app's real value back
+  before decoding, so secrets neither leave the app nor get overwritten; a changed one is rejected
+  with `errorPath`. Decoding uses the serializer if given, else kotlin-reflect on Android/JVM
+  (`$class` for sealed types, defaults for missing optional parameters). iOS without a serializer
+  advertises `decode = false`.
+- The schema for the form editor comes from the serializer's descriptor, or kotlin-reflect, and
+  is built on the SDK dispatcher because reflection is slow the first time.

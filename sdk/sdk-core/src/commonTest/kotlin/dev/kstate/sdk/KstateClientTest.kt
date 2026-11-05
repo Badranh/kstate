@@ -94,8 +94,9 @@ class KstateClientTest {
             runCurrent()
             advanceTimeBy(101)
 
+            // Every conflated value gets a seq (the ring keeps it); the throttle only limits what is sent.
             val snapshots = transport.sentMessages.filterIsInstance<StateSnapshot>()
-            assertEquals(listOf(0L to "0", 1L to "2"), snapshots.map { it.seq to it.state.toString() })
+            assertEquals(listOf(0L to "0", 2L to "2"), snapshots.map { it.seq to it.state.toString() })
         }
 
     @Test

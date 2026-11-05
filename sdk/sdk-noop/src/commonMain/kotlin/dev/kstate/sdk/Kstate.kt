@@ -30,6 +30,7 @@ public object Kstate {
         states: Flow<T>,
         encoder: StateEncoder<T> = StateEncoder.auto(),
         ownerType: String = "Flow",
+        writeThrough: ((T) -> Unit)? = null,
     ): SourceHandle = SourceHandle.None
 }
 
@@ -37,4 +38,11 @@ public fun <T> StateFlow<T>.inspect(
     scope: CoroutineScope,
     name: String,
     serializer: KSerializer<T>? = null,
+): StateFlow<T> = this
+
+public fun <T> StateFlow<T>.inspectable(
+    scope: CoroutineScope,
+    name: String,
+    serializer: KSerializer<T>? = null,
+    writeThrough: ((T) -> Unit)? = null,
 ): StateFlow<T> = this
