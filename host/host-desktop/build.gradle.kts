@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation(projects.host.hostCore)
+    implementation(projects.host.hostVideo)
     implementation(projects.viewer.viewerUi)
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutines.swing)

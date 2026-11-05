@@ -6,8 +6,7 @@ import java.io.File
 class ProcessAdbClient(
     private val adb: File,
     private val runner: ProcessRunner = SystemProcessRunner(),
-) : AdbClient,
-    AdbDeviceTools {
+) : Adb {
     override suspend fun devices(): List<AdbDevice> =
         run("devices", "devices", "-l")
             .lineSequence()

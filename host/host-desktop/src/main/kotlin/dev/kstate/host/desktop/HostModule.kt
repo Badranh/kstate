@@ -25,5 +25,5 @@ fun hostModule() =
         single {
             AdbLocator().locate()?.let { AdbAvailability.Found(ProcessAdbClient(it)) } ?: AdbAvailability.Missing
         }
-        single { HostRuntime(get(), get(), get(), get(), get()) }
+        single { HostRuntime(get(), get(), get(), get(), get(), get()) }
     }

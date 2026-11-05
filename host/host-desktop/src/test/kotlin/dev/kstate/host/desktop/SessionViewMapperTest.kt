@@ -4,6 +4,7 @@ import dev.kstate.host.device.AttachedDevice
 import dev.kstate.host.diff.Diff
 import dev.kstate.host.diff.DiffOp
 import dev.kstate.host.session.AppConnection
+import dev.kstate.host.session.ScrubbedState
 import dev.kstate.host.session.Session
 import dev.kstate.host.session.SourceKey
 import dev.kstate.host.session.SourceTrack
@@ -17,7 +18,11 @@ import dev.kstate.protocol.StateSnapshot
 import dev.kstate.viewer.client.DeviceView
 import dev.kstate.viewer.client.EventView
 import dev.kstate.viewer.client.SourceView
+import dev.kstate.viewer.client.TimelineLane
+import dev.kstate.viewer.client.TimelineView
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -124,5 +129,128 @@ class SessionViewMapperTest {
     @Test
     fun passesTheProblemThrough() {
         assertEquals("adb not found", SessionViewMapper.map(Session(), emptyList(), "adb not found").problem)
+    }
+
+    private val older = StateSnapshot("Counter-1", 1, buildJsonObject { put("count", 1) }, Encoding.SERIALIZER)
+    private val newer = StateSnapshot("Counter-1", 2, buildJsonObject { put("count", 2) }, Encoding.SERIALIZER)
+    private val track = SourceTrack(key, "Counter", "StateFlow", live = true, latest = TimedSnapshot(300, newer))
+    private val history = listOf(TimedSnapshot(100, older), TimedSnapshot(300, newer))
+
+    private fun stateAt(
+        source: SourceKey,
+        at: Long,
+    ): ScrubbedState? {
+        val index = history.indexOfLast { it.hostTs <= at }
+        return if (source != key || index < 0) null else ScrubbedState(history[index], history.getOrNull(index - 1))
+    }
+
+    @Test
+    fun aScrubbedSessionShowsEachSourcesStateAtThatTime() {
+        val session = Session(sources = mapOf(key to track))
+
+        val view = SessionViewMapper.mapAt(session, emptyList(), null, hostTs = 200, stateAt = ::stateAt)
+
+        val source =
+            view.devices
+                .single()
+                .sources
+                .single()
+        assertEquals(buildJsonObject { put("count", 1) }, source.state)
+        assertEquals(1L, source.seq)
+    }
+
+    @Test
+    fun aScrubbedStateIsHighlightedAgainstTheOneBeforeIt() {
+        val view =
+            SessionViewMapper.mapAt(
+                Session(sources = mapOf(key to track)),
+                emptyList(),
+                null,
+                hostTs = 350,
+                stateAt = ::stateAt,
+            )
+
+        assertEquals(
+            setOf("/count"),
+            view.devices
+                .single()
+                .sources
+                .single()
+                .changedPaths,
+        )
+    }
+
+    @Test
+    fun beforeItsFirstSnapshotASourceHasNoState() {
+        val view =
+            SessionViewMapper.mapAt(
+                Session(sources = mapOf(key to track)),
+                emptyList(),
+                null,
+                hostTs = 50,
+                stateAt = ::stateAt,
+            )
+
+        assertEquals(
+            null,
+            view.devices
+                .single()
+                .sources
+                .single()
+                .state,
+        )
+    }
+
+    @Test
+    fun aScrubbedSessionOnlyHasTheEventsUpToThatTime() {
+        val session =
+            Session(
+                recentEvents =
+                    listOf(
+                        TimedEvent(100, "emulator-5554", Event(name = "early")),
+                        TimedEvent(400, "emulator-5554", Event(name = "late")),
+                    ),
+            )
+
+        assertEquals(
+            listOf("early"),
+            SessionViewMapper.mapAt(session, emptyList(), null, 200, ::stateAt).events.map {
+                it.name
+            },
+        )
+    }
+
+    @Test
+    fun theTimelineHasALanePerSourceAndSpansFromTheFirstRecordingToNow() {
+        val session =
+            Session(
+                sources = mapOf(key to track),
+                recentEvents = listOf(TimedEvent(150, "emulator-5554", Event(name = "tap"))),
+            )
+
+        val timeline =
+            SessionViewMapper.timeline(session, history = {
+                history.map { it.hostTs }
+            }, videoStart = 80, now = 1_000)
+
+        assertEquals(
+            TimelineView(
+                start = 80,
+                end = 1_000,
+                lanes = listOf(TimelineLane("emulator-5554/Counter-1", "Counter", listOf(100, 300))),
+                eventTimes = listOf(150),
+            ),
+            timeline,
+        )
+    }
+
+    @Test
+    fun anEmptyTimelineStartsNow() {
+        assertEquals(
+            TimelineView(1_000, 1_000, emptyList(), emptyList()),
+            SessionViewMapper.timeline(Session(), {
+                emptyList()
+            }, null, 1_000),
+        )
     }
 }

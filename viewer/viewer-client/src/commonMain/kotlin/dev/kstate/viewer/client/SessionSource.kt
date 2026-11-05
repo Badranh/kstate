@@ -9,6 +9,17 @@ import kotlinx.serialization.json.JsonElement
  */
 interface SessionSource {
     val session: StateFlow<SessionView>
+
+    /** Device screens by device id. */
+    val screens: StateFlow<Map<String, DeviceScreen>>
+
+    /** The host clock, in the same units as every timestamp the source reports. */
+    fun now(): Long
+
+    /** The session as it was at [hostTs]: each source's state then, highlighted against the one before. */
+    fun sessionAt(hostTs: Long): SessionView
+
+    fun timeline(): TimelineView
 }
 
 data class SessionView(
