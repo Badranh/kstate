@@ -58,6 +58,26 @@ class SessionEngine(
         state.value = state.value.withAppUpdate(deviceId) { it.copy(connected = false) }.withDeviceOffline(deviceId)
     }
 
+    /** The source's last snapshot at or before [hostTs]; null if it had none yet. */
+    fun stateAt(
+        key: SourceKey,
+        hostTs: Long,
+    ): ScrubbedState? =
+        lock.withLock {
+            val history = histories[key] ?: return@withLock null
+            val index = history.lastIndexAtOrBefore(hostTs)
+            if (index < 0) null else ScrubbedState(history[index], history.getOrNull(index - 1))
+        }
+
+    /** When any source's state changed, oldest first: the stops for stepping through the timeline. */
+    fun stateChangeTimes(): List<Long> =
+        lock.withLock {
+            histories.values
+                .flatMap { list ->
+                    list.map { it.hostTs }
+                }.sorted()
+        }
+
     /** Every snapshot of a source, oldest first. */
     fun history(key: SourceKey): List<TimedSnapshot> = lock.withLock { histories[key]?.toList().orEmpty() }
 
@@ -75,6 +95,23 @@ class SessionEngine(
         histories.getOrPut(key) { mutableListOf() } += timed
         val diff = diffEngine.diff(source.latest?.snapshot?.state, snapshot.state)
         return session.copy(sources = session.sources + (key to source.copy(latest = timed, lastDiff = diff)))
+    }
+
+    /** Binary search over a list sorted by host time; -1 when every entry is later. */
+    private fun List<TimedSnapshot>.lastIndexAtOrBefore(hostTs: Long): Int {
+        var low = 0
+        var high = size - 1
+        var found = -1
+        while (low <= high) {
+            val middle = (low + high) ushr 1
+            if (this[middle].hostTs <= hostTs) {
+                found = middle
+                low = middle + 1
+            } else {
+                high = middle - 1
+            }
+        }
+        return found
     }
 
     private fun isCurrent(

@@ -45,3 +45,9 @@ data class TimedEvent(
     val deviceId: String,
     val event: Event,
 )
+
+/** A source's state at a scrubbed time, and the one before it (for change highlighting). */
+data class ScrubbedState(
+    val current: TimedSnapshot,
+    val previous: TimedSnapshot?,
+)

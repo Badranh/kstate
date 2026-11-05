@@ -240,4 +240,37 @@ class SessionEngineTest {
                 .latest,
         )
     }
+
+    @Test
+    fun scrubbingFindsEachSourcesLastStateAtOrBeforeTheTime() {
+        connectCounter()
+        now = 100
+        receive(snapshot(0, 0))
+        now = 200
+        receive(snapshot(1, 1))
+        now = 300
+        receive(snapshot(2, 2))
+
+        assertEquals(snapshot(1, 1), engine.stateAt(counter, 250)?.current?.snapshot)
+        assertEquals(snapshot(0, 0), engine.stateAt(counter, 250)?.previous?.snapshot)
+        assertEquals(snapshot(1, 1), engine.stateAt(counter, 200)?.current?.snapshot)
+        assertEquals(null, engine.stateAt(counter, 99))
+        assertEquals(snapshot(0, 0), engine.stateAt(counter, 150)?.current?.snapshot)
+        assertEquals(null, engine.stateAt(counter, 150)?.previous)
+    }
+
+    @Test
+    fun stateChangeTimesAreEverySnapshotOfEverySourceInOrder() {
+        connectCounter()
+        receive(hello, device = "emulator-5556")
+        receive(SourceRegistered("Other-1", "Other", "Flow"), device = "emulator-5556")
+        now = 100
+        receive(snapshot(0, 0))
+        now = 150
+        receive(StateSnapshot("Other-1", 0, JsonPrimitive(9), Encoding.RAW), device = "emulator-5556")
+        now = 200
+        receive(snapshot(1, 1))
+
+        assertEquals(listOf(100L, 150L, 200L), engine.stateChangeTimes())
+    }
 }
