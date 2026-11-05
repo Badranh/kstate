@@ -1,0 +1,5 @@
+public final class dev/kstate/adapter/rx/ObservableInspectKt {
+	public static final fun inspect (Lio/reactivex/rxjava3/core/Observable;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/serialization/KSerializer;)Ldev/kstate/sdk/SourceHandle;
+	public static synthetic fun inspect$default (Lio/reactivex/rxjava3/core/Observable;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/serialization/KSerializer;ILjava/lang/Object;)Ldev/kstate/sdk/SourceHandle;
+}
+

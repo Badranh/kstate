@@ -1,0 +1,9 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <kstate.sdk.adapters:adapter-mvikotlin>
+final fun <#A: kotlin/Any> (com.arkivanov.mvikotlin.core.store/Store<*, #A, *>).dev.kstate.adapter.mvikotlin/inspect(kotlinx.coroutines/CoroutineScope, kotlin/String, kotlinx.serialization/KSerializer<#A>? = ...): dev.kstate.sdk/SourceHandle // dev.kstate.adapter.mvikotlin/inspect|inspect@com.arkivanov.mvikotlin.core.store.Store<*,0:0,*>(kotlinx.coroutines.CoroutineScope;kotlin.String;kotlinx.serialization.KSerializer<0:0>?){0§<kotlin.Any>}[0]

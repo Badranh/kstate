@@ -16,6 +16,7 @@ abstract fun interface <#A: in kotlin/Any?> dev.kstate.sdk.encoding/StateEncoder
     final object Companion { // dev.kstate.sdk.encoding/StateEncoder.Companion|null[0]
         final fun <#A2: kotlin/Any?> auto(): dev.kstate.sdk.encoding/StateEncoder<#A2> // dev.kstate.sdk.encoding/StateEncoder.Companion.auto|auto(){0§<kotlin.Any?>}[0]
         final fun <#A2: kotlin/Any?> serializer(kotlinx.serialization/KSerializer<#A2>): dev.kstate.sdk.encoding/StateEncoder<#A2> // dev.kstate.sdk.encoding/StateEncoder.Companion.serializer|serializer(kotlinx.serialization.KSerializer<0:0>){0§<kotlin.Any?>}[0]
+        final fun <#A2: kotlin/Any?> serializerOrAuto(kotlinx.serialization/KSerializer<#A2>?): dev.kstate.sdk.encoding/StateEncoder<#A2> // dev.kstate.sdk.encoding/StateEncoder.Companion.serializerOrAuto|serializerOrAuto(kotlinx.serialization.KSerializer<0:0>?){0§<kotlin.Any?>}[0]
     }
 }
 
@@ -99,7 +100,7 @@ final class dev.kstate.sdk/KstateConfig { // dev.kstate.sdk/KstateConfig|null[0]
 }
 
 final object dev.kstate.sdk/Kstate { // dev.kstate.sdk/Kstate|null[0]
-    final fun <#A1: kotlin/Any?> track(kotlinx.coroutines/CoroutineScope, kotlin/String, kotlinx.coroutines.flow/Flow<#A1>, dev.kstate.sdk.encoding/StateEncoder<#A1> = ...): dev.kstate.sdk/SourceHandle // dev.kstate.sdk/Kstate.track|track(kotlinx.coroutines.CoroutineScope;kotlin.String;kotlinx.coroutines.flow.Flow<0:0>;dev.kstate.sdk.encoding.StateEncoder<0:0>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> track(kotlinx.coroutines/CoroutineScope, kotlin/String, kotlinx.coroutines.flow/Flow<#A1>, dev.kstate.sdk.encoding/StateEncoder<#A1> = ..., kotlin/String = ...): dev.kstate.sdk/SourceHandle // dev.kstate.sdk/Kstate.track|track(kotlinx.coroutines.CoroutineScope;kotlin.String;kotlinx.coroutines.flow.Flow<0:0>;dev.kstate.sdk.encoding.StateEncoder<0:0>;kotlin.String){0§<kotlin.Any?>}[0]
     final fun event(kotlin/String, kotlinx.serialization.json/JsonElement? = ..., kotlin/String? = ...) // dev.kstate.sdk/Kstate.event|event(kotlin.String;kotlinx.serialization.json.JsonElement?;kotlin.String?){}[0]
     final fun navigation(kotlin.collections/List<kotlin/String>) // dev.kstate.sdk/Kstate.navigation|navigation(kotlin.collections.List<kotlin.String>){}[0]
     final fun start(dev.kstate.sdk/KstateConfig = ...) // dev.kstate.sdk/Kstate.start|start(dev.kstate.sdk.KstateConfig){}[0]

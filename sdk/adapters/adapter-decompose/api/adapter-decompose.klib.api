@@ -1,0 +1,9 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <kstate.sdk.adapters:adapter-decompose>
+final fun <#A: kotlin/Any> (com.arkivanov.decompose.value/Value<#A>).dev.kstate.adapter.decompose/inspect(com.arkivanov.essenty.lifecycle/Lifecycle, kotlin/String, kotlinx.serialization/KSerializer<#A>? = ...): dev.kstate.sdk/SourceHandle // dev.kstate.adapter.decompose/inspect|inspect@com.arkivanov.decompose.value.Value<0:0>(com.arkivanov.essenty.lifecycle.Lifecycle;kotlin.String;kotlinx.serialization.KSerializer<0:0>?){0§<kotlin.Any>}[0]

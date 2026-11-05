@@ -29,6 +29,10 @@ public fun interface StateEncoder<in T> {
         public fun <T> serializer(serializer: KSerializer<T>): StateEncoder<T> =
             ChainEncoder(listOf(SerializerStrategy(serializer)) + fallbacks())
 
+        /** [serializer] when there is one, otherwise [auto]: what adapters and inspect() use. */
+        public fun <T> serializerOrAuto(serializer: KSerializer<T>?): StateEncoder<T> =
+            serializer?.let(::serializer) ?: auto()
+
         private fun fallbacks(): List<EncodingStrategy<Any?>> = platformStrategies + ToStringStrategy
     }
 }

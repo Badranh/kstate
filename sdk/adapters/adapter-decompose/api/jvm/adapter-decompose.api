@@ -1,0 +1,5 @@
+public final class dev/kstate/adapter/decompose/ValueInspectKt {
+	public static final fun inspect (Lcom/arkivanov/decompose/value/Value;Lcom/arkivanov/essenty/lifecycle/Lifecycle;Ljava/lang/String;Lkotlinx/serialization/KSerializer;)Ldev/kstate/sdk/SourceHandle;
+	public static synthetic fun inspect$default (Lcom/arkivanov/decompose/value/Value;Lcom/arkivanov/essenty/lifecycle/Lifecycle;Ljava/lang/String;Lkotlinx/serialization/KSerializer;ILjava/lang/Object;)Ldev/kstate/sdk/SourceHandle;
+}
+

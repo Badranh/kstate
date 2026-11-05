@@ -180,3 +180,15 @@ debuggable check) but not the grid of up to 4 devices. The desktop keeps one dev
 An additive field (default false), so a minor bump. Golden files live per version
 (`golden/1.0`, `golden/1.1`): the current version's must encode and decode exactly, older minor
 versions' must still decode.
+
+## 2026-11-05: Adapters compile against sdk-core; release builds swap in sdk-noop
+Each adapter is one call to `Kstate.track` with its `ownerType` (now a public, defaulted
+parameter). sdk-noop has a byte-identical API (`verifyApiParity`), so a release build can replace
+sdk-core with sdk-noop underneath the adapters; the guard plugin does that swap and fails the build
+if sdk-core is still there. Orbit reads `container.stateFlow`, not the ref-counted flow, so
+inspecting is never a UI subscriber. adapter-rx also targets the JVM, where its test runs.
+
+## 2026-11-05: sdk-testing records what the real SDK sends
+A small unpublished JVM module (`:sdk:sdk-testing`) with a localhost WebSocket host. Adapter tests
+start the real SDK against it and assert the registration and the state that arrive. LiveData has
+no such test: it needs Android's main looper, so it is only compiled.

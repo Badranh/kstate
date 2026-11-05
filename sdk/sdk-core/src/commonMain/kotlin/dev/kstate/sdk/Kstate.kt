@@ -53,20 +53,16 @@ public object Kstate {
         client?.navigation(stack)
     }
 
-    /** Sends every conflated state of [states] to the host until [scope] is cancelled. */
+    /**
+     * Sends every conflated state of [states] to the host until [scope] is cancelled.
+     * [ownerType] names the kind of state holder for the host, e.g. "ViewModel" or "Orbit".
+     */
     public fun <T> track(
         scope: CoroutineScope,
         name: String,
         states: Flow<T>,
         encoder: StateEncoder<T> = StateEncoder.auto(),
-    ): SourceHandle = track(scope, name, states, encoder, ownerType = "Flow")
-
-    internal fun <T> track(
-        scope: CoroutineScope,
-        name: String,
-        states: Flow<T>,
-        encoder: StateEncoder<T>,
-        ownerType: String,
+        ownerType: String = "Flow",
     ): SourceHandle = client?.track(scope, name, states, encoder, ownerType) ?: SourceHandle.None
 
     private fun createClient(config: KstateConfig): KstateClient {
@@ -95,7 +91,6 @@ public fun <T> StateFlow<T>.inspect(
     name: String,
     serializer: KSerializer<T>? = null,
 ): StateFlow<T> {
-    val encoder = serializer?.let { StateEncoder.serializer(it) } ?: StateEncoder.auto()
-    Kstate.track(scope, name, this, encoder, ownerType = "StateFlow")
+    Kstate.track(scope, name, this, StateEncoder.serializerOrAuto(serializer), ownerType = "StateFlow")
     return this
 }

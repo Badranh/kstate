@@ -7,7 +7,12 @@ kotlin {
     android { namespace = "dev.kstate.adapter.decompose" }
     sourceSets {
         commonMain.dependencies {
-            api(projects.protocol)
+            api(projects.sdk.sdkCore)
+            api(libs.decompose.core)
+            api(libs.essenty.lifecycle)
+        }
+        jvmTest.dependencies {
+            implementation(projects.sdk.sdkTesting)
         }
     }
 }

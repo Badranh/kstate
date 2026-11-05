@@ -7,7 +7,11 @@ kotlin {
     android { namespace = "dev.kstate.adapter.orbit" }
     sourceSets {
         commonMain.dependencies {
-            api(projects.protocol)
+            api(projects.sdk.sdkCore)
+            api(libs.orbit.core)
+        }
+        jvmTest.dependencies {
+            implementation(projects.sdk.sdkTesting)
         }
     }
 }

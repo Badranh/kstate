@@ -33,6 +33,7 @@ include(":protocol")
 
 include(":sdk:sdk-core")
 include(":sdk:sdk-noop")
+include(":sdk:sdk-testing")
 include(":sdk:sdk-koin")
 include(":sdk:adapters:adapter-orbit")
 include(":sdk:adapters:adapter-mvikotlin")

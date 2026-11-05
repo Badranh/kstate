@@ -1,0 +1,5 @@
+public final class dev/kstate/adapter/mvikotlin/StoreInspectKt {
+	public static final fun inspect (Lcom/arkivanov/mvikotlin/core/store/Store;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/serialization/KSerializer;)Ldev/kstate/sdk/SourceHandle;
+	public static synthetic fun inspect$default (Lcom/arkivanov/mvikotlin/core/store/Store;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/serialization/KSerializer;ILjava/lang/Object;)Ldev/kstate/sdk/SourceHandle;
+}
+

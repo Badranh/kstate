@@ -29,6 +29,7 @@ public object Kstate {
         name: String,
         states: Flow<T>,
         encoder: StateEncoder<T> = StateEncoder.auto(),
+        ownerType: String = "Flow",
     ): SourceHandle = SourceHandle.None
 }
 

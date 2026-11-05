@@ -1,0 +1,5 @@
+public final class dev/kstate/adapter/orbit/OrbitInspectKt {
+	public static final fun inspect (Lorg/orbitmvi/orbit/OrbitContainerHost;Ljava/lang/String;Lkotlinx/serialization/KSerializer;)Ldev/kstate/sdk/SourceHandle;
+	public static synthetic fun inspect$default (Lorg/orbitmvi/orbit/OrbitContainerHost;Ljava/lang/String;Lkotlinx/serialization/KSerializer;ILjava/lang/Object;)Ldev/kstate/sdk/SourceHandle;
+}
+

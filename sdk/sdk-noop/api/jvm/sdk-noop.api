@@ -6,8 +6,8 @@ public final class dev/kstate/sdk/Kstate {
 	public final fun start (Ldev/kstate/sdk/KstateConfig;)V
 	public static synthetic fun start$default (Ldev/kstate/sdk/Kstate;Ldev/kstate/sdk/KstateConfig;ILjava/lang/Object;)V
 	public final fun stop ()V
-	public final fun track (Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/coroutines/flow/Flow;Ldev/kstate/sdk/encoding/StateEncoder;)Ldev/kstate/sdk/SourceHandle;
-	public static synthetic fun track$default (Ldev/kstate/sdk/Kstate;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/coroutines/flow/Flow;Ldev/kstate/sdk/encoding/StateEncoder;ILjava/lang/Object;)Ldev/kstate/sdk/SourceHandle;
+	public final fun track (Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/coroutines/flow/Flow;Ldev/kstate/sdk/encoding/StateEncoder;Ljava/lang/String;)Ldev/kstate/sdk/SourceHandle;
+	public static synthetic fun track$default (Ldev/kstate/sdk/Kstate;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;Lkotlinx/coroutines/flow/Flow;Ldev/kstate/sdk/encoding/StateEncoder;Ljava/lang/String;ILjava/lang/Object;)Ldev/kstate/sdk/SourceHandle;
 }
 
 public final class dev/kstate/sdk/KstateConfig {
@@ -78,6 +78,7 @@ public abstract interface class dev/kstate/sdk/encoding/StateEncoder {
 public final class dev/kstate/sdk/encoding/StateEncoder$Companion {
 	public final fun auto ()Ldev/kstate/sdk/encoding/StateEncoder;
 	public final fun serializer (Lkotlinx/serialization/KSerializer;)Ldev/kstate/sdk/encoding/StateEncoder;
+	public final fun serializerOrAuto (Lkotlinx/serialization/KSerializer;)Ldev/kstate/sdk/encoding/StateEncoder;
 }
 
 public final class dev/kstate/sdk/redaction/Redaction {

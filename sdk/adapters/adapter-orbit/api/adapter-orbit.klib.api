@@ -1,0 +1,9 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <kstate.sdk.adapters:adapter-orbit>
+final fun <#A: kotlin/Any, #B: kotlin/Any> (org.orbitmvi.orbit/OrbitContainerHost<#A, #A, #B>).dev.kstate.adapter.orbit/inspect(kotlin/String, kotlinx.serialization/KSerializer<#A>? = ...): dev.kstate.sdk/SourceHandle // dev.kstate.adapter.orbit/inspect|inspect@org.orbitmvi.orbit.OrbitContainerHost<0:0,0:0,0:1>(kotlin.String;kotlinx.serialization.KSerializer<0:0>?){0§<kotlin.Any>;1§<kotlin.Any>}[0]

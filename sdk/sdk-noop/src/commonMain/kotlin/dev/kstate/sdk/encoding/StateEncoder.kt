@@ -25,6 +25,8 @@ public fun interface StateEncoder<in T> {
 
         public fun <T> serializer(serializer: KSerializer<T>): StateEncoder<T> = StateEncoder { NOTHING }
 
+        public fun <T> serializerOrAuto(serializer: KSerializer<T>?): StateEncoder<T> = StateEncoder { NOTHING }
+
         private val NOTHING = EncodedState(JsonNull, Encoding.RAW)
     }
 }
