@@ -1,0 +1,7 @@
+# Builds on detekt's default config; only deviations live here.
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+style:
+  MagicNumber:
+    excludes: ['**/*Test/**', '**/test/**']

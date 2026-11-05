@@ -1,0 +1,108 @@
+# Latest stable versions resolved from Maven Central / Google Maven / Gradle Plugin Portal on 2026-11-05.
+# detekt is the one pre-release: see docs/DECISIONS.md.
+[versions]
+kotlin = "2.4.21"
+agp = "9.5.0"
+compose-multiplatform = "1.12.2"
+compose-material3 = "1.9.0"
+android-compileSdk = "37"
+android-minSdk = "26"
+android-targetSdk = "37"
+androidx-activity = "1.13.0"
+androidx-lifecycle = "2.11.0"
+jetbrains-lifecycle = "2.11.0"
+coroutines = "1.11.0"
+serialization = "1.12.0"
+ktor = "3.6.1"
+koin = "4.2.2"
+kermit = "2.2.0"
+turbine = "1.2.1"
+junit = "6.1.3"
+orbit = "12.0.1"
+mvikotlin = "4.4.0"
+decompose = "3.5.0"
+essenty = "2.7.1"
+rxjava = "3.1.12"
+javacv = "1.5.14"
+detekt = "2.0.0-alpha.6"
+ktlint-gradle = "14.2.0"
+ktlint-engine = "1.8.0"
+binary-compatibility-validator = "0.18.2"
+maven-publish = "0.37.0"
+scrcpy = "5.0.1"
+
+[libraries]
+# Kotlin and kotlinx
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
+kotlinx-coroutines-rx3 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-rx3", version.ref = "coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+
+# Ktor
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
+ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktor" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
+
+# Host and SDK infrastructure
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+javacv-platform = { module = "org.bytedeco:javacv-platform", version.ref = "javacv" }
+
+# Architectures the adapters and the sample cover
+orbit-core = { module = "org.orbit-mvi:orbit-core", version.ref = "orbit" }
+mvikotlin-core = { module = "com.arkivanov.mvikotlin:mvikotlin", version.ref = "mvikotlin" }
+decompose-core = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+decompose-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
+essenty-lifecycle = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }
+rxjava = { module = "io.reactivex.rxjava3:rxjava", version.ref = "rxjava" }
+androidx-lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "androidx-lifecycle" }
+lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "jetbrains-lifecycle" }
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-lifecycle" }
+lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jetbrains-lifecycle" }
+
+# Compose
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material3" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+
+# Build logic classpath
+gradle-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+gradle-kotlin-compose = { module = "org.jetbrains.kotlin.plugin.compose:org.jetbrains.kotlin.plugin.compose.gradle.plugin", version.ref = "kotlin" }
+gradle-kotlin-serialization = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
+gradle-compose = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
+gradle-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+gradle-detekt = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+gradle-ktlint = { module = "org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint-gradle" }
+gradle-bcv = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
+kstate-lint = { id = "kstate.lint" }
+kstate-kmp-library = { id = "kstate.kmp-library" }
+kstate-kmp-android-library = { id = "kstate.kmp-android-library" }
+kstate-kmp-web = { id = "kstate.kmp-web" }
+kstate-kmp-sdk = { id = "kstate.kmp-sdk" }
+kstate-compose = { id = "kstate.compose" }
+kstate-jvm-library = { id = "kstate.jvm-library" }
+kstate-jvm-app = { id = "kstate.jvm-app" }
