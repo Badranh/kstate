@@ -20,9 +20,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.kstate.viewer.client.DeviceView
 import dev.kstate.viewer.client.SourceView
+import dev.kstate.viewer.ui.theme.Kstate
 
 @Composable
 internal fun SourceList(
@@ -48,12 +51,17 @@ internal fun SourceList(
 @Composable
 private fun DeviceHeader(device: DeviceView) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         StatusDot(device.connected)
-        Text(device.label, style = MaterialTheme.typography.labelLarge)
+        Text(
+            device.label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+        )
     }
 }
 
@@ -63,27 +71,55 @@ private fun SourceRow(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val background = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface
+    val colors = MaterialTheme.colorScheme
+    val background = if (selected) colors.primaryContainer else Color.Transparent
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .background(
-                    background,
-                ).clickable(onClick = onClick)
-                .padding(horizontal = 32.dp, vertical = 8.dp),
+                .padding(horizontal = 8.dp, vertical = 2.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(background)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(source.name, modifier = Modifier.weight(1f))
-        source.seq?.let { Text("#$it", style = MaterialTheme.typography.labelSmall) }
-        if (!source.live) Text("ended", style = MaterialTheme.typography.labelSmall)
+        Text(
+            source.name,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (selected) colors.onPrimaryContainer else colors.onSurface,
+        )
+        if (!source.live) Badge("ended", colors.outline)
+        if (source.overridden) Badge("override", Kstate.colors.paused)
+        source.seq?.let { Badge("#$it", colors.onSurfaceVariant) }
     }
 }
 
 @Composable
+private fun Badge(
+    text: String,
+    color: Color,
+) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelSmall,
+        color = color,
+        modifier =
+            Modifier
+                .background(
+                    color.copy(alpha = BADGE_ALPHA),
+                    CircleShape,
+                ).padding(horizontal = 6.dp, vertical = 1.dp),
+    )
+}
+
+private const val BADGE_ALPHA = 0.12f
+
+@Composable
 private fun StatusDot(connected: Boolean) {
-    val color = if (connected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+    val color = if (connected) Kstate.colors.live else MaterialTheme.colorScheme.outline
     Box(Modifier.size(8.dp).background(color, CircleShape))
 }
 

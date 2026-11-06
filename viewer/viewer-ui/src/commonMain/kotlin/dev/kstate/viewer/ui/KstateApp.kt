@@ -1,6 +1,8 @@
 package dev.kstate.viewer.ui
 
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,9 +37,12 @@ import dev.kstate.viewer.client.canDrive
 import dev.kstate.viewer.ui.actions.ConfirmingCommands
 import dev.kstate.viewer.ui.actions.InjectionDialog
 import dev.kstate.viewer.ui.actions.InjectionGate
+import dev.kstate.viewer.ui.chrome.PanelCard
+import dev.kstate.viewer.ui.chrome.TopBar
 import dev.kstate.viewer.ui.collab.CommentsPanel
 import dev.kstate.viewer.ui.collab.ParticipantBar
 import dev.kstate.viewer.ui.screen.DeviceTile
+import dev.kstate.viewer.ui.theme.KstateTheme
 import dev.kstate.viewer.ui.timeline.Playback
 import dev.kstate.viewer.ui.timeline.Playhead
 import dev.kstate.viewer.ui.timeline.TimelineBar
@@ -74,28 +79,34 @@ fun KstateApp(
             ?.value
             ?.canDrive ?: true
 
-    MaterialTheme {
-        Surface(modifier.fillMaxSize()) {
+    KstateTheme {
+        Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             var tab by remember { mutableStateOf(DetailTab.STATE) }
-            Column(
-                Modifier.focusRequester(keys).focusable().playbackShortcuts(playback, timeline).editShortcut {
-                    tab =
-                        DetailTab.EDIT
-                },
-            ) {
-                session.problem?.let { ProblemBanner(it) }
-                ModeBar(playback)
-                collaboration?.let { ParticipantBar(it) }
-                HorizontalDivider()
-                val comments = collaboration?.let { commentsTab(it, playback, timeline.start, selected) }
-                val panes =
-                    Panes(session, screenFor(session, screens), paused, commands, selected, { chosen = it }, tab, {
+            BoxWithConstraints {
+                val narrow = maxWidth < NARROW
+                Column(
+                    Modifier.focusRequester(keys).focusable().playbackShortcuts(playback, timeline).editShortcut {
                         tab =
-                            it
-                    }, canDrive, comments)
-                AdaptivePanes(panes, Modifier.weight(1f).fillMaxWidth())
-                HorizontalDivider()
-                TimelineBar(timeline, playback.playhead, playback.now, onSeek = playback::seek)
+                            DetailTab.EDIT
+                    },
+                ) {
+                    TopBar(playback, narrow)
+                    session.problem?.let { ProblemBanner(it) }
+                    collaboration?.let { ParticipantBar(it) }
+                    val comments = collaboration?.let { commentsTab(it, playback, timeline.start, selected) }
+                    val panes =
+                        Panes(session, screenFor(session, screens), paused, commands, selected, { chosen = it }, tab, {
+                            tab =
+                                it
+                        }, canDrive, comments)
+                    val gap = if (narrow) NARROW_GAP else GAP
+                    Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = gap)) {
+                        if (narrow) NarrowPanes(panes) else WidePanes(panes)
+                    }
+                    PanelCard(Modifier.fillMaxWidth().padding(gap)) {
+                        TimelineBar(timeline, playback.playhead, playback.now, onSeek = playback::seek)
+                    }
+                }
             }
             gate.pending?.let { InjectionDialog(it.question, onAnswer = gate::answer) }
         }
@@ -119,15 +130,6 @@ private fun commentsTab(
         )
     }
 
-/** Side by side on a wide window, stacked on a phone. */
-@Composable
-private fun AdaptivePanes(
-    panes: Panes,
-    modifier: Modifier,
-) {
-    BoxWithConstraints(modifier) { if (maxWidth < NARROW) NarrowPanes(panes) else WidePanes(panes) }
-}
-
 /** Everything the middle of the window shows, laid out side by side or stacked. */
 private class Panes(
     val session: SessionView,
@@ -146,26 +148,35 @@ private class Panes(
 
 @Composable
 private fun WidePanes(panes: Panes) {
-    Row(Modifier.fillMaxSize()) {
-        panes.screen?.let { DeviceTile(it, panes.pausedAt, Modifier.width(TILE_WIDTH).fillMaxHeight(), panes.canDrive) }
-        SourceList(
-            panes.session.devices,
-            panes.selected,
-            onSelect = panes.onSelect,
-            modifier = Modifier.width(SIDEBAR_WIDTH).fillMaxHeight(),
-        )
-        VerticalDivider()
-        Details(panes, Modifier.weight(1f))
+    Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(GAP)) {
+        panes.screen?.let {
+            PanelCard(Modifier.width(TILE_WIDTH).fillMaxHeight()) {
+                DeviceTile(it, panes.pausedAt, Modifier.fillMaxSize(), panes.canDrive)
+            }
+        }
+        PanelCard(Modifier.width(SIDEBAR_WIDTH).fillMaxHeight()) {
+            SourceList(
+                panes.session.devices,
+                panes.selected,
+                onSelect = panes.onSelect,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+        PanelCard(Modifier.weight(1f).fillMaxHeight()) { Details(panes, Modifier.fillMaxSize()) }
     }
 }
 
 /** A phone: the device on top, the sources as chips, the details below. */
 @Composable
 private fun NarrowPanes(panes: Panes) {
-    Column(Modifier.fillMaxSize()) {
-        panes.screen?.let { DeviceTile(it, panes.pausedAt, Modifier.fillMaxWidth().weight(1f), panes.canDrive) }
+    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(NARROW_GAP)) {
+        panes.screen?.let {
+            PanelCard(
+                Modifier.fillMaxWidth().weight(1f),
+            ) { DeviceTile(it, panes.pausedAt, Modifier.fillMaxSize(), panes.canDrive) }
+        }
         SourceChips(panes.session.devices, panes.selected, panes.onSelect)
-        Details(panes, Modifier.weight(1f))
+        PanelCard(Modifier.fillMaxWidth().weight(1f)) { Details(panes, Modifier.fillMaxSize()) }
     }
 }
 
@@ -190,26 +201,10 @@ private fun screenFor(
     screens: Map<String, DeviceScreen>,
 ): DeviceScreen? = session.devices.firstNotNullOfOrNull { screens[it.id] } ?: screens.values.firstOrNull()
 
-@Composable
-private fun ModeBar(playback: Playback) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(playback.label(), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-        val space = if (playback.replaying) "play/pause" else "pause/live"
-        Text("Space: $space   ←/→: previous/next change", style = MaterialTheme.typography.labelSmall)
-        TextButton(onClick = playback::toggle) { Text(playback.toggleLabel()) }
-    }
-}
-
-private fun Playback.toggleLabel(): String =
-    when {
-        replaying && playhead is Playhead.Playing -> "Pause"
-        replaying -> "Play"
-        playhead == Playhead.Live -> "Pause"
-        else -> "Go live"
-    }
-
 private val SIDEBAR_WIDTH = 260.dp
+private val GAP = 12.dp
+private val NARROW_GAP = 8.dp
 
 /** Below this the panes stack, as on a phone. */
 private val NARROW = 900.dp
-private val TILE_WIDTH = 360.dp
+private val TILE_WIDTH = 400.dp

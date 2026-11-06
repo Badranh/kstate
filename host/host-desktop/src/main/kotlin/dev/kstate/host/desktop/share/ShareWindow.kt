@@ -34,6 +34,7 @@ import dev.kstate.host.collab.CollabSession
 import dev.kstate.host.desktop.Sharing
 import dev.kstate.host.desktop.SharingState
 import dev.kstate.host.tunnel.Availability
+import dev.kstate.viewer.ui.theme.KstateTheme
 import kotlinx.coroutines.launch
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
@@ -53,7 +54,7 @@ fun ShareWindow(
         title = "Share this session",
         state = rememberWindowState(width = 560.dp, height = 640.dp),
     ) {
-        MaterialTheme {
+        KstateTheme {
             Surface(Modifier.fillMaxSize()) {
                 Column(
                     Modifier.verticalScroll(rememberScrollState()).padding(16.dp),

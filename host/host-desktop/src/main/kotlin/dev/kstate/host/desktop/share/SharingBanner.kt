@@ -9,12 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.kstate.host.desktop.SharingState
+import dev.kstate.viewer.ui.theme.KstateTheme
 
 /** Always visible while shared (docs/SPEC.md, Security model): people elsewhere may be watching. */
 @Composable
 fun SharingBanner(state: SharingState) {
     val on = state as? SharingState.On ?: return
-    MaterialTheme {
+    KstateTheme {
         Text(
             "Shared via ${on.providerId} at ${on.publicUrl}. People with an invite see this app's state and screen.",
             color = MaterialTheme.colorScheme.onTertiaryContainer,

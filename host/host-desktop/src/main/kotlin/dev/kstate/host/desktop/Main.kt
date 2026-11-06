@@ -21,6 +21,8 @@ import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 
 fun main() {
+    // Kstate is dark only, so the window's own title bar is too.
+    System.setProperty("apple.awt.application.appearance", "NSAppearanceNameDarkAqua")
     val koin = startKoin { modules(hostModule()) }.koin
     val runtime = koin.get<HostRuntime>()
     val sessions = koin.get<DesktopSessions>()

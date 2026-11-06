@@ -390,3 +390,16 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   stacks video, sources and details; a reload kept the session and the role.
 - Found and fixed: the page had no stylesheet, so Compose's canvas was 0 px high; and command
   outcomes went over the wire under their Kotlin class names, now short names.
+
+## 2026-11-06: Kstate is dark only
+- One theme, `KstateTheme`, for the desktop window, the share window and the web viewer: a
+  near-black blue base, raised surfaces for panels, an indigo accent, and Kstate's own colours
+  for what Material has no slot for (JSON value types, live/paused/suppressed, the phone frame).
+  There is no light theme to keep in step. The macOS title bar is set to dark aqua, and the web
+  page's background matches the theme so it never flashes white while loading.
+- The device video sits in a drawn phone: a bezel that is a share of the phone's width, rounded
+  screen corners, a punch-hole camera and side keys. The screen keeps the video's own shape (a
+  20:9 phone until the first picture says otherwise), so touch mapping inside it is unchanged.
+- The state tree is coloured like code (keys, strings, numbers, booleans, null, redacted) and
+  marks a changed value with a green bar on the left and a light tint. Its chevrons are drawn,
+  not ▾/▸ glyphs, which the web viewer's font doesn't have.

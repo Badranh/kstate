@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.kstate.viewer.ui.theme.KstateTheme
 
 /** Asks a guest for a name before the invite is used, or says why they can't get in. */
 @Composable
@@ -28,14 +29,22 @@ internal fun JoinScreen(
     onJoin: ((name: String) -> Unit)?,
 ) {
     var name by remember { mutableStateOf("") }
-    MaterialTheme {
-        Surface(Modifier.fillMaxSize()) {
+    KstateTheme {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Box(contentAlignment = Alignment.Center) {
                 Column(
                     Modifier.widthIn(max = 360.dp).padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text("Kstate", style = MaterialTheme.typography.headlineSmall)
+                    Text(
+                        "kstate",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(
+                        "You've been invited to watch a live app session.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     message?.let { Text(it) }
                     if (onJoin != null) {
                         OutlinedTextField(name, { name = it }, label = { Text("Your name") }, singleLine = true)
