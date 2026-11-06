@@ -51,6 +51,8 @@ class DeviceVideo(
     private val clock: HostClock = HostClock.System,
     val timeline: VideoTimeline = VideoTimeline(),
     private val decoders: () -> VideoDecoder = ::FfmpegDecoder,
+    /** False for a stream only relayed to remote viewers: their browsers decode it, the Mac doesn't. */
+    private val decodeLive: Boolean = true,
 ) : Closeable {
     private val live = MutableStateFlow<LiveFrame?>(null)
     private val currentSize = MutableStateFlow<VideoSize?>(null)
@@ -77,7 +79,7 @@ class DeviceVideo(
                 val reader = VideoStreamReader(connection.video)
                 name.value = reader.readHeader().deviceName
                 streamState.value = VideoState.Streaming
-                decoders().use { decoder -> pump(reader, decoder) }
+                if (decodeLive) decoders().use { decoder -> pump(reader, decoder) } else pump(reader, decoder = null)
                 VideoState.Ended(cause = null)
             } catch (failure: IOException) {
                 VideoState.Ended(failure)
@@ -108,7 +110,7 @@ class DeviceVideo(
 
     private fun pump(
         reader: VideoStreamReader,
-        decoder: VideoDecoder,
+        decoder: VideoDecoder?,
     ) {
         val merger = ConfigMerger()
         while (true) {
@@ -122,7 +124,7 @@ class DeviceVideo(
     private fun onPacket(
         packet: StreamEvent.Packet,
         merger: ConfigMerger,
-        decoder: VideoDecoder,
+        decoder: VideoDecoder?,
     ) {
         if (packet.config) {
             timeline.setConfig(packet.data)
@@ -131,7 +133,15 @@ class DeviceVideo(
         }
         val hostTs = clock.nanos()
         timeline.append(VideoSample(hostTs, packet.keyFrame, packet.data))
-        val merged = merger.merge(packet) ?: return
+        if (decoder != null) decodeLive(merger.merge(packet), decoder, hostTs)
+    }
+
+    private fun decodeLive(
+        merged: StreamEvent.Packet?,
+        decoder: VideoDecoder,
+        hostTs: Long,
+    ) {
+        merged ?: return
         decoder.outputSize = outputSize
         decoder.decode(merged.data, hostTs).lastOrNull()?.let { live.value = LiveFrame(hostTs, it) }
     }

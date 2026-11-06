@@ -112,4 +112,15 @@ class DeviceVideoTest {
 
         assertEquals(true, connection.closed)
     }
+
+    @Test
+    fun withoutLiveDecodingTheTimelineStillFillsButNoPictureIsMade() {
+        val remote = DeviceVideo(FixtureConnection(), clock = { now++ }, decodeLive = false)
+
+        remote.stream()
+
+        assertEquals(64, remote.timeline.frameTimes().size)
+        assertNull(remote.frames.value)
+        assertEquals(VideoSize(142, 320), remote.size.value)
+    }
 }
