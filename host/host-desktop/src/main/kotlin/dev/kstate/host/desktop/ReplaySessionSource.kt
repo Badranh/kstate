@@ -1,6 +1,7 @@
 package dev.kstate.host.desktop
 
 import dev.kstate.host.record.RecordedSession
+import dev.kstate.session.view.SessionViewMapper
 import dev.kstate.viewer.client.ApplyMode
 import dev.kstate.viewer.client.CommandOutcome
 import dev.kstate.viewer.client.DeviceScreen

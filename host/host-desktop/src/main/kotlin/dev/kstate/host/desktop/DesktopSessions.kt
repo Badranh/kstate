@@ -3,9 +3,9 @@ package dev.kstate.host.desktop
 import dev.kstate.host.record.RecordedSession
 import dev.kstate.host.record.SessionArchive
 import dev.kstate.host.record.SessionRecorder
-import dev.kstate.host.session.HostClock
-import dev.kstate.host.session.SessionEngine
 import dev.kstate.host.timeline.VideoTimeline
+import dev.kstate.session.HostClock
+import dev.kstate.session.SessionEngine
 import dev.kstate.viewer.client.SessionSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -83,7 +83,7 @@ class DesktopSessions(
         }
     }
 
-    /** Shows a recording folder or `.kstate` file; throws [dev.kstate.host.record.RecordingFormatException]. */
+    /** Shows a recording folder or `.kstate` file; throws [dev.kstate.session.wire.RecordingFormatException]. */
     fun open(path: Path) {
         val dir = if (path.isDirectory()) path else archive.import(path, library.imports)
         val recorded = RecordedSession.open(dir)

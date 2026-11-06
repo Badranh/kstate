@@ -314,3 +314,30 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   app show 7.
 - Found and fixed during the run: a replay opened at the video's key frame, about 9 s before the
   recording began, with no state to show; its timeline now starts at the recording's start.
+
+## 2026-11-06: M6 spike: video in the Compose Wasm viewer takes the main approach
+- Tested in the browser pane with 60 s of the M5 emulator recording, played at real speed into the
+  shared `KstateApp` tile. WebCodecs decodes Annex-B H.264 (no `description`; each key frame
+  carries the SPS/PPS), a 2D canvas turns each picture into RGBA, and the bytes go to the same
+  Skia bitmap the desktop tile uses.
+- Main thread load, measured as how often `requestAnimationFrame` still ran (119/s when idle):
+  324x720 at 30 fps (the remote profile) decoded 29 fps with rAF at 119/s and ~4 ms to copy a
+  picture into Kotlin; 570x1280 starved the page (rAF 3-9/s, 11-20 ms a copy). The DOM-canvas
+  overlay fallback ran both sizes at 29 fps with rAF at 119/s.
+- Decision: the main approach. It keeps one tile, one fit and one input path for desktop and web,
+  and the web viewer only ever receives the remote profiles (720 and 540), where it has headroom.
+  The overlay stays the fallback if a larger profile is ever sent to browsers.
+- The browser never drops packets while it decodes: one missed delta freezes the picture until
+  the next key frame (13 s apart on the emulator). Keeping up is the host's job, per viewer.
+
+## 2026-11-06: The session model is shared with the browser
+- `:session` (JVM + wasmJs) now holds the engine, its histories, the diff engine, the timeline
+  line codec and the view mapper, moved out of host-core and host-desktop. A web viewer receives
+  the same inputs a recording stores and applies them to its own engine, so scrubbing, diffs and
+  the timeline work in the browser with the code the desktop runs, and the wire carries only
+  appends.
+- The lock is `expect`/`actual`: a reentrant lock on the JVM, nothing in the single-threaded
+  browser. `HostClock.System` reads `performance.now()` there.
+- Compose's Skia runtime can't load under Node, so plain logic the web viewer needs (such as the
+  WebCodecs codec string) lives in `:session` and is tested on the JVM and Node; viewer-web keeps
+  only the browser glue.

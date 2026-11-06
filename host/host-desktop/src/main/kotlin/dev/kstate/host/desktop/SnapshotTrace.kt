@@ -1,7 +1,7 @@
 package dev.kstate.host.desktop
 
-import dev.kstate.host.session.Session
-import dev.kstate.host.session.SourceKey
+import dev.kstate.session.Session
+import dev.kstate.session.SourceKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

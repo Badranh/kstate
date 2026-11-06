@@ -1,7 +1,5 @@
 package dev.kstate.host.record
 
-import dev.kstate.host.session.SessionEngine
-import dev.kstate.host.session.SourceKey
 import dev.kstate.protocol.Capabilities
 import dev.kstate.protocol.Encoding
 import dev.kstate.protocol.Envelope
@@ -12,6 +10,8 @@ import dev.kstate.protocol.Platform
 import dev.kstate.protocol.SourceCleared
 import dev.kstate.protocol.SourceRegistered
 import dev.kstate.protocol.StateSnapshot
+import dev.kstate.session.SessionEngine
+import dev.kstate.session.SourceKey
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals

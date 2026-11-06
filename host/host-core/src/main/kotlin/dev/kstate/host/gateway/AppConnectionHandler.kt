@@ -1,7 +1,5 @@
 package dev.kstate.host.gateway
 
-import dev.kstate.host.session.HostClock
-import dev.kstate.host.session.SessionEngine
 import dev.kstate.protocol.CloseCodes
 import dev.kstate.protocol.CommandResult
 import dev.kstate.protocol.Envelope
@@ -12,6 +10,8 @@ import dev.kstate.protocol.Ping
 import dev.kstate.protocol.ProtocolVersion
 import dev.kstate.protocol.Ulid
 import dev.kstate.protocol.Welcome
+import dev.kstate.session.HostClock
+import dev.kstate.session.SessionEngine
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession

@@ -2,7 +2,6 @@ package dev.kstate.host.desktop
 
 import dev.kstate.host.record.RecordedSession
 import dev.kstate.host.record.SessionRecorder
-import dev.kstate.host.session.SessionEngine
 import dev.kstate.host.timeline.VideoSample
 import dev.kstate.host.timeline.VideoTimeline
 import dev.kstate.protocol.Encoding
@@ -12,6 +11,7 @@ import dev.kstate.protocol.Msg
 import dev.kstate.protocol.Platform
 import dev.kstate.protocol.SourceRegistered
 import dev.kstate.protocol.StateSnapshot
+import dev.kstate.session.SessionEngine
 import dev.kstate.viewer.client.ApplyMode
 import dev.kstate.viewer.client.CommandOutcome
 import dev.kstate.viewer.client.DeviceScreen

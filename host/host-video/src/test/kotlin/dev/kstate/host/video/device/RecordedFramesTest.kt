@@ -2,8 +2,8 @@ package dev.kstate.host.video.device
 
 import dev.kstate.host.record.RecordedSession
 import dev.kstate.host.record.SessionRecorder
-import dev.kstate.host.session.SessionEngine
 import dev.kstate.host.video.scrcpy.VideoConnection
+import dev.kstate.session.SessionEngine
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.nio.file.Files

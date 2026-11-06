@@ -7,9 +7,9 @@ import dev.kstate.host.gateway.CommandBus
 import dev.kstate.host.gateway.GatewayFactory
 import dev.kstate.host.gateway.HostCommands
 import dev.kstate.host.gateway.KtorGatewayFactory
-import dev.kstate.host.session.HostClock
-import dev.kstate.host.session.SessionEngine
 import dev.kstate.protocol.Ulid
+import dev.kstate.session.HostClock
+import dev.kstate.session.SessionEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

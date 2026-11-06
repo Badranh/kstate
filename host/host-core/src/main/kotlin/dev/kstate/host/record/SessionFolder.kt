@@ -1,5 +1,7 @@
 package dev.kstate.host.record
 
+import dev.kstate.session.wire.RecordingFormatException
+import dev.kstate.session.wire.formatCheck
 import java.nio.file.Path
 
 /**

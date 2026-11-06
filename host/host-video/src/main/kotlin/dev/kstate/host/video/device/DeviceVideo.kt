@@ -1,6 +1,5 @@
 package dev.kstate.host.video.device
 
-import dev.kstate.host.session.HostClock
 import dev.kstate.host.timeline.VideoSample
 import dev.kstate.host.timeline.VideoTimeline
 import dev.kstate.host.video.control.ControlMessage
@@ -14,6 +13,7 @@ import dev.kstate.host.video.stream.ConfigMerger
 import dev.kstate.host.video.stream.StreamEvent
 import dev.kstate.host.video.stream.VideoStreamException
 import dev.kstate.host.video.stream.VideoStreamReader
+import dev.kstate.session.HostClock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

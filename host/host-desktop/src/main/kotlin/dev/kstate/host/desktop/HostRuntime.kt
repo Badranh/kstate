@@ -6,13 +6,13 @@ import dev.kstate.host.device.DeviceManager
 import dev.kstate.host.device.PortAllocator
 import dev.kstate.host.gateway.GatewayFactory
 import dev.kstate.host.gateway.HostCommands
-import dev.kstate.host.session.HostClock
-import dev.kstate.host.session.SessionEngine
 import dev.kstate.host.timeline.VideoTimeline
 import dev.kstate.host.video.device.DeviceVideo
 import dev.kstate.host.video.device.DeviceVideos
 import dev.kstate.host.video.scrcpy.ScrcpyLauncher
 import dev.kstate.host.video.scrcpy.VideoProfile
+import dev.kstate.session.HostClock
+import dev.kstate.session.SessionEngine
 import dev.kstate.viewer.client.SessionSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

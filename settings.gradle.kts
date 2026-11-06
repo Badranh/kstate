@@ -30,6 +30,7 @@ dependencyResolutionManagement {
 }
 
 include(":protocol")
+include(":session")
 
 include(":sdk:sdk-core")
 include(":sdk:sdk-noop")

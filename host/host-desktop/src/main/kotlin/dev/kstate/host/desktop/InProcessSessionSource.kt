@@ -2,11 +2,13 @@ package dev.kstate.host.desktop
 
 import dev.kstate.host.device.AttachedDevice
 import dev.kstate.host.gateway.HostCommands
-import dev.kstate.host.session.HostClock
-import dev.kstate.host.session.SessionEngine
-import dev.kstate.host.session.SourceKey
 import dev.kstate.host.video.device.DeviceVideo
 import dev.kstate.protocol.OverrideMode
+import dev.kstate.session.HostClock
+import dev.kstate.session.SessionEngine
+import dev.kstate.session.SourceKey
+import dev.kstate.session.view.DeviceInfo
+import dev.kstate.session.view.SessionViewMapper
 import dev.kstate.viewer.client.ApplyMode
 import dev.kstate.viewer.client.CommandOutcome
 import dev.kstate.viewer.client.DeviceScreen
@@ -46,12 +48,9 @@ class InProcessSessionSource(
     private val screenMap = MutableStateFlow<Map<String, DeviceScreen>>(emptyMap())
 
     override val session: StateFlow<SessionView> =
-        combine(
-            engine.session,
-            devices,
-            problem,
-            SessionViewMapper::map,
-        ).stateIn(scope, SharingStarted.Eagerly, SessionView())
+        combine(engine.session, devices, problem) { session, attached, problem ->
+            SessionViewMapper.map(session, attached.map(AttachedDevice::info), problem)
+        }.stateIn(scope, SharingStarted.Eagerly, SessionView())
 
     override val screens: StateFlow<Map<String, DeviceScreen>> = screenMap.asStateFlow()
 
@@ -62,7 +61,13 @@ class InProcessSessionSource(
     override fun now(): Long = clock.nanos()
 
     override fun sessionAt(hostTs: Long): SessionView =
-        SessionViewMapper.mapAt(engine.session.value, devices.value, problem.value, hostTs, engine.timeline::stateAt)
+        SessionViewMapper.mapAt(
+            engine.session.value,
+            devices.value.map(AttachedDevice::info),
+            problem.value,
+            hostTs,
+            engine.timeline::stateAt,
+        )
 
     override fun timeline(): TimelineView =
         SessionViewMapper.timeline(
@@ -142,3 +147,5 @@ class InProcessSessionSource(
         screenMap.value = attachedScreens.mapValues { it.value.screen }
     }
 }
+
+private fun AttachedDevice.info() = DeviceInfo(serial, model)

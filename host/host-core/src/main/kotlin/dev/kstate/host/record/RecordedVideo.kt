@@ -3,6 +3,8 @@ package dev.kstate.host.record
 import dev.kstate.host.timeline.Gop
 import dev.kstate.host.timeline.GopSource
 import dev.kstate.host.timeline.VideoSample
+import dev.kstate.session.wire.RecordingFormatException
+import dev.kstate.session.wire.formatCheck
 import java.io.DataInputStream
 import java.io.RandomAccessFile
 import java.nio.file.Files

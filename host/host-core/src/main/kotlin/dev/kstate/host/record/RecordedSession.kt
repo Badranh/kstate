@@ -1,6 +1,9 @@
 package dev.kstate.host.record
 
-import dev.kstate.host.session.SessionEngine
+import dev.kstate.session.SessionEngine
+import dev.kstate.session.wire.RecordingFormatException
+import dev.kstate.session.wire.TimelineLines
+import dev.kstate.session.wire.formatCheck
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.exists

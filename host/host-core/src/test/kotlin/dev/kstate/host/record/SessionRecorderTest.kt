@@ -1,7 +1,5 @@
 package dev.kstate.host.record
 
-import dev.kstate.host.session.SessionEngine
-import dev.kstate.host.session.SourceKey
 import dev.kstate.host.timeline.VideoSample
 import dev.kstate.host.timeline.VideoTimeline
 import dev.kstate.protocol.Encoding
@@ -12,6 +10,10 @@ import dev.kstate.protocol.Msg
 import dev.kstate.protocol.Platform
 import dev.kstate.protocol.SourceRegistered
 import dev.kstate.protocol.StateSnapshot
+import dev.kstate.session.SessionEngine
+import dev.kstate.session.SourceKey
+import dev.kstate.session.wire.RecordingFormatException
+import dev.kstate.session.wire.TimelineLines
 import kotlinx.serialization.json.JsonPrimitive
 import java.nio.file.Files
 import java.nio.file.Path

@@ -1,11 +1,12 @@
 package dev.kstate.host.record
 
-import dev.kstate.host.session.SessionEngine
 import dev.kstate.host.timeline.VideoSample
 import dev.kstate.host.timeline.VideoTimeline
 import dev.kstate.protocol.Envelope
 import dev.kstate.protocol.Hello
 import dev.kstate.protocol.Platform
+import dev.kstate.session.SessionEngine
+import dev.kstate.session.wire.RecordingFormatException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipEntry

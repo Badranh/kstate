@@ -1,6 +1,5 @@
 package dev.kstate.host.gateway
 
-import dev.kstate.host.session.SessionEngine
 import dev.kstate.protocol.CloseCodes
 import dev.kstate.protocol.CommandResult
 import dev.kstate.protocol.Envelope
@@ -14,6 +13,7 @@ import dev.kstate.protocol.Release
 import dev.kstate.protocol.SourceCleared
 import dev.kstate.protocol.SourceRegistered
 import dev.kstate.protocol.Welcome
+import dev.kstate.session.SessionEngine
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.server.application.install

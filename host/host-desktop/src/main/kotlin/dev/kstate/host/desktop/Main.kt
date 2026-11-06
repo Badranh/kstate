@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import dev.kstate.host.session.SessionEngine
+import dev.kstate.session.SessionEngine
 import dev.kstate.viewer.ui.KstateApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking

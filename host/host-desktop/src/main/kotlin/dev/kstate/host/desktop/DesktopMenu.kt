@@ -7,7 +7,7 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
-import dev.kstate.host.record.RecordingFormatException
+import dev.kstate.session.wire.RecordingFormatException
 import java.awt.FileDialog
 import java.io.IOException
 import java.nio.file.Path

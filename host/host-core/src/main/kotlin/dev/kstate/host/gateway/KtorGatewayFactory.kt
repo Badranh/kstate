@@ -1,7 +1,7 @@
 package dev.kstate.host.gateway
 
-import dev.kstate.host.session.HostClock
-import dev.kstate.host.session.SessionEngine
+import dev.kstate.session.HostClock
+import dev.kstate.session.SessionEngine
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
