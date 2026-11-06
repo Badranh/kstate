@@ -341,3 +341,52 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 - Compose's Skia runtime can't load under Node, so plain logic the web viewer needs (such as the
   WebCodecs codec string) lives in `:session` and is tested on the JVM and Node; viewer-web keeps
   only the browser glue.
+
+## 2026-11-06: How a shared session is protected
+- The viewer server binds 127.0.0.1:47800; only the tunnel the Owner starts makes it reachable,
+  and LAN mode adds the chosen interface's address. adb, scrcpy and the app gateways are never on
+  it. A banner shows in the main window while shared; stopping revokes every invite.
+- Invites carry 128 random bits in base64url in the link's fragment (`/#join=`), so tunnels and
+  proxies never log them; the page removes it from the address bar after joining. `/api/join`
+  trades it for a separate 128-bit session token in an HttpOnly, SameSite=Strict cookie, Secure
+  when the browser came over https (X-Forwarded-Proto). Invites only ever make Viewers and last
+  8 h; revoking one ends every session it opened and closes their sockets (4003).
+- Every POST and WebSocket upgrade must carry an Origin naming this host (or the
+  X-Forwarded-Host a tunnel sets, which a page can't), against cross-site WebSocket hijacking.
+- Roles are checked on the host for every message. Viewers see, comment and show presence.
+  The one Driver, chosen by the Owner from those who asked, may touch the device and, only if the
+  Owner allows it, show states (overlay, freeze, release), never write them in. Owner decisions
+  are plain calls on the desktop; no viewer message maps to them. Input outside the video, long
+  text and unknown messages are dropped; viewer messages are size- and depth-checked first.
+- The page is served with a strict CSP (self only, plus 'wasm-unsafe-eval' for Wasm), no
+  framing, no referrer, nosniff and same-origin opener policy. Its stylesheet is a static file
+  for the same reason.
+
+## 2026-11-06: How the shared session and its video travel
+- A viewer gets the session log on join (every applied input since the host started, or a
+  baseline of what was showing when the log began), then batched appends. A viewer more than
+  10,000 inputs behind is cut off (4008) and reconnects from a fresh copy instead of growing the
+  host's memory. The log itself is kept for the host's lifetime.
+- `/video/{deviceId}` comes from a second scrcpy instance at the remote profile (720, 1 Mbps,
+  30 fps) with its own scid, started on the first lease and stopped 10 s after the last; the Mac
+  doesn't decode it. A joiner gets the current GOP at once. Each viewer has a 120-packet queue;
+  when it fills, packets are skipped until the next key frame instead of queueing late video.
+- Browsers keep no video history: paused, the web tile shows the latest live picture while the
+  state still scrubs exactly. Scrubbing video remotely would need the GOP history sent to them.
+- Tunnels: ngrok (`--log stdout --log-format json`, URL from the "started tunnel" line, its own
+  errors shown), Cloudflare quick tunnels (URL from cloudflared's output), Tailscale
+  (`tailscale serve --bg --https=443`, URL from the tailnet name, `serve --https=443 off` to stop)
+  and LAN (plain http on the first site-local IPv4). Binaries are also looked for in the Homebrew
+  folders, since a Finder-launched app doesn't get the shell's PATH.
+
+## 2026-11-06: M6 checked locally before the tunnel
+- The real host (the app's own Koin wiring) against the emulator, shared on loopback, joined
+  from the browser pane: the join screen took the name and removed the token from the URL; the
+  page showed the live video and the state tree; presence reported the source the guest looked
+  at; the guest's taps on +1 changed nothing (counter stayed 12), and a raw `/ws/view` socket
+  from the page's console sending a touch and a write-through restore was refused on the host
+  (touch dropped, `notAllowed`). After "Ask to drive" and the Owner's approval, two taps took the
+  device to 14 (read from the device's own UI). A comment reached the Owner. The phone layout
+  stacks video, sources and details; a reload kept the session and the role.
+- Found and fixed: the page had no stylesheet, so Compose's canvas was 0 px high; and command
+  outcomes went over the wire under their Kotlin class names, now short names.

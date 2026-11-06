@@ -105,4 +105,11 @@ class ViewWireTest {
             )
         }
     }
+
+    @Test
+    fun outcomesHaveShortWireNames() {
+        val text = ViewWire.encode(ToViewer.CommandReply("r", CommandOutcome.NotAllowed))
+
+        assertEquals("""{"t":"CommandReply","requestId":"r","outcome":{"t":"notAllowed"}}""", text)
+    }
 }

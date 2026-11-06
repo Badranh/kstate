@@ -469,9 +469,9 @@ Build in this order; each milestone ends with a working demo on the sample app a
 
 **M6: Collaboration**
 
-- [ ] Spike: video inside the Compose Wasm viewer; choose the main approach or the fallback.
-- [ ] `viewer-web`, `/ws/view`, invites, roles, driver handoff, presence, comments.
-- [ ] Tunnel providers: LAN, Tailscale, ngrok, Cloudflare. Second scrcpy instance for the remote profile.
+- [x] Spike: video inside the Compose Wasm viewer; choose the main approach or the fallback. (Main approach; see DECISIONS.)
+- [x] `viewer-web`, `/ws/view`, invites, roles, driver handoff, presence, comments.
+- [x] Tunnel providers: LAN, Tailscale, ngrok, Cloudflare. Second scrcpy instance for the remote profile.
 - [ ] Accepted when a viewer on another network joins through ngrok, sees video and state, and can drive only after approval.
 
 **M7: iOS Simulator**
@@ -554,7 +554,7 @@ or add an entry to docs/DECISIONS.md, don't silently deviate.
 ## Open questions
 
 - [ ] Final name and package root: check that "Kstate" is free on GitHub, Maven Central and as a domain, or pick another before M8.
-- [ ] Video in the Compose Wasm viewer: canvas inside Compose, or the HTML overlay fallback? Decided by the M6 spike.
+- [x] Video in the Compose Wasm viewer: canvas inside Compose, or the HTML overlay fallback? Decided by the M6 spike: inside Compose.
 - [ ] iOS video: ScreenCaptureKit sidecar or `idb video-stream`? Decide at the start of M7 after checking idb's maintenance status.
 - [ ] Compiler plugin for zero-config instrumentation and iOS decoding without `@Serializable`: post-0.1, only if adoption justifies following every Kotlin release.
 - [ ] Android auto-discovery (`inspectableViewModelOf` in sdk-koin, reflecting over StateFlow properties): include in M3 or defer?

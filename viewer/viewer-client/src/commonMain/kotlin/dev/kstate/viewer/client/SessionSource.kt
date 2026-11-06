@@ -1,6 +1,7 @@
 package dev.kstate.viewer.client
 
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
@@ -67,27 +68,33 @@ sealed interface SessionKind {
 @Serializable
 sealed interface CommandOutcome {
     @Serializable
+    @SerialName("ok")
     data object Ok : CommandOutcome
 
     /** The app refused; [path] is the JSON Pointer of the rejected value, if any. */
     @Serializable
+    @SerialName("refused")
     data class Refused(
         val error: String,
         val path: String?,
     ) : CommandOutcome
 
     @Serializable
+    @SerialName("timedOut")
     data object TimedOut : CommandOutcome
 
     @Serializable
+    @SerialName("notConnected")
     data object NotConnected : CommandOutcome
 
     /** The person said no when asked to confirm. */
     @Serializable
+    @SerialName("cancelled")
     data object Cancelled : CommandOutcome
 
     /** The person's role doesn't allow it; checked by the host, whatever the viewer shows. */
     @Serializable
+    @SerialName("notAllowed")
     data object NotAllowed : CommandOutcome
 }
 

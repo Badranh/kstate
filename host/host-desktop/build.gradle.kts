@@ -20,7 +20,7 @@ tasks.named<ProcessResources>("processResources") {
     dependsOn(":viewer:viewer-web:wasmJsBrowserDistribution")
     from(rootProject.layout.projectDirectory.dir("viewer/viewer-web/build/dist/wasmJs/productionExecutable")) {
         into("viewer")
-        include("*.html", "*.js", "*.wasm", "composeResources/**")
+        include("*.html", "*.css", "*.js", "*.wasm", "composeResources/**")
     }
 }
 

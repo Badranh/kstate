@@ -1,0 +1,9 @@
+/* Compose draws into one canvas that fills its container, so the page must fill the window. */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
