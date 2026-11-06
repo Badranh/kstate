@@ -15,6 +15,7 @@ class OutcomeTextTest {
                 "The app didn't answer within 3 seconds.",
                 "No app is connected.",
                 "Cancelled.",
+                "Your role doesn't allow that. Ask the owner.",
             ),
             listOf(
                 CommandOutcome.Ok,
@@ -23,6 +24,7 @@ class OutcomeTextTest {
                 CommandOutcome.TimedOut,
                 CommandOutcome.NotConnected,
                 CommandOutcome.Cancelled,
+                CommandOutcome.NotAllowed,
             ).map(::outcomeText),
         )
     }

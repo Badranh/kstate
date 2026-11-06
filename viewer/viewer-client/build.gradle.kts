@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kstate.kmp.web)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {

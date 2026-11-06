@@ -1,6 +1,7 @@
 package dev.kstate.viewer.client
 
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 /**
@@ -12,6 +13,9 @@ interface SessionSource {
 
     /** A live session, or a recording being replayed: what the viewer offers depends on it. */
     val kind: SessionKind get() = SessionKind.Live
+
+    /** Who else is here and what they said; null when the session isn't shared. */
+    val collaboration: Collaboration? get() = null
 
     /** Device screens by device id. */
     val screens: StateFlow<Map<String, DeviceScreen>>
@@ -60,21 +64,31 @@ sealed interface SessionKind {
     ) : SessionKind
 }
 
+@Serializable
 sealed interface CommandOutcome {
+    @Serializable
     data object Ok : CommandOutcome
 
     /** The app refused; [path] is the JSON Pointer of the rejected value, if any. */
+    @Serializable
     data class Refused(
         val error: String,
         val path: String?,
     ) : CommandOutcome
 
+    @Serializable
     data object TimedOut : CommandOutcome
 
+    @Serializable
     data object NotConnected : CommandOutcome
 
     /** The person said no when asked to confirm. */
+    @Serializable
     data object Cancelled : CommandOutcome
+
+    /** The person's role doesn't allow it; checked by the host, whatever the viewer shows. */
+    @Serializable
+    data object NotAllowed : CommandOutcome
 }
 
 /** What a source lets the viewer do. */

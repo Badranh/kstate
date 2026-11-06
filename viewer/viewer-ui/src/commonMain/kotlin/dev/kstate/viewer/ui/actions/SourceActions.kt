@@ -44,6 +44,10 @@ fun outcomeText(outcome: CommandOutcome): String =
         CommandOutcome.Cancelled -> {
             "Cancelled."
         }
+
+        CommandOutcome.NotAllowed -> {
+            "Your role doesn't allow that. Ask the owner."
+        }
     }
 
 /**

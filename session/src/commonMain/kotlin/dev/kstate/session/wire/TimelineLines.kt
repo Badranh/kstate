@@ -32,6 +32,15 @@ object TimelineLines {
 
     fun encode(recorded: RecordedInput): String = json.encodeToString(Line.serializer(), recorded.toLine())
 
+    /** The same line as a JSON value, for messages that carry lines inside them. */
+    fun toJson(recorded: RecordedInput): JsonElement = json.encodeToJsonElement(Line.serializer(), recorded.toLine())
+
+    /** Throws [RecordingFormatException]; the caller has already limited the message's size and depth. */
+    fun fromJson(element: JsonElement): RecordedInput {
+        val line = readingOrFail("timeline line") { json.decodeFromJsonElement(Line.serializer(), element) }
+        return RecordedInput(line.seq, line.hostTs, line.toInput())
+    }
+
     /** Throws [RecordingFormatException] for anything but a line this version wrote. */
     fun decode(text: String): RecordedInput {
         formatCheck(text.length <= JsonLimits.MAX_LINE_CHARS) { "timeline line too long" }
