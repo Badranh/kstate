@@ -1,6 +1,7 @@
 package dev.kstate.viewer.ui
 
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -26,12 +27,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
+import dev.kstate.viewer.client.Collaboration
 import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.SessionView
+import dev.kstate.viewer.client.canDrive
 import dev.kstate.viewer.ui.actions.ConfirmingCommands
 import dev.kstate.viewer.ui.actions.InjectionDialog
 import dev.kstate.viewer.ui.actions.InjectionGate
+import dev.kstate.viewer.ui.collab.CommentsPanel
+import dev.kstate.viewer.ui.collab.ParticipantBar
 import dev.kstate.viewer.ui.screen.DeviceTile
 import dev.kstate.viewer.ui.timeline.Playback
 import dev.kstate.viewer.ui.timeline.Playhead
@@ -58,6 +63,17 @@ fun KstateApp(
     val gate = remember(source) { InjectionGate() }
     val commands = remember(source, gate) { ConfirmingCommands(source, gate) }
 
+    val collaboration = source.collaboration
+    var chosen by remember(source) { mutableStateOf<String?>(null) }
+    val selected = selectSource(session.devices.flatMap { it.sources }, chosen)
+    LaunchedEffect(collaboration, selected, paused) { collaboration?.watch(selected, paused) }
+    val canDrive =
+        collaboration
+            ?.state
+            ?.collectAsState()
+            ?.value
+            ?.canDrive ?: true
+
     MaterialTheme {
         Surface(modifier.fillMaxSize()) {
             var tab by remember { mutableStateOf(DetailTab.STATE) }
@@ -69,16 +85,15 @@ fun KstateApp(
             ) {
                 session.problem?.let { ProblemBanner(it) }
                 ModeBar(playback)
+                collaboration?.let { ParticipantBar(it) }
                 HorizontalDivider()
-                MainPanes(
-                    session,
-                    screenFor(session, screens),
-                    paused,
-                    commands,
-                    tab,
-                    { tab = it },
-                    Modifier.weight(1f).fillMaxWidth(),
-                )
+                val comments = collaboration?.let { commentsTab(it, playback, timeline.start, selected) }
+                val panes =
+                    Panes(session, screenFor(session, screens), paused, commands, selected, { chosen = it }, tab, {
+                        tab =
+                            it
+                    }, canDrive, comments)
+                AdaptivePanes(panes, Modifier.weight(1f).fillMaxWidth())
                 HorizontalDivider()
                 TimelineBar(timeline, playback.playhead, playback.now, onSeek = playback::seek)
             }
@@ -87,38 +102,87 @@ fun KstateApp(
     }
 }
 
-@Composable
-private fun MainPanes(
-    session: SessionView,
-    screen: DeviceScreen?,
-    pausedAt: Long?,
-    commands: SessionSource,
-    tab: DetailTab,
-    onTab: (DetailTab) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var chosen by remember { mutableStateOf<String?>(null) }
-    val sources = session.devices.flatMap { it.sources }
-    val selected = selectSource(sources, chosen)
-    Row(modifier) {
-        screen?.let { DeviceTile(it, pausedAt, Modifier.width(TILE_WIDTH).fillMaxHeight()) }
-        SourceList(session.devices, selected, onSelect = {
-            chosen = it
-        }, modifier = Modifier.width(SIDEBAR_WIDTH).fillMaxHeight())
-        VerticalDivider()
-        DetailPane(
-            sources.firstOrNull {
-                it.key == selected
-            },
-            session.events,
-            pausedAt != null,
-            commands,
-            tab,
-            onTab,
-            Modifier.weight(1f),
+/** The Comments tab: new comments are pinned to the moment shown and the selected source. */
+private fun commentsTab(
+    collaboration: Collaboration,
+    playback: Playback,
+    sessionStart: Long,
+    selected: String?,
+): @Composable () -> Unit =
+    {
+        CommentsPanel(
+            collaboration,
+            momentShown = playback.playhead.timeAt(playback.now),
+            sessionStart = sessionStart,
+            sourceKey = selected,
+            onShowMoment = playback::seek,
         )
     }
+
+/** Side by side on a wide window, stacked on a phone. */
+@Composable
+private fun AdaptivePanes(
+    panes: Panes,
+    modifier: Modifier,
+) {
+    BoxWithConstraints(modifier) { if (maxWidth < NARROW) NarrowPanes(panes) else WidePanes(panes) }
 }
+
+/** Everything the middle of the window shows, laid out side by side or stacked. */
+private class Panes(
+    val session: SessionView,
+    val screen: DeviceScreen?,
+    val pausedAt: Long?,
+    val commands: SessionSource,
+    val selected: String?,
+    val onSelect: (String) -> Unit,
+    val tab: DetailTab,
+    val onTab: (DetailTab) -> Unit,
+    val canDrive: Boolean,
+    val comments: (@Composable () -> Unit)?,
+) {
+    val source get() = session.devices.flatMap { it.sources }.firstOrNull { it.key == selected }
+}
+
+@Composable
+private fun WidePanes(panes: Panes) {
+    Row(Modifier.fillMaxSize()) {
+        panes.screen?.let { DeviceTile(it, panes.pausedAt, Modifier.width(TILE_WIDTH).fillMaxHeight(), panes.canDrive) }
+        SourceList(
+            panes.session.devices,
+            panes.selected,
+            onSelect = panes.onSelect,
+            modifier = Modifier.width(SIDEBAR_WIDTH).fillMaxHeight(),
+        )
+        VerticalDivider()
+        Details(panes, Modifier.weight(1f))
+    }
+}
+
+/** A phone: the device on top, the sources as chips, the details below. */
+@Composable
+private fun NarrowPanes(panes: Panes) {
+    Column(Modifier.fillMaxSize()) {
+        panes.screen?.let { DeviceTile(it, panes.pausedAt, Modifier.fillMaxWidth().weight(1f), panes.canDrive) }
+        SourceChips(panes.session.devices, panes.selected, panes.onSelect)
+        Details(panes, Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun Details(
+    panes: Panes,
+    modifier: Modifier,
+) = DetailPane(
+    panes.source,
+    panes.session.events,
+    panes.pausedAt != null,
+    panes.commands,
+    panes.tab,
+    panes.onTab,
+    modifier,
+    panes.comments,
+)
 
 /** M2 shows one device: the first one in the session that has video, else any. */
 private fun screenFor(
@@ -145,4 +209,7 @@ private fun Playback.toggleLabel(): String =
     }
 
 private val SIDEBAR_WIDTH = 260.dp
+
+/** Below this the panes stack, as on a phone. */
+private val NARROW = 900.dp
 private val TILE_WIDTH = 360.dp

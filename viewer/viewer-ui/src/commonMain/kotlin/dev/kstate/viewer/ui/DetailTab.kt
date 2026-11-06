@@ -6,4 +6,7 @@ enum class DetailTab(
     STATE("State"),
     EDIT("Edit"),
     EVENTS("Events"),
+
+    /** Only in a shared session. */
+    COMMENTS("Comments"),
 }

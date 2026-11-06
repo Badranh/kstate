@@ -2,6 +2,7 @@ package dev.kstate.viewer.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -91,5 +94,26 @@ internal fun Hint(
 ) {
     Column(modifier) {
         Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** The sources as one scrollable row of chips, for narrow screens. */
+@Composable
+internal fun SourceChips(
+    devices: List<DeviceView>,
+    selectedKey: String?,
+    onSelect: (String) -> Unit,
+) {
+    Row(
+        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        devices.flatMap { it.sources }.forEach { source ->
+            FilterChip(
+                selected = source.key == selectedKey,
+                onClick = { onSelect(source.key) },
+                label = { Text(source.name) },
+            )
+        }
     }
 }

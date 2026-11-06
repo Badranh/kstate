@@ -11,5 +11,8 @@ kotlin {
             api(projects.viewer.viewerClient)
             implementation(libs.kotlinx.serialization.json)
         }
+        commonTest.dependencies {
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }

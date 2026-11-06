@@ -1,5 +1,6 @@
 package dev.kstate.viewer.web.video
 
+import dev.kstate.session.wire.AvcCodec
 import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.TouchPhase
 import dev.kstate.viewer.client.VideoFrame
@@ -7,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.khronos.webgl.toByteArray
-import dev.kstate.session.wire.AvcCodec
 import org.khronos.webgl.toInt8Array
 
 /**

@@ -19,6 +19,9 @@ kotlin {
             implementation(projects.viewer.viewerUi)
             implementation(projects.session)
             implementation(libs.compose.ui)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(libs.kotlinx.serialization.json)
         }
     }
 }

@@ -25,17 +25,21 @@ import androidx.compose.ui.unit.IntSize
 import dev.kstate.viewer.client.DeviceScreen
 import kotlin.math.roundToInt
 
-/** A device's screen: live video with input, or the frame at [pausedAt] while scrubbing. */
+/**
+ * A device's screen: live video with input, or the frame at [pausedAt] while scrubbing. Input goes
+ * to the device only while live and when [canDrive] (the host checks the role again).
+ */
 @Composable
 fun DeviceTile(
     screen: DeviceScreen,
     pausedAt: Long?,
     modifier: Modifier = Modifier,
+    canDrive: Boolean = true,
 ) {
     val picture = rememberTilePicture(screen, pausedAt)
     var box by remember { mutableStateOf(IntSize.Zero) }
     val focus = remember { FocusRequester() }
-    val live = pausedAt == null
+    val live = pausedAt == null && canDrive
     val videoRect = { picture.frameSize?.let { fit(it.width, it.height, box.width.toFloat(), box.height.toFloat()) } }
 
     Box(

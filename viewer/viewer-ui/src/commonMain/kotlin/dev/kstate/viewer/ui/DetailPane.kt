@@ -27,10 +27,12 @@ internal fun DetailPane(
     tab: DetailTab,
     onTab: (DetailTab) -> Unit,
     modifier: Modifier = Modifier,
+    comments: (@Composable () -> Unit)? = null,
 ) {
+    val tabs = DetailTab.entries.filter { it != DetailTab.COMMENTS || comments != null }
     Column(modifier) {
-        PrimaryTabRow(selectedTabIndex = tab.ordinal) {
-            DetailTab.entries.forEach { entry ->
+        PrimaryTabRow(selectedTabIndex = tabs.indexOf(tab).coerceAtLeast(0)) {
+            tabs.forEach { entry ->
                 val title = if (entry == DetailTab.EVENTS) "${entry.title} (${events.size})" else entry.title
                 Tab(selected = tab == entry, onClick = { onTab(entry) }, text = { Text(title) })
             }
@@ -39,6 +41,10 @@ internal fun DetailPane(
         when {
             tab == DetailTab.EVENTS -> {
                 EventList(events)
+            }
+
+            tab == DetailTab.COMMENTS && comments != null -> {
+                comments()
             }
 
             source == null -> {
