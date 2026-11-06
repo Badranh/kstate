@@ -1,15 +1,14 @@
 package dev.kstate.host.desktop
 
 import dev.kstate.host.device.AttachedDevice
-import dev.kstate.host.gateway.HostCommands
 import dev.kstate.host.video.device.DeviceVideo
-import dev.kstate.protocol.OverrideMode
 import dev.kstate.session.HostClock
 import dev.kstate.session.SessionEngine
-import dev.kstate.session.SourceKey
 import dev.kstate.session.view.DeviceInfo
 import dev.kstate.session.view.SessionViewMapper
+import dev.kstate.session.wire.ViewerCommand
 import dev.kstate.viewer.client.ApplyMode
+import dev.kstate.viewer.client.Collaboration
 import dev.kstate.viewer.client.CommandOutcome
 import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.SessionSource
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement
-import dev.kstate.host.gateway.CommandOutcome as HostOutcome
 
 /** The desktop's session source: the host's own session, video and clock, in process. */
 class InProcessSessionSource(
@@ -36,7 +34,8 @@ class InProcessSessionSource(
     private val videos: StateFlow<Map<String, DeviceVideo>>,
     private val clock: HostClock,
     private val scope: CoroutineScope,
-    private val commands: HostCommands,
+    private val commands: HostCommandRunner,
+    override val collaboration: Collaboration? = null,
 ) : SessionSource {
     private class Attached(
         val video: DeviceVideo,
@@ -85,53 +84,20 @@ class InProcessSessionSource(
         sourceKey: String,
         seq: Long,
         mode: ApplyMode,
-    ): CommandOutcome = command(sourceKey) { commands.restore(it, seq, mode.toProtocol()) }
+    ): CommandOutcome = commands.command(sourceKey, ViewerCommand.Restore(seq, mode))
 
     override suspend fun setState(
         sourceKey: String,
         state: JsonElement,
         mode: ApplyMode,
-    ): CommandOutcome = command(sourceKey) { commands.setState(it, state, mode.toProtocol()) }
+    ): CommandOutcome = commands.command(sourceKey, ViewerCommand.SetState(state, mode))
 
     override suspend fun freeze(
         sourceKey: String,
         frozen: Boolean,
-    ): CommandOutcome = command(sourceKey) { commands.freeze(it, frozen) }
+    ): CommandOutcome = commands.command(sourceKey, ViewerCommand.Freeze(frozen))
 
-    override suspend fun release(sourceKey: String): CommandOutcome = command(sourceKey) { commands.release(it) }
-
-    private suspend fun command(
-        sourceKey: String,
-        send: suspend (SourceKey) -> HostOutcome,
-    ): CommandOutcome {
-        val key =
-            engine.session.value.sources.keys
-                .firstOrNull { "${it.deviceId}/${it.sourceId}" == sourceKey }
-                ?: return CommandOutcome.NotConnected
-        return when (val outcome = send(key)) {
-            is HostOutcome.Done -> {
-                if (outcome.result.ok) {
-                    CommandOutcome.Ok
-                } else {
-                    CommandOutcome.Refused(outcome.result.error ?: "refused", outcome.result.errorPath)
-                }
-            }
-
-            HostOutcome.TimedOut -> {
-                CommandOutcome.TimedOut
-            }
-
-            HostOutcome.NotConnected -> {
-                CommandOutcome.NotConnected
-            }
-        }
-    }
-
-    private fun ApplyMode.toProtocol(): OverrideMode =
-        when (this) {
-            ApplyMode.OVERLAY -> OverrideMode.OVERLAY
-            ApplyMode.WRITE_THROUGH -> OverrideMode.WRITE_THROUGH
-        }
+    override suspend fun release(sourceKey: String): CommandOutcome = commands.command(sourceKey, ViewerCommand.Release)
 
     /** One screen per video, created when it appears and stopped when it goes. */
     private fun syncScreens(current: Map<String, DeviceVideo>) {

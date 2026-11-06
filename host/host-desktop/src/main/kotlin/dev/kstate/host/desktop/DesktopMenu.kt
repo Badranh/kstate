@@ -15,7 +15,10 @@ import javax.swing.JOptionPane
 
 /** File menu: record the live session, open and export recordings, go back to live. */
 @Composable
-fun FrameWindowScope.DesktopMenu(sessions: DesktopSessions) {
+fun FrameWindowScope.DesktopMenu(
+    sessions: DesktopSessions,
+    onShare: () -> Unit,
+) {
     val recording by sessions.recording.collectAsState()
     val shownRecording by sessions.shownRecording.collectAsState()
     MenuBar {
@@ -47,6 +50,8 @@ fun FrameWindowScope.DesktopMenu(sessions: DesktopSessions) {
                 enabled = shownRecording != null,
                 onClick = sessions::showLive,
             )
+            Separator()
+            Item("Share…", shortcut = KeyShortcut(Key.S, meta = true, shift = true), onClick = onShare)
         }
     }
 }

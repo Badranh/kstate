@@ -27,6 +27,16 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
 
+/** Starts and stops the viewer server; what the sharing controls need from it. */
+interface ViewerServer {
+    fun start(
+        hosts: List<String>,
+        port: Int,
+    )
+
+    fun stop()
+}
+
 /**
  * Serves the web viewer and its sockets (docs/SPEC.md, Collaboration). Bound to loopback unless the
  * Owner picks a LAN interface; tunnels forward to it. Every socket needs the session cookie from
@@ -41,7 +51,7 @@ class ViewServer(
     private val assets: ViewerAssets,
     private val sessionId: String,
     private val hostNow: () -> Long,
-) {
+) : ViewerServer {
     @Serializable
     private data class JoinRequest(
         val token: String,
@@ -53,9 +63,9 @@ class ViewServer(
 
     /** (Re)starts listening on [hosts], usually just loopback. */
     @Synchronized
-    fun start(
-        hosts: List<String> = listOf(LOOPBACK),
-        port: Int = DEFAULT_PORT,
+    override fun start(
+        hosts: List<String>,
+        port: Int,
     ) {
         stop()
         server =
@@ -71,7 +81,7 @@ class ViewServer(
     }
 
     @Synchronized
-    fun stop() {
+    override fun stop() {
         server?.stop(gracePeriodMillis = STOP_GRACE_MILLIS, timeoutMillis = STOP_TIMEOUT_MILLIS)
         server = null
     }

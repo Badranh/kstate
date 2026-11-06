@@ -7,10 +7,21 @@ plugins {
 dependencies {
     implementation(projects.host.hostCore)
     implementation(projects.host.hostVideo)
+    implementation(projects.host.hostTunnel)
     implementation(projects.viewer.viewerUi)
     implementation(compose.desktop.currentOs)
+    implementation(libs.compose.material3)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.koin.core)
+}
+
+// The web viewer the host serves to guests: the wasm bundle, under viewer/ on the classpath.
+tasks.named<ProcessResources>("processResources") {
+    dependsOn(":viewer:viewer-web:wasmJsBrowserDistribution")
+    from(rootProject.layout.projectDirectory.dir("viewer/viewer-web/build/dist/wasmJs/productionExecutable")) {
+        into("viewer")
+        include("*.html", "*.js", "*.wasm", "composeResources/**")
+    }
 }
 
 compose.desktop {

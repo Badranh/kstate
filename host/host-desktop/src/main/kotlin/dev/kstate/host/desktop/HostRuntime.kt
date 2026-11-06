@@ -1,18 +1,22 @@
 package dev.kstate.host.desktop
 
 import dev.kstate.host.adb.Adb
+import dev.kstate.host.collab.DeviceInputs
+import dev.kstate.host.collab.RemoteVideoSource
+import dev.kstate.host.desktop.share.VideoDeviceInputs
 import dev.kstate.host.device.AttachedDevice
 import dev.kstate.host.device.DeviceManager
 import dev.kstate.host.device.PortAllocator
 import dev.kstate.host.gateway.GatewayFactory
-import dev.kstate.host.gateway.HostCommands
 import dev.kstate.host.timeline.VideoTimeline
 import dev.kstate.host.video.device.DeviceVideo
 import dev.kstate.host.video.device.DeviceVideos
+import dev.kstate.host.video.device.RemoteVideos
 import dev.kstate.host.video.scrcpy.ScrcpyLauncher
 import dev.kstate.host.video.scrcpy.VideoProfile
 import dev.kstate.session.HostClock
 import dev.kstate.session.SessionEngine
+import dev.kstate.viewer.client.Collaboration
 import dev.kstate.viewer.client.SessionSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -39,17 +43,16 @@ class HostRuntime(
     gateways: GatewayFactory,
     clock: HostClock,
     private val scope: CoroutineScope,
-    commands: HostCommands,
+    commands: HostCommandRunner,
+    collaboration: Collaboration? = null,
     videoProfile: VideoProfile = VideoProfile(),
+    remoteProfile: VideoProfile = REMOTE_PROFILE,
 ) {
     private val found = adb as? AdbAvailability.Found
     private val deviceManager = found?.let { DeviceManager(it.adb, ports, gateways) }
     private val attached: StateFlow<List<AttachedDevice>> = deviceManager?.devices ?: MutableStateFlow(emptyList())
-    private val videos =
-        found?.let { available ->
-            val launcher = ScrcpyLauncher(available.adb)
-            DeviceVideos(attached, launch = { serial -> launcher.start(serial, videoProfile) })
-        }
+    private val launcher = found?.let { ScrcpyLauncher(it.adb) }
+    private val videos = launcher?.let { DeviceVideos(attached, launch = { serial -> it.start(serial, videoProfile) }) }
     private var videoJob: Job? = null
     private val deviceVideos: StateFlow<Map<String, DeviceVideo>> = videos?.videos ?: MutableStateFlow(emptyMap())
 
@@ -60,6 +63,14 @@ class HostRuntime(
                 current.mapValues { it.value.timeline }
             }.stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
+    /** The remote-profile stream for web viewers: a second scrcpy instance, only while someone watches. */
+    val remoteVideos: RemoteVideoSource =
+        launcher?.let { RemoteVideos(attached, launch = { serial -> it.start(serial, remoteProfile) }, scope = scope) }
+            ?: RemoteVideoSource { null }
+
+    /** A remote Driver's input goes through the same control socket as the Owner's. */
+    val deviceInputs: DeviceInputs = VideoDeviceInputs(deviceVideos)
+
     val sessionSource: SessionSource =
         InProcessSessionSource(
             engine = engine,
@@ -69,6 +80,7 @@ class HostRuntime(
             clock = clock,
             scope = scope,
             commands = commands,
+            collaboration = collaboration,
         )
 
     fun start() {
@@ -82,8 +94,11 @@ class HostRuntime(
         deviceManager?.detachAll()
     }
 
-    private companion object {
-        const val ADB_MISSING =
+    companion object {
+        /** docs/SPEC.md, Bandwidth profiles: about 450 MB an hour per viewer. */
+        val REMOTE_PROFILE: VideoProfile = VideoProfile(maxSize = 720, bitRate = 1_000_000, maxFps = 30)
+
+        private const val ADB_MISSING =
             "adb not found. Install Android SDK platform-tools, or set ANDROID_HOME, then restart Kstate."
     }
 }
