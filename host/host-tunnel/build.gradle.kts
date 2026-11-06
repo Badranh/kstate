@@ -3,5 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.protocol)
+    api(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
