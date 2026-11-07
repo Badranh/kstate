@@ -23,11 +23,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import dev.kstate.viewer.client.DeviceScreen
+import dev.kstate.viewer.ui.chrome.shimmer
 import dev.kstate.viewer.ui.theme.Kstate
 import kotlin.math.roundToInt
 
@@ -107,11 +109,13 @@ private fun Screen(
     ) {
         val frameSize = picture.frameSize
         if (frameSize == null) {
-            Text(
-                "Waiting for video…",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.labelMedium,
-            )
+            Box(Modifier.fillMaxSize().shimmer(RectangleShape), contentAlignment = Alignment.Center) {
+                Text(
+                    "Waiting for video…",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
         } else {
             LaunchedEffect(frameSize, box) { requestOutputSize(screen, frameSize, box) }
             VideoCanvas(picture)

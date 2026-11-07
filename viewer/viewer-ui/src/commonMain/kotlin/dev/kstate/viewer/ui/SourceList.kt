@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +26,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.kstate.viewer.client.DeviceView
 import dev.kstate.viewer.client.SourceView
+import dev.kstate.viewer.ui.chrome.HeartbeatDot
+import dev.kstate.viewer.ui.chrome.Skeleton
+import dev.kstate.viewer.ui.chrome.shimmer
 import dev.kstate.viewer.ui.theme.Kstate
 
 @Composable
@@ -35,7 +39,7 @@ internal fun SourceList(
     modifier: Modifier = Modifier,
 ) {
     if (devices.isEmpty()) {
-        Hint("Start an emulator with an app that uses the Kstate SDK.", modifier.padding(16.dp))
+        WaitingForApps(modifier)
         return
     }
     LazyColumn(modifier) {
@@ -120,8 +124,24 @@ private const val BADGE_ALPHA = 0.12f
 @Composable
 private fun StatusDot(connected: Boolean) {
     val color = if (connected) Kstate.colors.live else MaterialTheme.colorScheme.outline
-    Box(Modifier.size(8.dp).background(color, CircleShape))
+    HeartbeatDot(color, beating = connected)
 }
+
+/** Placeholder rows shaped like devices and sources, until the first app connects. */
+@Composable
+private fun WaitingForApps(modifier: Modifier) {
+    Column(modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        repeat(SKELETON_ROWS) { row ->
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Box(Modifier.size(if (row == 0) 10.dp else 28.dp).shimmer(CircleShape))
+                Box(Modifier.fillMaxWidth(Skeleton.lineWidths(SKELETON_ROWS)[row]).height(12.dp).shimmer())
+            }
+        }
+        Hint("Waiting for an app. Start an emulator with an app that uses the Kstate SDK.")
+    }
+}
+
+private const val SKELETON_ROWS = 4
 
 @Composable
 internal fun Hint(

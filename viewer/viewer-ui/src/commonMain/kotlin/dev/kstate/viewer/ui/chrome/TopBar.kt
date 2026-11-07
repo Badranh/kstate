@@ -83,7 +83,11 @@ private fun StatusPill(playback: Playback) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Box(Modifier.size(7.dp).background(color, CircleShape))
+        HeartbeatDot(
+            color,
+            beating = playback.playhead == Playhead.Live || playback.playhead is Playhead.Playing,
+            size = 7.dp,
+        )
         Text(text, style = MaterialTheme.typography.labelMedium, color = color, fontWeight = FontWeight.SemiBold)
     }
 }

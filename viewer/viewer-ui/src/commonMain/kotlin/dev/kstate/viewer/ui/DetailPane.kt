@@ -1,6 +1,7 @@
 package dev.kstate.viewer.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import dev.kstate.viewer.client.EventView
 import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.SourceView
 import dev.kstate.viewer.ui.actions.SourceActions
+import dev.kstate.viewer.ui.chrome.SkeletonLines
 import dev.kstate.viewer.ui.edit.StateEditor
 import dev.kstate.viewer.ui.tree.StateTree
 
@@ -60,11 +62,11 @@ internal fun DetailPane(
             }
 
             source == null -> {
-                Hint("No state source yet.", Modifier.padding(16.dp))
+                Loading("No state source yet. It appears as soon as the app calls inspect() or track().")
             }
 
             state == null -> {
-                Hint("${source.name} has not sent a state yet.", Modifier.padding(16.dp))
+                Loading("${source.name} has not sent a state yet.")
             }
 
             tab == DetailTab.EDIT && source.capabilities.decode -> {
@@ -100,3 +102,14 @@ internal fun ProblemBanner(problem: String) {
                 .padding(horizontal = 14.dp, vertical = 10.dp),
     )
 }
+
+/** A tree-shaped placeholder, with what we wait for underneath. */
+@Composable
+private fun Loading(caption: String) {
+    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SkeletonLines(LOADING_LINES)
+        Hint(caption)
+    }
+}
+
+private const val LOADING_LINES = 7
