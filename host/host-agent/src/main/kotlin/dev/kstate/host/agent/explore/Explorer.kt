@@ -16,6 +16,8 @@ import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.DeviceView
 import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.SourceView
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlin.time.TimeSource
 
 /** What Kstate notices on its own, before anyone looks at the pictures. */
@@ -83,14 +85,21 @@ class Explorer(
         val variants = SchemaVariants.generate(state, view.schema, view.redactedPaths.toSet(), limit)
         val results = mutableListOf<VariantResult>()
         var stopped: String? = null
-        for (variant in variants) {
-            val result = tryVariant(sourceKey, variant, device.id, screen, baseline, results)
-            results += result
-            onVariant(results.size, variants.size, variant.label)
-            if (Flag.CRASHED in result.flags || result.outcome == CommandOutcome.NotConnected) {
-                stopped = "The app disconnected after ${variant.label}; the rest were not tried."
-                break
+        var finished = false
+        try {
+            for (variant in variants) {
+                val result = tryVariant(sourceKey, variant, device.id, screen, baseline, results)
+                results += result
+                onVariant(results.size, variants.size, variant.label)
+                if (Flag.CRASHED in result.flags || result.outcome == CommandOutcome.NotConnected) {
+                    stopped = "The app disconnected after ${variant.label}; the rest were not tried."
+                    break
+                }
             }
+            finished = true
+        } finally {
+            // Cancelled or failed half way: never leave the app showing a made-up state.
+            if (!finished) withContext(NonCancellable) { source.release(sourceKey) }
         }
         val restored = stopped == null && restore(sourceKey, device.id, screen, baseline)
         return ExploreRun("r${++runs}", sourceKey, device.id, device.route, baseline, results, restored, stopped)
@@ -175,6 +184,7 @@ class Explorer(
     ): String? =
         when {
             !view.live -> "${view.name} is not connected: its state is not reaching Kstate"
+            view.overridden -> "${view.name} is showing an overlay already: release it first, so the baseline is real"
             view.state == null -> "${view.name} has not sent a state yet"
             !view.capabilities.overlay -> "${view.name} can't show a state from Kstate: make it inspectable()"
             view.schema == null -> "${view.name} sends no schema, so Kstate can't make variants of it"

@@ -5,7 +5,10 @@ import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.image.Picture
 import dev.kstate.host.agent.settle.SettleTiming
 import dev.kstate.viewer.client.CommandOutcome
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -163,6 +166,37 @@ class ExplorerTest {
             assertEquals(CommandOutcome.NotConnected, dropped.outcome)
             assertTrue(run.results.none { Flag.REJECTED in it.flags })
             assertNotNull(run.stoppedEarly)
+        }
+
+    @Test
+    fun aCancelledRunStillPutsTheAppBack() =
+        runTest {
+            val app = app()
+            val run = launch { explorer(app).explore(FakeApp.KEY, limit = 50) }
+            while (app.applied.size < 2) advanceTimeBy(100)
+
+            run.cancelAndJoin()
+
+            assertEquals(1, app.releases)
+            assertEquals(
+                false,
+                app.session.value.devices
+                    .single()
+                    .sources
+                    .single()
+                    .overridden,
+            )
+        }
+
+    @Test
+    fun aSourceAlreadyShowingAnOverlayIsNotExploredFromIt() =
+        runTest {
+            val app = app()
+            app.setState(FakeApp.KEY, state, dev.kstate.viewer.client.ApplyMode.OVERLAY)
+
+            val error = assertFailsWith<ExploreException> { explorer(app).explore(FakeApp.KEY, limit = 5) }
+
+            assertTrue("release" in error.message.orEmpty(), error.message)
         }
 
     @Test

@@ -89,6 +89,15 @@ class SchemaVariantsTest {
     }
 
     @Test
+    fun aCrowdedListHasDistinctItemsSoKeyedListsDoNotClash() {
+        val many = at(variant("/cart/lines → many").state, "/cart/lines").jsonArray
+
+        assertEquals(at(state, "/cart/lines/0"), many.first())
+        assertEquals(many.size, many.toSet().size)
+        assertEquals(many.size, many.map { at(it, "/product/name") }.toSet().size)
+    }
+
+    @Test
     fun valuesInsideTheFirstListItemAreVariedToo() {
         val long = at(variant("/cart/lines/0/product/name → long text").state, "/cart/lines/0/product/name")
 

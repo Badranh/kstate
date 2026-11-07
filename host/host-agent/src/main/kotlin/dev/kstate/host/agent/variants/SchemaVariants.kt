@@ -11,6 +11,7 @@ import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.longOrNull
 
 /** One state to show the app: the current state with one value changed at [path]. */
 data class Variant(
@@ -193,7 +194,7 @@ object SchemaVariants {
                 return
             }
             add(path, "empty", VariantKind.COLLECTION, JsonArray(emptyList()))
-            add(path, "many", VariantKind.COLLECTION, JsonArray(List(MANY) { items.first() }))
+            add(path, "many", VariantKind.COLLECTION, JsonArray(List(MANY) { copy -> numbered(items.first(), copy) }))
             element?.let { walk(it, items.first(), path.child(0), depth + 1) }
         }
 
@@ -207,6 +208,52 @@ object SchemaVariants {
         }
     }
 }
+
+/**
+ * The [copy]-th copy of a list item, told apart from the others, as a list keyed by id needs: text
+ * gets a number, whole numbers grow by [copy]. Sealed tags are kept so the item still decodes.
+ */
+private fun numbered(
+    item: JsonElement,
+    copy: Int,
+): JsonElement =
+    when {
+        copy == 0 -> {
+            item
+        }
+
+        item is JsonObject -> {
+            JsonObject(
+                item.mapValues { (key, value) ->
+                    if (key in
+                        TAG_KEYS
+                    ) {
+                        value
+                    } else {
+                        numbered(value, copy)
+                    }
+                },
+            )
+        }
+
+        item is JsonArray -> {
+            JsonArray(item.map { numbered(it, copy) })
+        }
+
+        item is JsonPrimitive && item.isString -> {
+            JsonPrimitive("${item.content} ${copy + 1}")
+        }
+
+        item is JsonPrimitive -> {
+            item.longOrNull?.let { JsonPrimitive(it + copy) } ?: item
+        }
+
+        else -> {
+            item
+        }
+    }
+
+private val TAG_KEYS = setOf("\$type", "\$class", "type")
 
 /** Changes to a value with nothing inside to walk into: text, numbers, booleans, a map as a whole. */
 private object Leaves {
