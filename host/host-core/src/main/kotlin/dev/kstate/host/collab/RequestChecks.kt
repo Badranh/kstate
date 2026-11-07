@@ -1,5 +1,7 @@
 package dev.kstate.host.collab
 
+import io.ktor.http.Cookie
+import io.ktor.http.CookieEncoding
 import io.ktor.http.HttpHeaders
 import io.ktor.server.request.ApplicationRequest
 import java.net.URI
@@ -39,5 +41,14 @@ internal object RequestChecks {
     fun sessionCookie(
         token: String,
         secure: Boolean,
-    ): String = "$SESSION_COOKIE=$token; Path=/; HttpOnly; SameSite=Strict" + if (secure) "; Secure" else ""
+    ): Cookie =
+        Cookie(
+            name = SESSION_COOKIE,
+            value = token,
+            encoding = CookieEncoding.RAW,
+            path = "/",
+            secure = secure,
+            httpOnly = true,
+            extensions = mapOf("SameSite" to "Strict"),
+        )
 }

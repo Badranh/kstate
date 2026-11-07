@@ -25,6 +25,8 @@ import io.ktor.websocket.close
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlin.time.Duration.Companion.seconds
 
 /** Starts and stops the viewer server; what the sharing controls need from it. */
@@ -143,11 +145,13 @@ class ViewServer(
             call.respondText("invite not valid", status = HttpStatusCode.Forbidden)
             return
         }
-        call.response.headers.append(
-            HttpHeaders.SetCookie,
+        call.response.cookies.append(
             RequestChecks.sessionCookie(joined.sessionToken, RequestChecks.overHttps(call.request)),
         )
-        call.respondText("""{"participantId":"${joined.participantId}"}""", ContentType.Application.Json)
+        call.respondText(
+            JsonObject(mapOf("participantId" to JsonPrimitive(joined.participantId))).toString(),
+            ContentType.Application.Json,
+        )
     }
 
     private suspend fun DefaultWebSocketServerSession.withSession(
