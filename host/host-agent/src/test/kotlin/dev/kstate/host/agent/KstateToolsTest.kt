@@ -2,6 +2,7 @@ package dev.kstate.host.agent
 
 import dev.kstate.host.agent.image.Picture
 import dev.kstate.host.agent.settle.SettleTiming
+import dev.kstate.viewer.client.SourceCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ImageContent
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
@@ -309,6 +310,68 @@ class KstateToolsTest {
             val one = runs[0].results.map { it.variant.state.toString() }
             val two = runs[1].results.map { it.variant.state.toString() }
             assertTrue(applied == one + two || applied == two + one, "the runs were interleaved: $applied")
+        }
+
+    private fun TestScope.observeOnly(): Pair<FakeApp, KstateTools> {
+        val app =
+            FakeApp(
+                backgroundScope,
+                state(0),
+                schema = null,
+                render = ::render,
+                capabilities = SourceCapabilities(overlay = false, writeThrough = false, decode = false),
+            )
+        return app to KstateTools(KstateAgent(app, reports, time = testScheduler.timeSource))
+    }
+
+    @Test
+    fun settingAnObserveOnlySourceSaysWhyAndHowWithoutAskingTheApp() =
+        runTest {
+            val (app, server) = observeOnly()
+
+            val result = server.call("set_state", """{"source":"${FakeApp.KEY}","state":{"count":1,"mode":"LIGHT"}}""")
+
+            assertTrue(result.isError())
+            val text = result.texts().single()
+            assertTrue("only reports its state" in text, text)
+            assertTrue("Kstate.inspectable" in text, text)
+            assertTrue("refused" !in text, text)
+            assertEquals(emptyList(), app.applied)
+        }
+
+    @Test
+    fun writingThroughNeedsASourceThatTakesWrites() =
+        runTest {
+            val app =
+                FakeApp(
+                    backgroundScope,
+                    state(0),
+                    schema,
+                    ::render,
+                    capabilities = SourceCapabilities(overlay = true, writeThrough = false, decode = true),
+                )
+            val server = KstateTools(KstateAgent(app, reports, time = testScheduler.timeSource))
+
+            val result =
+                server.call(
+                    "set_state",
+                    """{"source":"${FakeApp.KEY}","state":{"count":1,"mode":"LIGHT"},"mode":"write_through"}""",
+                )
+
+            assertTrue(result.isError())
+            assertTrue("write_through" in result.texts().single(), result.texts().single())
+            assertEquals(emptyList(), app.applied)
+        }
+
+    @Test
+    fun theOverviewSaysWhyASourceCantBeExplored() =
+        runTest {
+            val (_, server) = observeOnly()
+
+            val text = server.call("overview").texts().single()
+
+            assertTrue("\"explorable\":false" in text, text)
+            assertTrue("only reports its state" in text, text)
         }
 
     @Test

@@ -1,6 +1,7 @@
 package dev.kstate.host.agent.explore
 
 import dev.kstate.host.agent.AgentFailure
+import dev.kstate.host.agent.SourceLimits
 import dev.kstate.host.agent.capture.Capture
 import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.image.Fingerprints
@@ -79,7 +80,7 @@ class Explorer(
     ): ExploreRun {
         val (device, view) = find(sourceKey)
         val screen = source.screens.value[device.id]
-        whyNot(view, screen != null)?.let { throw ExploreException(it) }
+        SourceLimits.whyCantExplore(view, screen != null)?.let { throw ExploreException(it) }
         val state = checkNotNull(view.state)
         val baseline =
             capture(device.id, checkNotNull(screen)) ?: throw ExploreException("No picture from ${device.id} yet")
@@ -187,21 +188,6 @@ class Explorer(
             CommandOutcome.NotConnected -> Flag.DISCONNECTED
             CommandOutcome.TimedOut -> Flag.NO_ANSWER
             else -> Flag.REJECTED
-        }
-
-    /** Why [view] can't be explored, or null when it can. */
-    private fun whyNot(
-        view: SourceView,
-        hasVideo: Boolean,
-    ): String? =
-        when {
-            !view.live -> "${view.name} is not connected: its state is not reaching Kstate"
-            view.overridden -> "${view.name} is showing an overlay already: release it first, so the baseline is real"
-            view.state == null -> "${view.name} has not sent a state yet"
-            !view.capabilities.overlay -> "${view.name} can't show a state from Kstate: make it inspectable()"
-            view.schema == null -> "${view.name} sends no schema, so Kstate can't make variants of it"
-            !hasVideo -> "No video from this device yet"
-            else -> null
         }
 
     private fun find(sourceKey: String): Pair<DeviceView, SourceView> {

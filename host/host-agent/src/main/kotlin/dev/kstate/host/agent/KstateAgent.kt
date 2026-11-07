@@ -11,6 +11,7 @@ import dev.kstate.viewer.client.ApplyMode
 import dev.kstate.viewer.client.CommandOutcome
 import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.SessionView
+import dev.kstate.viewer.client.SourceView
 import kotlinx.serialization.json.JsonElement
 import java.nio.file.Path
 import kotlin.time.TimeSource
@@ -38,6 +39,8 @@ class KstateAgent(
 
     val session: SessionView get() = source.session.value
 
+    fun hasVideo(deviceId: String): Boolean = deviceId in source.screens.value
+
     fun run(id: String): ExploreRun =
         synchronized(runs) { runs.firstOrNull { it.id == id } } ?: throw AgentFailure("No explore run $id")
 
@@ -47,7 +50,10 @@ class KstateAgent(
         sourceKey: String,
         state: JsonElement,
         mode: ApplyMode,
-    ): ActionResult = command(sourceKey, "set_state") { source.setState(sourceKey, state, mode) }
+    ): ActionResult {
+        SourceLimits.whyCantSet(sourceOf(sourceKey), mode)?.let { throw AgentFailure(it) }
+        return command(sourceKey, "set_state") { source.setState(sourceKey, state, mode) }
+    }
 
     suspend fun release(sourceKey: String): ActionResult = command(sourceKey, "release") { source.release(sourceKey) }
 
@@ -76,8 +82,13 @@ class KstateAgent(
     }
 
     private fun deviceOf(sourceKey: String): String =
-        session.devices.firstOrNull { device -> device.sources.any { it.key == sourceKey } }?.id
-            ?: throw AgentFailure(
-                "No source $sourceKey. Sources: ${session.devices.flatMap { it.sources }.joinToString { it.key }}",
-            )
+        session.devices.firstOrNull { device -> device.sources.any { it.key == sourceKey } }?.id ?: noSource(sourceKey)
+
+    private fun sourceOf(sourceKey: String): SourceView =
+        session.devices.flatMap { it.sources }.firstOrNull { it.key == sourceKey } ?: noSource(sourceKey)
+
+    private fun noSource(sourceKey: String): Nothing =
+        throw AgentFailure(
+            "No source $sourceKey. Sources: ${session.devices.flatMap { it.sources }.joinToString { it.key }}",
+        )
 }

@@ -1,6 +1,7 @@
 package dev.kstate.host.agent.tools
 
 import dev.kstate.host.agent.KstateAgent
+import dev.kstate.host.agent.SourceLimits
 import dev.kstate.host.agent.mcp.ToolInputException
 import dev.kstate.host.agent.mcp.ToolSpec
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
@@ -41,10 +42,9 @@ internal class LookTools(
                                             put("key", s.key)
                                             put("name", s.name)
                                             put("live", s.live)
-                                            put(
-                                                "explorable",
-                                                s.capabilities.overlay && s.schema != null && s.state != null,
-                                            )
+                                            val why = SourceLimits.whyCantExplore(s, agent.hasVideo(device.id))
+                                            put("explorable", why == null)
+                                            why?.let { put("notExplorable", it) }
                                             put("overridden", s.overridden)
                                         }
                                     }

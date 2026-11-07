@@ -36,6 +36,9 @@ class FakeApp(
     /** States at which the connection is found gone: the command never reaches the app. */
     private val dropsOn: (JsonElement) -> Boolean = { false },
     route: List<String> = listOf("Checkout"),
+    /** What the source lets Kstate do; a track()ed source can do none of it. */
+    private val capabilities: SourceCapabilities =
+        SourceCapabilities(overlay = true, writeThrough = true, decode = true),
     private val frameDelayMillis: Long = 30,
     private val stateDelayMillis: Long = 0,
 ) : SessionSource {
@@ -170,7 +173,7 @@ class FakeApp(
                                 state = shown(),
                                 changedPaths = emptySet(),
                                 seq = applied.size.toLong(),
-                                capabilities = SourceCapabilities(overlay = true, writeThrough = true, decode = true),
+                                capabilities = capabilities,
                                 schema = schema,
                                 redactedPaths = emptyList(),
                                 overridden = overlay != null,
