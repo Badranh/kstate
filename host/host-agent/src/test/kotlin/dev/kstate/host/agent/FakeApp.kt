@@ -33,6 +33,8 @@ class FakeApp(
     private val render: (JsonElement) -> Picture,
     private val crashesOn: (JsonElement) -> Boolean = { false },
     private val refuses: (JsonElement) -> Boolean = { false },
+    /** States at which the connection is found gone: the command never reaches the app. */
+    private val dropsOn: (JsonElement) -> Boolean = { false },
     route: List<String> = listOf("Checkout"),
     private val frameDelayMillis: Long = 30,
     private val stateDelayMillis: Long = 0,
@@ -49,6 +51,12 @@ class FakeApp(
     private val screen = Screen()
     override val session = MutableStateFlow(view())
     override val screens: StateFlow<Map<String, DeviceScreen>> = MutableStateFlow(mapOf(DEVICE to screen))
+
+    /** The state channel drops while the video keeps going, as when adb loses its reverse rule. */
+    fun dropStateChannel() {
+        connected = false
+        session.value = view()
+    }
 
     /** The app changing its own state, as after a tap. */
     fun emit(
@@ -89,6 +97,11 @@ class FakeApp(
 
             refuses(state) -> {
                 CommandOutcome.Refused("the app said no", path = null)
+            }
+
+            dropsOn(state) -> {
+                dropStateChannel()
+                CommandOutcome.NotConnected
             }
 
             else -> {

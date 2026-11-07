@@ -252,6 +252,42 @@ class KstateToolsTest {
         }
 
     @Test
+    fun anActionWhileTheAppIsDisconnectedSaysSoInsteadOfReportingNoChange() =
+        runTest {
+            val (app, server) = server()
+            app.dropStateChannel()
+
+            val result = server.call("tap", """{"x":0.5,"y":0.8}""")
+
+            assertTrue(result.isError())
+            assertTrue("not connected" in result.texts().first(), result.texts().first())
+            assertEquals(1, result.images())
+        }
+
+    @Test
+    fun aStaleStateIsMarkedAsStale() =
+        runTest {
+            val (app, server) = server()
+            app.dropStateChannel()
+
+            val text = server.call("get_state", """{"source":"${FakeApp.KEY}"}""").texts().single()
+
+            assertTrue("\"connected\":false" in text, text)
+        }
+
+    @Test
+    fun exploringADisconnectedAppIsRefused() =
+        runTest {
+            val (app, server) = server()
+            app.dropStateChannel()
+
+            val result = server.call("explore", """{"source":"${FakeApp.KEY}"}""")
+
+            assertTrue(result.isError())
+            assertTrue("not connected" in result.texts().single(), result.texts().single())
+        }
+
+    @Test
     fun aWrongSourceOrKeyIsExplainedToTheAgent() =
         runTest {
             val (_, server) = server()

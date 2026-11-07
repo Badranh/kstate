@@ -81,14 +81,14 @@ internal class LookTools(
             input("source" to Params.SOURCE, required = listOf("source")),
         ) {
             val key = it.string("source")
-            val view =
-                agent.session.devices
-                    .flatMap { d -> d.sources }
-                    .firstOrNull { s -> s.key == key }
+            val device =
+                agent.session.devices.firstOrNull { d -> d.sources.any { s -> s.key == key } }
                     ?: throw ToolInputException("No source $key")
+            val view = device.sources.first { s -> s.key == key }
             reply(
                 buildJsonObject {
                     put("source", key)
+                    put("connected", device.connected && view.live)
                     put("state", view.state ?: JsonPrimitive("no state yet"))
                     put("schema", view.schema ?: JsonPrimitive("none"))
                     putJsonArray("redactedPaths") { view.redactedPaths.forEach { p -> add(p) } }

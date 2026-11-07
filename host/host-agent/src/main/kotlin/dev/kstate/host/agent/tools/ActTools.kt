@@ -145,17 +145,23 @@ internal class ActTools(
                     }
                 }
                 put("settled", result.capture.settled)
+                put("appConnected", result.appConnected)
                 putImageSize(shown)
             }
+        val warning = if (result.appConnected) emptyList() else listOf(TextContent(NOT_CONNECTED))
         return reply(
-            listOf(TextContent(text.toString()), shown.image),
-            isError = result.outcome !is CommandOutcome.Ok,
+            warning + listOf(TextContent(text.toString()), shown.image),
+            isError = result.outcome !is CommandOutcome.Ok || !result.appConnected,
             structured = text,
         )
     }
 
     private companion object {
         const val DEFAULT_SWIPE_MILLIS = 300
+        const val NOT_CONNECTED =
+            "The app is not connected to Kstate: its state is not being received, so `changed` and `route` " +
+                "below are stale, not proof that nothing changed. The screen is live. Kstate restores the " +
+                "connection within seconds; check overview before trusting state again."
         val KEYS = mapOf("back" to 4, "home" to 3, "enter" to 66, "tab" to 61, "delete" to 67, "escape" to 111)
     }
 }

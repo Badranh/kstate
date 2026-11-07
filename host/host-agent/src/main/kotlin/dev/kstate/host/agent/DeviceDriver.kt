@@ -29,6 +29,8 @@ data class ActionResult(
     val routeBefore: List<String>,
     val changes: List<StateChange>,
     val outcome: CommandOutcome = CommandOutcome.Ok,
+    /** False when the app's state is not reaching Kstate: then [changes] and the route are stale. */
+    val appConnected: Boolean = true,
 ) {
     val changedSources: List<String> get() = changes.map { it.source }.distinct()
 }
@@ -110,7 +112,16 @@ class DeviceDriver(
         val settled = Settle.afterChange(screen.frames, source.session, id, mark, timing, time)
         val capture = captures.take(source.session.value, id, settled) ?: throw AgentFailure("No picture from $id yet")
         val beforeStates = before?.sources.orEmpty().associate { it.key to it.state }
-        return ActionResult(capture, before?.route.orEmpty(), changes(beforeStates, capture.states))
+        val connected =
+            source.session.value.devices
+                .firstOrNull { it.id == id }
+                ?.connected == true
+        return ActionResult(
+            capture,
+            before?.route.orEmpty(),
+            changes(beforeStates, capture.states),
+            appConnected = connected,
+        )
     }
 
     private fun changes(

@@ -23,6 +23,8 @@ enum class Flag(
     val meaning: String,
 ) {
     REJECTED("the app refused this state"),
+    DISCONNECTED("the app's connection was gone, so this state was never shown (a crash or a dropped link)"),
+    NO_ANSWER("the app did not answer in time, so this state may not have been shown"),
     CRASHED("the app disconnected after this state"),
     UNCHANGED("the state changed but the screen did not"),
     BLANK("almost nothing on screen"),
@@ -107,7 +109,7 @@ class Explorer(
         if (outcome !=
             CommandOutcome.Ok
         ) {
-            return VariantResult(variant, outcome, capture = null, flags = setOf(Flag.REJECTED))
+            return VariantResult(variant, outcome, capture = null, flags = setOf(failureFlag(outcome)))
         }
         val settled = Settle.afterChange(screen.frames, source.session, deviceId, mark, timing, time)
         val capture = captures.take(source.session.value, deviceId, settled)
@@ -158,12 +160,21 @@ class Explorer(
             .firstOrNull { it.key == sourceKey }
             ?.live == true
 
+    /** What a failed command means for the variant: only the app saying no is a refusal. */
+    private fun failureFlag(outcome: CommandOutcome): Flag =
+        when (outcome) {
+            CommandOutcome.NotConnected -> Flag.DISCONNECTED
+            CommandOutcome.TimedOut -> Flag.NO_ANSWER
+            else -> Flag.REJECTED
+        }
+
     /** Why [view] can't be explored, or null when it can. */
     private fun whyNot(
         view: SourceView,
         hasVideo: Boolean,
     ): String? =
         when {
+            !view.live -> "${view.name} is not connected: its state is not reaching Kstate"
             view.state == null -> "${view.name} has not sent a state yet"
             !view.capabilities.overlay -> "${view.name} can't show a state from Kstate: make it inspectable()"
             view.schema == null -> "${view.name} sends no schema, so Kstate can't make variants of it"

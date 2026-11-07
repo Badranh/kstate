@@ -148,6 +148,24 @@ class ExplorerTest {
         }
 
     @Test
+    fun aDroppedConnectionIsNeverReportedAsARefusal() =
+        runTest {
+            val app =
+                FakeApp(backgroundScope, state, schema, ::render, dropsOn = {
+                    it.jsonObject["mode"] ==
+                        JsonPrimitive("DARK")
+                })
+
+            val run = explorer(app).explore(FakeApp.KEY, limit = 50)
+            val dropped = run.result("/mode → DARK")
+
+            assertEquals(setOf(Flag.DISCONNECTED), dropped.flags)
+            assertEquals(CommandOutcome.NotConnected, dropped.outcome)
+            assertTrue(run.results.none { Flag.REJECTED in it.flags })
+            assertNotNull(run.stoppedEarly)
+        }
+
+    @Test
     fun aScreenAlreadySeenInThisRunIsMarkedAsADuplicate() =
         runTest {
             val run = explorer(app()).explore(FakeApp.KEY, limit = 50)
