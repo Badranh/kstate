@@ -43,6 +43,32 @@ or add an entry to docs/DECISIONS.md, don't silently deviate.
   stable ones; depend on interfaces (AdbClient, KstateTransport, TunnelProvider,
   SessionSource, StateEncoder) and inject them; keep interfaces narrow.
 
+## Definition of done (every change)
+1. The test was seen failing first, for the right reason; a bug fix starts with a test that
+   reproduces it. A test that was never red proves nothing.
+2. `./gradlew check apiCheck` passes before every commit, the same gate as CI.
+3. User-visible behaviour is verified in the running app, or the gap is stated plainly.
+4. Non-obvious choices are in docs/DECISIONS.md.
+
+## Reliability rules
+- Ownership: every thread, coroutine, process, server, socket and native resource has one owner
+  that closes it. Quitting the app stops everything within 2 s, with no orphaned adb or scrcpy.
+- Errors: catch only what you can handle. Everything else is logged with context (never
+  unredacted state) or propagates; never swallowed. Cancellation always propagates.
+- Timeouts: every external call (adb, scrcpy, tunnels, network, the device, the app) has a
+  timeout and a failure state the UI can show.
+- Bounds: every queue, buffer, cache and history has a named, tested limit.
+- Threads: shared mutable state has one owner. What crosses threads is immutable or guarded,
+  and the guard is named in a comment.
+- Libraries first: use the JDK, kotlinx, Ktor, Compose or the official SDK before writing it
+  yourself. When hand-writing is right, say why in the code.
+- Verified edits: check that a scripted or bulk edit actually applied before building on it.
+
+## Review
+- Non-trivial changes get an independent review by someone who did not write them (a fresh
+  reviewer or a second agent) before commit. Findings are checked against the code before they
+  are fixed or dismissed.
+
 ## Code style
 - Kotlin official style, ktlint + detekt clean. Prefer sealed interfaces and data classes.
 - Coroutines: structured concurrency only, no GlobalScope. Inject dispatchers for testability.

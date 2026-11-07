@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.encodedPath
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.modelcontextprotocol.kotlin.sdk.client.Client
@@ -102,6 +103,23 @@ class McpEndpointTest {
 
             assertEquals(HttpStatusCode.Unauthorized, none.status)
             assertEquals(HttpStatusCode.Unauthorized, wrong.status)
+        }
+
+    @Test
+    fun anotherSpellingOfThePathStillNeedsTheToken() =
+        test {
+            for (path in listOf("//mcp", "/%6Dcp", "/./mcp", "/MCP")) {
+                val response =
+                    client.post {
+                        url { encodedPath = path }
+                        header(HttpHeaders.Host, HOST)
+                        header(HttpHeaders.Accept, "application/json, text/event-stream")
+                        contentType(ContentType.Application.Json)
+                        setBody(initialize)
+                    }
+
+                assertEquals(HttpStatusCode.Unauthorized, response.status, path)
+            }
         }
 
     @Test

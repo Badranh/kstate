@@ -9,7 +9,6 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.request.header
-import io.ktor.server.request.path
 import io.ktor.server.response.respond
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import io.modelcontextprotocol.kotlin.sdk.server.mcpStreamableHttp
@@ -21,14 +20,15 @@ import java.security.MessageDigest
  * so other local programs can't drive the app either. [server] makes the server for a new session.
  *
  * The token is checked in the call pipeline rather than with Ktor's `authenticate { }`: the SDK sets
- * up Streamable HTTP for the whole application, so there is no route of ours to wrap.
+ * up Streamable HTTP for the whole application, so there is no route of ours to wrap. It is checked on
+ * every request, whatever its path: routing also matches `//mcp` and `/%6Dcp`, so a check on the
+ * raw path could be walked around.
  */
 fun Application.kstateMcp(
     token: String,
     server: () -> Server,
 ) {
     intercept(ApplicationCallPipeline.Plugins) {
-        if (!call.request.path().startsWith(PATH)) return@intercept
         val given =
             call.request
                 .header(HttpHeaders.Authorization)
