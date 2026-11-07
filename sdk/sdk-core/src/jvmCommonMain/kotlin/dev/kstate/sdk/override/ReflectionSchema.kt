@@ -37,6 +37,10 @@ internal object ReflectionSchema {
                     )
                 }
 
+                "SEALED" -> {
+                    mapOf("variants" to variants(kClass, depth, path + kClass))
+                }
+
                 "ENUM" -> {
                     mapOf(
                         "values" to
@@ -82,6 +86,33 @@ internal object ReflectionSchema {
             }
         return JsonObject(base + details)
     }
+
+    /** Every concrete subclass, however deeply nested, with the `$type`/`$class` the decoder reads. */
+    private fun variants(
+        kClass: KClass<*>,
+        depth: Int,
+        path: Set<KClass<*>>,
+    ): JsonArray =
+        JsonArray(
+            kClass.sealedLeaves().map { leaf ->
+                JsonObject(
+                    mapOf(
+                        "name" to JsonPrimitive(leaf.simpleName),
+                        "tag" to
+                            JsonObject(
+                                mapOf(
+                                    "\$type" to JsonPrimitive(leaf.simpleName),
+                                    "\$class" to JsonPrimitive(leaf.qualifiedName),
+                                ),
+                            ),
+                        "schema" to describe(leaf.starProjectedType, depth + 1, path),
+                    ),
+                )
+            },
+        )
+
+    private fun KClass<*>.sealedLeaves(): List<KClass<*>> =
+        sealedSubclasses.flatMap { if (it.isSealed) it.sealedLeaves() else listOf(it) }
 
     private fun fields(
         kClass: KClass<*>,

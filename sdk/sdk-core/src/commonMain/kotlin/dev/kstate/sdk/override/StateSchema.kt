@@ -16,11 +16,15 @@ import kotlinx.serialization.json.JsonPrimitive
  * A serializer's descriptor as JSON, for the host's form editor:
  * `{"kind":"CLASS","name":…,"nullable":…,"fields":[{"name":…,"optional":…,"sensitive":…,"schema":{…}}]}`,
  * `{"kind":"ENUM","values":[…]}`, `{"kind":"LIST","element":{…}}`, `{"kind":"MAP","key":{…},"value":{…}}`,
- * or a primitive kind such as `INT` or `STRING`.
+ * `{"kind":"SEALED","variants":[{"name":…,"tag":{"type":…},"schema":{…}}]}` (the tag is what to write
+ * to pick that variant), or a primitive kind such as `INT` or `STRING`.
  */
 @OptIn(ExperimentalSerializationApi::class)
 internal object StateSchema {
     private const val MAX_DEPTH = 8
+
+    /** [StateJson]'s class discriminator. */
+    private const val DISCRIMINATOR = "type"
 
     fun of(descriptor: SerialDescriptor): JsonElement = describe(descriptor, depth = 0, path = emptySet())
 
@@ -49,6 +53,10 @@ internal object StateSchema {
                     )
                 }
 
+                PolymorphicKind.SEALED -> {
+                    mapOf("variants" to variants(descriptor, depth, inside))
+                }
+
                 SerialKind.ENUM -> {
                     mapOf(
                         "values" to
@@ -74,6 +82,27 @@ internal object StateSchema {
                 }
             }
         return JsonObject(base + details)
+    }
+
+    /** A sealed descriptor's second element holds one element per concrete subclass, by serial name. */
+    private fun variants(
+        descriptor: SerialDescriptor,
+        depth: Int,
+        path: Set<String>,
+    ): JsonArray {
+        val leaves = descriptor.getElementDescriptor(1)
+        return JsonArray(
+            (0 until leaves.elementsCount).map { index ->
+                val serialName = leaves.getElementName(index)
+                JsonObject(
+                    mapOf(
+                        "name" to JsonPrimitive(serialName.substringAfterLast('.')),
+                        "tag" to JsonObject(mapOf(DISCRIMINATOR to JsonPrimitive(serialName))),
+                        "schema" to describe(leaves.getElementDescriptor(index), depth + 1, path),
+                    ),
+                )
+            },
+        )
     }
 
     private fun fields(
