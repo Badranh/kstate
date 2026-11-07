@@ -63,6 +63,15 @@ class ProcessAdbClientTest {
         }
 
     @Test
+    fun theDevicePortsWithAReverseRuleAreListed() =
+        runTest {
+            result = ProcessResult(0, "host-16 tcp:47000 tcp:47100\nhost-16 tcp:8081 tcp:8081\n", "")
+
+            assertEquals(setOf(47000, 8081), client.reversedPorts("emulator-5554"))
+            assertEquals(listOf("/sdk/adb", "-s", "emulator-5554", "reverse", "--list"), commands.single())
+        }
+
+    @Test
     fun removeReverseDropsTheRule() =
         runTest {
             client.removeReverse("emulator-5554", devicePort = 47000)

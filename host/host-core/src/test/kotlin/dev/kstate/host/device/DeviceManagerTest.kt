@@ -28,6 +28,9 @@ class DeviceManagerTest {
             return attached
         }
 
+        /** The reverse rules adb holds, by serial: what `adb reverse --list` would print. */
+        val rules = mutableMapOf<String, MutableSet<Int>>()
+
         override suspend fun reverse(
             serial: String,
             devicePort: Int,
@@ -35,6 +38,7 @@ class DeviceManagerTest {
         ) {
             if (serial in reverseFailures) throw AdbException("offline")
             log += "reverse $serial $devicePort->$hostPort"
+            rules.getOrPut(serial) { mutableSetOf() } += devicePort
         }
 
         override suspend fun removeReverse(
@@ -42,7 +46,10 @@ class DeviceManagerTest {
             devicePort: Int,
         ) {
             log += "unreverse $serial $devicePort"
+            rules[serial]?.remove(devicePort)
         }
+
+        override suspend fun reversedPorts(serial: String): Set<Int> = rules[serial].orEmpty().toSet()
     }
 
     private val adb = FakeAdb()
@@ -66,6 +73,29 @@ class DeviceManagerTest {
             assertEquals(listOf("start emulator-5554@47100"), gatewayLog)
             assertEquals(listOf("reverse emulator-5554 47000->47100"), adb.log)
             assertEquals(listOf(AttachedDevice("emulator-5554", "model-emulator-5554", 47100)), manager.devices.value)
+        }
+
+    @Test
+    fun aLostReverseRuleIsRestoredOnTheNextPoll() =
+        runTest {
+            adb.attached = listOf(device("emulator-5554"))
+            manager.poll()
+
+            adb.rules.getValue("emulator-5554").clear()
+            manager.poll()
+
+            assertEquals(listOf("reverse emulator-5554 47000->47100", "reverse emulator-5554 47000->47100"), adb.log)
+            assertEquals(listOf(47100), manager.devices.value.map { it.hostPort })
+        }
+
+    @Test
+    fun anIntactReverseRuleIsLeftAlone() =
+        runTest {
+            adb.attached = listOf(device("emulator-5554"))
+
+            repeat(3) { manager.poll() }
+
+            assertEquals(listOf("reverse emulator-5554 47000->47100"), adb.log)
         }
 
     @Test

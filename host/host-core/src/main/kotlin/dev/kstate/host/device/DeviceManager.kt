@@ -24,7 +24,8 @@ data class AttachedDevice(
 )
 
 /**
- * Keeps one gateway and one `adb reverse` rule per ready Android device, polling adb.
+ * Keeps one gateway and one `adb reverse` rule per ready Android device, polling adb, and puts a
+ * lost rule back.
  * Connections through adb reverse all come from 127.0.0.1, so the port identifies the device.
  */
 class DeviceManager(
@@ -66,7 +67,9 @@ class DeviceManager(
             }
         lastProblem.value = null
         (attachments.keys - ready.keys).forEach { detach(it) }
+        val known = attachments.keys.toList()
         (ready.keys - attachments.keys).forEach { attach(ready.getValue(it)) }
+        known.forEach { keepReversed(it) }
         publish()
     }
 
@@ -84,6 +87,20 @@ class DeviceManager(
         } catch (failure: AdbException) {
             gateway.stop()
             ports.release(port)
+            lastProblem.value = failure.message
+        }
+    }
+
+    /**
+     * The app's state reaches us through the reverse rule, and adb drops every rule when its server
+     * restarts, even while the device stays listed. Put it back, so the state channel returns as
+     * video does.
+     */
+    private suspend fun keepReversed(serial: String) {
+        val attachment = attachments[serial] ?: return
+        try {
+            if (devicePort !in adb.reversedPorts(serial)) adb.reverse(serial, devicePort, attachment.device.hostPort)
+        } catch (failure: AdbException) {
             lastProblem.value = failure.message
         }
     }

@@ -32,4 +32,7 @@ interface AdbClient {
         serial: String,
         devicePort: Int,
     )
+
+    /** The device ports that have a reverse rule now. adb drops them all when its server restarts. */
+    suspend fun reversedPorts(serial: String): Set<Int>
 }

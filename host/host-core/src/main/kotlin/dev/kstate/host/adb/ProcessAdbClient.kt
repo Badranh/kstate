@@ -22,6 +22,18 @@ class ProcessAdbClient(
         run("reverse", "-s", serial, "reverse", "tcp:$devicePort", "tcp:$hostPort")
     }
 
+    override suspend fun reversedPorts(serial: String): Set<Int> =
+        run("reverse --list", "-s", serial, "reverse", "--list")
+            .lineSequence()
+            .mapNotNull { line ->
+                line
+                    .trim()
+                    .split(WHITESPACE)
+                    .getOrNull(1)
+                    ?.removePrefix(TCP)
+                    ?.toIntOrNull()
+            }.toSet()
+
     override suspend fun removeReverse(
         serial: String,
         devicePort: Int,
@@ -81,5 +93,6 @@ class ProcessAdbClient(
     private companion object {
         val WHITESPACE = Regex("\\s+")
         const val MODEL = "model:"
+        const val TCP = "tcp:"
     }
 }
