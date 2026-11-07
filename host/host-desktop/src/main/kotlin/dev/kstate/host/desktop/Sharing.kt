@@ -80,11 +80,28 @@ class Sharing(
     /** A link for one more guest. The token sits in the fragment, which tunnels never see. */
     fun newInviteLink(): String {
         val url = (current.value as? SharingState.On)?.publicUrl ?: error("Start sharing first")
-        return "$url/#join=${collab.invites.create().token}"
+        return link(url, collab.invites.create().token)
     }
+
+    /** Every invite that still lets people in, with its link to copy again; none while not shared. */
+    fun inviteLinks(): List<InviteLink> {
+        val url = (current.value as? SharingState.On)?.publicUrl ?: return emptyList()
+        return collab.invites.active().map { InviteLink(it.id, link(url, it.token), it.expiresAtMillis) }
+    }
+
+    private fun link(
+        url: String,
+        token: String,
+    ) = "$url/#join=$token"
 
     private fun closeTunnel() {
         tunnel?.close()
         tunnel = null
     }
 }
+
+data class InviteLink(
+    val id: String,
+    val link: String,
+    val expiresAtMillis: Long,
+)

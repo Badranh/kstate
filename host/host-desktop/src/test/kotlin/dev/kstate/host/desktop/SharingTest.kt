@@ -91,6 +91,29 @@ class SharingTest {
         }
 
     @Test
+    fun everyActiveInviteCanBeCopiedAgain(): Unit =
+        runBlocking {
+            sharing.start("ngrok")
+            val first = sharing.newInviteLink()
+            val second = sharing.newInviteLink()
+
+            assertEquals(listOf(first, second), sharing.inviteLinks().map { it.link })
+        }
+
+    @Test
+    fun aRevokedInviteHasNoLinkAndNothingIsListedWhileNotShared(): Unit =
+        runBlocking {
+            assertEquals(emptyList(), sharing.inviteLinks())
+            sharing.start("ngrok")
+            sharing.newInviteLink()
+            val kept = sharing.newInviteLink()
+
+            collab.invites.revoke(sharing.inviteLinks().first().id)
+
+            assertEquals(listOf(kept), sharing.inviteLinks().map { it.link })
+        }
+
+    @Test
     fun noInviteWithoutSharing() {
         assertFailsWith<IllegalStateException> { sharing.newInviteLink() }
     }
