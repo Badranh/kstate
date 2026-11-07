@@ -458,3 +458,12 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 - "Same screen" stays strict (one stray cell) for the UNCHANGED and DUPLICATE flags: a caret may
   hide a hint there, but a real small text change is never called "unchanged". Only the check that
   the app came back after explore is lenient, where a caret's phase would raise a false warning.
+
+## 2026-11-08: Source keys survive a screen being opened again
+- A source id is `name-n` with n the lowest number no live source of that name holds, freed once
+  the source's job completes (after `SourceCleared` is sent). A screen closed and opened again gets
+  its old key back, so the host's history and an agent's key stay valid; before, one counter shared
+  by every name made `Signup-5` come back as `Signup-6`.
+- While two copies are live at once (a navigation animation keeps the old screen), the new one
+  gets the next number. Keys are stable across reopen, not across overlap; names that must never
+  collide should be distinct names.

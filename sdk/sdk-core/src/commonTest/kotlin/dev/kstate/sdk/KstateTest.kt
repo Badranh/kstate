@@ -62,7 +62,8 @@ class KstateTest {
         Kstate.start(KstateConfig(port = 2))
 
         assertEquals("A-1", first)
-        assertEquals("B-2", Kstate.track(scope, "B", MutableStateFlow(0)).sourceId)
+        // A fresh instance would hand out A-1 again.
+        assertEquals("A-2", Kstate.track(scope, "A", MutableStateFlow(0)).sourceId)
     }
 
     @Test

@@ -217,6 +217,66 @@ class KstateClientTest {
         }
 
     @Test
+    fun eachNameIsNumberedOnItsOwn() =
+        runTest {
+            val (client, _) = client()
+
+            client.track(ownerScope(), "Cart", MutableStateFlow(1), StateEncoder.auto())
+            val signup = client.track(ownerScope(), "Signup", MutableStateFlow(2), StateEncoder.auto())
+
+            assertEquals("Signup-1", signup.sourceId)
+        }
+
+    @Test
+    fun aScreenOpenedAgainGetsItsKeyBack() =
+        runTest {
+            val (client, _) = client()
+            val first = ownerScope()
+            client.track(first, "Signup", MutableStateFlow(1), StateEncoder.auto())
+            runCurrent()
+            first.cancel()
+            runCurrent()
+
+            val again = client.track(ownerScope(), "Signup", MutableStateFlow(1), StateEncoder.auto())
+
+            assertEquals("Signup-1", again.sourceId)
+        }
+
+    @Test
+    fun aKeyIsNotReusedWhileItsSourceIsStillLive() =
+        runTest {
+            val (client, _) = client()
+            val first = ownerScope()
+            client.track(first, "Signup", MutableStateFlow(1), StateEncoder.auto())
+            runCurrent()
+
+            first.cancel()
+            // The old source is not cleared yet: the new one must not take its key.
+            val again = client.track(ownerScope(), "Signup", MutableStateFlow(1), StateEncoder.auto())
+
+            assertEquals("Signup-2", again.sourceId)
+        }
+
+    @Test
+    fun anInspectableScreenOpenedAgainGetsItsKeyBackToo() =
+        runTest {
+            val (client, transport) = client()
+            val first = ownerScope()
+            client.inspectable(first, "Signup", MutableStateFlow(1), StateEncoder.auto(), decoder = null)
+            runCurrent()
+            first.cancel()
+            runCurrent()
+
+            client.inspectable(ownerScope(), "Signup", MutableStateFlow(1), StateEncoder.auto(), decoder = null)
+            runCurrent()
+
+            assertEquals(
+                listOf("Signup-1", "Signup-1"),
+                transport.sentMessages.filterIsInstance<SourceRegistered>().map { it.sourceId },
+            )
+        }
+
+    @Test
     fun aPartialEncodingIsFlaggedOnTheSnapshot() {
         runTest {
             val (client, transport) = client()

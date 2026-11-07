@@ -35,15 +35,11 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement
-import kotlin.concurrent.atomics.AtomicInt
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.incrementAndFetch
 
 /**
  * The running SDK. All of its state lives on [dispatcher], a single-threaded view of a
  * background dispatcher, so the app's main thread only ever launches work.
  */
-@OptIn(ExperimentalAtomicApi::class)
 internal class KstateClient(
     private val config: KstateConfig,
     /** Read lazily, on the SDK dispatcher: on Android it asks the package manager. */
@@ -56,7 +52,7 @@ internal class KstateClient(
     private val scope = CoroutineScope(SupervisorJob() + dispatcher)
     private val registry = SourceRegistry()
     private val directory = SourceDirectory(config)
-    private val sourceNumbers = AtomicInt(0)
+    private val sourceIds = SourceIds()
     private val transport = transportFactory(ReplaySource(::replay))
 
     fun start() {
@@ -78,12 +74,14 @@ internal class KstateClient(
         schema: () -> JsonElement? = { null },
         writeThrough: ((T) -> Unit)? = null,
     ): SourceHandle {
-        val sourceId = "$name-${sourceNumbers.incrementAndFetch()}"
+        val sourceId = sourceIds.take(name)
         val source = directory.create(sourceId, encoder, decoder, writeThrough, override = null)
         val job =
             ownerScope.launch(
                 dispatcher,
             ) { observe(directory.add(source, name, ownerType, schema), states, source) }
+        // Given back once the source is cleared, or at once if the owner was already gone.
+        job.invokeOnCompletion { sourceIds.release(sourceId) }
         return JobSourceHandle(sourceId, job)
     }
 
@@ -101,9 +99,11 @@ internal class KstateClient(
         writeThrough: ((T) -> Unit)? = null,
     ): StateFlow<T> {
         val override = MutableStateFlow<Override<T>?>(null)
-        val sourceId = "$name-${sourceNumbers.incrementAndFetch()}"
+        val sourceId = sourceIds.take(name)
         val source = directory.create(sourceId, encoder, decoder, writeThrough, override)
-        ownerScope.launch(dispatcher) { observe(directory.add(source, name, "StateFlow", schema), real, source) }
+        ownerScope
+            .launch(dispatcher) { observe(directory.add(source, name, "StateFlow", schema), real, source) }
+            .invokeOnCompletion { sourceIds.release(sourceId) }
         return combine(
             real,
             override,
