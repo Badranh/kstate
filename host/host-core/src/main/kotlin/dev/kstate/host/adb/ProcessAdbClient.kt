@@ -1,6 +1,7 @@
 package dev.kstate.host.adb
 
 import java.io.File
+import java.io.IOException
 
 /** Shells out to the user's adb binary. */
 class ProcessAdbClient(
@@ -78,7 +79,13 @@ class ProcessAdbClient(
         what: String,
         vararg args: String,
     ): String {
-        val result = runner.run(listOf(adb.path) + args)
+        val result =
+            try {
+                runner.run(listOf(adb.path) + args)
+            } catch (failure: IOException) {
+                // adb moved or replaced (an SDK update): a problem to show, not a crash of discovery.
+                throw AdbException("adb $what failed: ${failure.message}", failure)
+            }
         if (result.exitCode != 0) throw AdbException("adb $what failed: ${result.stderr.trim()}")
         return result.stdout
     }

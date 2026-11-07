@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.io.IOException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -80,7 +81,15 @@ class DeviceManager(
 
     private suspend fun attach(device: AdbDevice) {
         val port = ports.allocate()
-        val gateway = gateways.start(device.serial, port)
+        val gateway =
+            try {
+                gateways.start(device.serial, port)
+            } catch (failure: IOException) {
+                // Another program took the port between the check and the bind: try again next poll.
+                ports.release(port)
+                lastProblem.value = "Couldn't listen for ${device.serial}'s app on port $port: ${failure.message}"
+                return
+            }
         try {
             adb.reverse(device.serial, devicePort, port)
             attachments[device.serial] = Attachment(AttachedDevice(device.serial, device.model, port), gateway)

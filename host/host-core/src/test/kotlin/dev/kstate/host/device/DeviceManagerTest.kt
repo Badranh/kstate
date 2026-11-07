@@ -99,6 +99,25 @@ class DeviceManagerTest {
         }
 
     @Test
+    fun aGatewayThatCannotStartIsReportedAndItsPortFreed() =
+        runTest {
+            val failing =
+                DeviceManager(
+                    adb,
+                    PortAllocator(first = 47100, isFree = {
+                        true
+                    }),
+                    { _, _ -> throw java.net.BindException("Address already in use") },
+                )
+            adb.attached = listOf(device("emulator-5554"))
+
+            failing.poll()
+
+            assertEquals(emptyList(), failing.devices.value)
+            assertTrue("Address already in use" in failing.problem.value.orEmpty())
+        }
+
+    @Test
     fun devicesThatAreNotReadyAreLeftAlone() =
         runTest {
             adb.attached = listOf(AdbDevice("R58", "unauthorized", null))

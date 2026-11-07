@@ -15,7 +15,8 @@ data class AdbDevice(
 
 class AdbException(
     message: String,
-) : Exception(message)
+    cause: Throwable? = null,
+) : Exception(message, cause)
 
 /** The adb commands the host needs. */
 interface AdbClient {

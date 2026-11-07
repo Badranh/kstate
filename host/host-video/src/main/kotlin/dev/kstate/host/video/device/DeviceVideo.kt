@@ -85,6 +85,12 @@ class DeviceVideo(
                 VideoState.Ended(failure)
             } catch (failure: VideoStreamException) {
                 VideoState.Ended(failure)
+            } catch (
+                @Suppress("TooGenericExceptionCaught") failure: Exception,
+            ) {
+                // Anything else (a decoder that can't start, missing natives) must still end the
+                // stream visibly, with its cause, so it is shown and retried instead of a black tile.
+                VideoState.Ended(failure)
             }
     }
 

@@ -84,6 +84,17 @@ class DeviceVideoTest {
     }
 
     @Test
+    fun aDecoderThatCannotStartEndsTheStreamWithItsCause() {
+        val broken =
+            DeviceVideo(FixtureConnection(), clock = { now++ }, decoders = { error("FFmpeg has no H.264 decoder") })
+
+        broken.stream()
+
+        val ended = assertIs<VideoState.Ended>(broken.state.value)
+        assertEquals("FFmpeg has no H.264 decoder", ended.cause?.message)
+    }
+
+    @Test
     fun inputGoesToTheControlChannelAsScrcpyBytes() {
         val touch = ControlMessage.InjectTouch(0, -2, Position(10, 20, 142, 320), 1f, 0, 0)
 

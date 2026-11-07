@@ -107,9 +107,11 @@ class FfmpegDecoder : VideoDecoder {
                 checkNotNull(avcodec.avcodec_find_decoder(avcodec.AV_CODEC_ID_H264)) { "FFmpeg has no H.264 decoder" }
             val context = avcodec.avcodec_alloc_context3(codec)
             context.flags(context.flags() or avcodec.AV_CODEC_FLAG_LOW_DELAY)
-            check(
-                avcodec.avcodec_open2(context, codec, null as AVDictionary?) >= 0,
-            ) { "Could not open the H.264 decoder" }
+            if (avcodec.avcodec_open2(context, codec, null as AVDictionary?) < 0) {
+                // Native memory: free it here, nothing else will.
+                avcodec.avcodec_free_context(context)
+                error("Could not open the H.264 decoder")
+            }
             return context
         }
     }
