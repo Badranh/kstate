@@ -40,6 +40,9 @@ class FakeApp(
     private val stateDelayMillis: Long = 0,
 ) : SessionSource {
     var onTap: (x: Float, y: Float) -> Unit = { _, _ -> }
+
+    /** Every touch phase the device received, in order. */
+    val touches = mutableListOf<TouchPhase>()
     private var appState: JsonElement = initial
     private var overlay: JsonElement? = null
     private var connected = true
@@ -199,6 +202,7 @@ class FakeApp(
             x: Float,
             y: Float,
         ) {
+            touches += phase
             if (phase == TouchPhase.UP) onTap(x, y)
         }
 

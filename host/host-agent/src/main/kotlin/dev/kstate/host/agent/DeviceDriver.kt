@@ -11,7 +11,9 @@ import dev.kstate.viewer.client.CommandOutcome
 import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.TouchPhase
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonElement
 import kotlin.time.TimeSource
 
@@ -57,9 +59,7 @@ class DeviceDriver(
         y: Float,
     ): ActionResult =
         act(deviceId, "tap ${fraction(x)}, ${fraction(y)}") { screen ->
-            screen.touch(TouchPhase.DOWN, x.inside(), y.inside())
-            delay(TAP_MILLIS)
-            screen.touch(TouchPhase.UP, x.inside(), y.inside())
+            pressed(screen, x.inside(), y.inside()) { delay(TAP_MILLIS) }
         }
 
     suspend fun swipe(
@@ -72,17 +72,34 @@ class DeviceDriver(
             from.first,
         )}, ${fraction(from.second)} → ${fraction(to.first)}, ${fraction(to.second)}"
         return act(deviceId, note) { screen ->
-            screen.touch(TouchPhase.DOWN, from.first.inside(), from.second.inside())
-            for (step in 1..SWIPE_STEPS) {
-                delay(durationMillis / SWIPE_STEPS)
-                val t = step.toFloat() / SWIPE_STEPS
-                screen.touch(
-                    TouchPhase.MOVE,
-                    lerp(from.first, to.first, t).inside(),
-                    lerp(from.second, to.second, t).inside(),
-                )
+            var at = from.first.inside() to from.second.inside()
+            pressed(screen, at.first, at.second, lift = { at }) {
+                for (step in 1..SWIPE_STEPS) {
+                    delay(durationMillis / SWIPE_STEPS)
+                    val t = step.toFloat() / SWIPE_STEPS
+                    at = lerp(from.first, to.first, t).inside() to lerp(from.second, to.second, t).inside()
+                    screen.touch(TouchPhase.MOVE, at.first, at.second)
+                }
             }
-            screen.touch(TouchPhase.UP, to.first.inside(), to.second.inside())
+        }
+    }
+
+    /**
+     * Puts a finger down, runs [gesture], and lifts it at [lift] however the gesture ends: a
+     * cancelled call (the client pressed Esc) must never leave a finger down on the device.
+     */
+    private suspend fun pressed(
+        screen: DeviceScreen,
+        x: Float,
+        y: Float,
+        lift: () -> Pair<Float, Float> = { x to y },
+        gesture: suspend () -> Unit,
+    ) {
+        screen.touch(TouchPhase.DOWN, x, y)
+        try {
+            gesture()
+        } finally {
+            withContext(NonCancellable) { lift().let { (liftX, liftY) -> screen.touch(TouchPhase.UP, liftX, liftY) } }
         }
     }
 

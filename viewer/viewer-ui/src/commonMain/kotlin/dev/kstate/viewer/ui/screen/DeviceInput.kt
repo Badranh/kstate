@@ -29,7 +29,11 @@ internal fun Modifier.deviceKeys(
         true
     }
 
-/** Mouse becomes touch: a press on the video starts a finger, moves follow it, the wheel scrolls. */
+/**
+ * Mouse becomes touch: a press on the video starts a finger, moves follow it, the wheel scrolls.
+ * Points are kept on the screen, and a finger still down when the gesture ends (the person lost
+ * control, the tile went away) is lifted, so the device never keeps a finger down.
+ */
 internal fun Modifier.deviceTouches(
     screen: DeviceScreen,
     enabled: Boolean,
@@ -39,11 +43,15 @@ internal fun Modifier.deviceTouches(
     pointerInput(screen, enabled) {
         if (!enabled) return@pointerInput
         val forwarder = TouchForwarder(screen, onTouch)
-        awaitPointerEventScope {
-            while (true) {
-                val event = awaitPointerEvent()
-                videoRect()?.let { forwarder.forward(event, it) }
+        try {
+            awaitPointerEventScope {
+                while (true) {
+                    val event = awaitPointerEvent()
+                    videoRect()?.let { forwarder.forward(event, it) }
+                }
             }
+        } finally {
+            forwarder.lift()
         }
     }
 
@@ -52,20 +60,24 @@ private class TouchForwarder(
     private val onTouch: () -> Unit,
 ) {
     private var pressed = false
+    private var lastX = 0f
+    private var lastY = 0f
 
     fun forward(
         event: PointerEvent,
         rect: FitRect,
     ) {
         val change = event.changes.first()
-        val (x, y) = rect.normalize(change.position.x, change.position.y)
+        val (rawX, rawY) = rect.normalize(change.position.x, change.position.y)
+        val x = rawX.coerceIn(0f, 1f)
+        val y = rawY.coerceIn(0f, 1f)
         when (event.type) {
             PointerEventType.Press -> {
                 press(change.position, rect, x, y)
             }
 
             PointerEventType.Move -> {
-                if (pressed) screen.touch(TouchPhase.MOVE, x, y)
+                if (pressed) move(x, y)
             }
 
             PointerEventType.Release -> {
@@ -83,6 +95,9 @@ private class TouchForwarder(
         }
     }
 
+    /** Lifts a finger still down, where it last was. */
+    fun lift() = release(lastX, lastY)
+
     private fun press(
         position: Offset,
         rect: FitRect,
@@ -92,7 +107,17 @@ private class TouchForwarder(
         if (!rect.contains(position.x, position.y)) return
         onTouch()
         pressed = true
-        screen.touch(TouchPhase.DOWN, x, y)
+        move(x, y, TouchPhase.DOWN)
+    }
+
+    private fun move(
+        x: Float,
+        y: Float,
+        phase: TouchPhase = TouchPhase.MOVE,
+    ) {
+        lastX = x
+        lastY = y
+        screen.touch(phase, x, y)
     }
 
     private fun release(

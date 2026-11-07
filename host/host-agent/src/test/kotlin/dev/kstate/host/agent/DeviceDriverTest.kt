@@ -2,7 +2,11 @@ package dev.kstate.host.agent
 
 import dev.kstate.host.agent.image.Picture
 import dev.kstate.host.agent.settle.SettleTiming
+import dev.kstate.viewer.client.TouchPhase
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonElement
@@ -59,6 +63,19 @@ class DeviceDriverTest {
 
             assertEquals(emptyList(), result.changes)
             assertTrue(currentTime < 1_000, "took $currentTime ms")
+        }
+
+    @Test
+    fun aSwipeCancelledHalfWayStillLiftsTheFinger() =
+        runTest {
+            val (app, agent) = agent(stateDelayMillis = 0)
+            val swiping = launch { agent.driver.swipe(null, 0.5f to 0.8f, 0.5f to 0.2f, durationMillis = 2_000) }
+            advanceTimeBy(500)
+
+            swiping.cancelAndJoin()
+
+            assertEquals(TouchPhase.DOWN, app.touches.first())
+            assertEquals(TouchPhase.UP, app.touches.last())
         }
 
     @Test
