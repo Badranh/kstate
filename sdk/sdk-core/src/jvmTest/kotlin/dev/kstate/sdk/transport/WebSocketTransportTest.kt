@@ -1,6 +1,7 @@
 package dev.kstate.sdk.transport
 
 import dev.kstate.protocol.CloseCodes
+import dev.kstate.protocol.Encoding
 import dev.kstate.protocol.Envelope
 import dev.kstate.protocol.EnvelopeCodec
 import dev.kstate.protocol.Event
@@ -8,6 +9,7 @@ import dev.kstate.protocol.Hello
 import dev.kstate.protocol.Msg
 import dev.kstate.protocol.Ping
 import dev.kstate.protocol.Platform
+import dev.kstate.protocol.StateSnapshot
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.websocket.WebSockets
@@ -20,14 +22,24 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.json.JsonPrimitive
+import java.net.InetAddress
+import java.net.ServerSocket
+import java.net.Socket
+import java.security.MessageDigest
+import java.util.Base64
+import kotlin.concurrent.thread
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -157,6 +169,72 @@ class WebSocketTransportTest {
         }
 
     @Test
+    fun afterARejectionNothingMoreIsHeldAndTheClientIsClosed() =
+        runBlocking {
+            val host = host { _, _ -> close(CloseReason(CloseCodes.VERSION_MISMATCH, "host speaks 2.x")) }
+            val made = HttpClient(CIO) { install(WebSockets) }
+            val transport =
+                WebSocketTransport(
+                    host.url,
+                    clientFactory = { made },
+                    replay = { listOf(envelope(hello)) },
+                    scope = scope,
+                )
+            withTimeout(5.seconds) { transport.connection.first { it is ConnectionState.Rejected } }
+
+            val accepted = transport.send(envelope(Event(name = "late")))
+
+            assertFalse(accepted, "a rejected transport keeps every later message forever")
+            withTimeout(5.seconds) { while (made.isActive) delay(10) }
+        }
+
+    @Test
+    fun closingClosesTheHttpClient() =
+        runBlocking {
+            val host = host()
+            val made = HttpClient(CIO) { install(WebSockets) }
+            val transport =
+                WebSocketTransport(
+                    host.url,
+                    clientFactory = { made },
+                    replay = { listOf(envelope(hello)) },
+                    scope = scope,
+                )
+            host.next()
+
+            transport.close()
+
+            withTimeout(5.seconds) { while (made.isActive) delay(10) }
+        }
+
+    @Test
+    fun aHostThatStopsReadingCostsTheAppNoMoreThanTheBuffer() =
+        runBlocking {
+            val host = StalledHost().also { closeables += it }
+            val transport =
+                WebSocketTransport(
+                    host.url,
+                    clientFactory = { client },
+                    replay = { emptyList() },
+                    scope = scope,
+                    bufferCapacity = 8,
+                )
+            withTimeout(5.seconds) { transport.connection.first { it == ConnectionState.Connected } }
+            val big = JsonPrimitive("x".repeat(64 * 1024))
+
+            repeat(
+                2_000,
+            ) { transport.send(envelope(StateSnapshot("Counter-1", it.toLong(), big, Encoding.SERIALIZER))) }
+            delay(500)
+
+            val backlog = transport.backlog()
+            assertTrue(backlog.held <= 9, "holding ${backlog.held} messages")
+            // What the kernel's socket buffers take is bounded; 2,000 x 64 KB handed to Ktor's unbounded
+            // outgoing queue would be 128 MB the app can't drop.
+            assertTrue(backlog.handedOver < 400, "handed ${backlog.handedOver} frames to a host that isn't reading")
+        }
+
+    @Test
     fun incomingFramesAreDecodedAndGarbageIsSkipped() =
         runBlocking {
             val host =
@@ -184,4 +262,43 @@ class WebSocketTransportTest {
 
             assertNull(withTimeoutOrNull(300.milliseconds) { host.received.receive() })
         }
+
+    /**
+     * Accepts the WebSocket handshake, then never reads again: once the kernel's buffers fill, the
+     * app's sends block for real (Ktor's own server would keep reading into a queue).
+     */
+    private class StalledHost : AutoCloseable {
+        private val server = ServerSocket(0, 1, InetAddress.getLoopbackAddress())
+        val url = "ws://127.0.0.1:${server.localPort}/ws/app"
+        private val accepted = mutableListOf<Socket>()
+
+        init {
+            thread(isDaemon = true) {
+                val socket = server.accept().also { synchronized(accepted) { accepted += it } }
+                val request = socket.getInputStream().bufferedReader()
+                val key =
+                    generateSequence { request.readLine() }
+                        .takeWhile { it.isNotEmpty() }
+                        .first { it.startsWith("Sec-WebSocket-Key:", ignoreCase = true) }
+                        .substringAfter(':')
+                        .trim()
+                val accept =
+                    Base64.getEncoder().encodeToString(
+                        MessageDigest
+                            .getInstance(
+                                "SHA-1",
+                            ).digest((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").toByteArray()),
+                    )
+                socket.getOutputStream().write(
+                    "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: $accept\r\n\r\n"
+                        .toByteArray(),
+                )
+            }
+        }
+
+        override fun close() {
+            synchronized(accepted) { accepted.forEach { it.close() } }
+            server.close()
+        }
+    }
 }

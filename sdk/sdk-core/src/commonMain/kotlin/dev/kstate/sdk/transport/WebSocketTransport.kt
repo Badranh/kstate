@@ -11,7 +11,9 @@ import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,16 +24,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.decrementAndFetch
+import kotlin.concurrent.atomics.incrementAndFetch
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 /**
  * One WebSocket to the host, reconnecting with [backoff] until closed or rejected.
  * Every (re)connect sends the [replay] first, then whatever is still buffered.
- * The connection loop owns the [OutboundBuffer]; [send] only hands envelopes to it.
+ * The connection loop owns the [OutboundBuffer]; [send] only hands envelopes to it, and a mover
+ * keeps them flowing into it even while the socket is slow, so the buffer's limits always hold.
  * The HTTP client is built inside that loop: building a Ktor engine reads from disk,
  * which must not happen on the thread that called Kstate.start() (often the main thread).
  */
+@OptIn(ExperimentalAtomicApi::class)
 internal class WebSocketTransport(
     private val url: String,
     private val clientFactory: () -> HttpClient,
@@ -42,6 +50,13 @@ internal class WebSocketTransport(
 ) : KstateTransport {
     private val outbox = Channel<Envelope>(Channel.UNLIMITED)
     private val buffer = OutboundBuffer(bufferCapacity)
+
+    /** Sent but not yet moved into [buffer]. */
+    private val inOutbox = AtomicInt(0)
+    private val sentFrames = AtomicInt(0)
+
+    /** Signals the exchange that the buffer has something new. */
+    private val queued = Channel<Unit>(Channel.CONFLATED)
     private val state = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     private val received = MutableSharedFlow<Envelope>(extraBufferCapacity = INCOMING_BUFFER)
     private val loop: Job = scope.launch { run() }
@@ -49,9 +64,18 @@ internal class WebSocketTransport(
     override val connection: StateFlow<ConnectionState> = state.asStateFlow()
     override val incoming: Flow<Envelope> = received.asSharedFlow()
 
-    override fun send(envelope: Envelope) {
-        outbox.trySend(envelope)
-    }
+    override fun send(envelope: Envelope): Boolean =
+        outbox.trySend(envelope).isSuccess.also {
+            if (it) inOutbox.incrementAndFetch()
+        }
+
+    /** What the app holds for the host now, wherever it waits, and how many frames went to the socket in all. */
+    internal fun backlog(): Backlog = Backlog(held = inOutbox.load() + buffer.size, handedOver = sentFrames.load())
+
+    internal data class Backlog(
+        val held: Int,
+        val handedOver: Int,
+    )
 
     override fun close() {
         loop.cancel()
@@ -61,15 +85,24 @@ internal class WebSocketTransport(
 
     private suspend fun run() {
         val client = clientFactory()
-        while (true) {
-            state.value = ConnectionState.Connecting
-            val rejection = connectOnce(client)
-            if (rejection != null) {
-                state.value = ConnectionState.Rejected(rejection)
-                return
+        try {
+            coroutineScope {
+                // Ends when the outbox closes, after a rejection or close(); until then it never waits on the socket.
+                launch { moveOutboxToBuffer() }
+                while (true) {
+                    state.value = ConnectionState.Connecting
+                    val rejection = connectOnce(client)
+                    if (rejection != null) {
+                        state.value = ConnectionState.Rejected(rejection)
+                        outbox.close()
+                        return@coroutineScope
+                    }
+                    state.value = ConnectionState.Disconnected
+                    delay(backoff.next())
+                }
             }
-            state.value = ConnectionState.Disconnected
-            bufferWhileWaiting(backoff.next())
+        } finally {
+            client.close()
         }
     }
 
@@ -80,7 +113,12 @@ internal class WebSocketTransport(
             client.webSocket(url) {
                 backoff.reset()
                 state.value = ConnectionState.Connected
-                runCatchingIo { exchange() }
+                // The host may close mid-exchange; the close reason below still tells us why.
+                try {
+                    exchange()
+                } catch (_: Exception) {
+                    rethrowIfWeAreCancelled()
+                }
                 val reason = withTimeoutOrNull(CLOSE_REASON_WAIT) { closeReason.await() }
                 if (reason?.code == CloseCodes.VERSION_MISMATCH) rejection = reason.message
             }
@@ -91,15 +129,6 @@ internal class WebSocketTransport(
         return rejection
     }
 
-    /** The host may close mid-exchange; the close reason still tells us why. */
-    private suspend inline fun runCatchingIo(block: () -> Unit) {
-        try {
-            block()
-        } catch (_: Exception) {
-            rethrowIfWeAreCancelled()
-        }
-    }
-
     /**
      * Ktor reports a socket the host closed as a CancellationException ("Channel was cancelled").
      * Only a cancellation of our own coroutine may stop the loop; anything else is a broken socket.
@@ -107,20 +136,18 @@ internal class WebSocketTransport(
     private suspend fun rethrowIfWeAreCancelled() = currentCoroutineContext().ensureActive()
 
     private suspend fun DefaultClientWebSocketSession.exchange() {
-        moveOutboxToBuffer()
         buffer.dropReplayable()
-        replay.replay().forEach { send(Frame.Text(EnvelopeCodec.encode(it))) }
+        replay.replay().forEach { deliver(it) }
         val reader = launch { readIncoming() }
         try {
-            flushBuffer()
             while (true) {
-                val next =
-                    select<Envelope?> {
-                        reader.onJoin { null }
-                        outbox.onReceive { it }
-                    } ?: break
-                buffer.offer(next)
                 flushBuffer()
+                val more =
+                    select<Boolean> {
+                        reader.onJoin { false }
+                        queued.onReceive { true }
+                    }
+                if (!more) break
             }
         } finally {
             reader.cancel()
@@ -133,24 +160,40 @@ internal class WebSocketTransport(
         }
     }
 
-    /** Sends buffered envelopes; one leaves the buffer only once the socket took it. */
+    /**
+     * Sends buffered envelopes. One leaves the buffer only once the socket took it, and is put back
+     * if the socket fails; meanwhile new ones keep arriving into the bounded buffer.
+     */
     private suspend fun DefaultClientWebSocketSession.flushBuffer() {
         while (true) {
-            val next = buffer.peek() ?: return
-            send(Frame.Text(EnvelopeCodec.encode(next)))
-            buffer.poll()
+            val next = buffer.poll() ?: return
+            var delivered = false
+            try {
+                deliver(next)
+                delivered = true
+            } finally {
+                if (!delivered) buffer.requeue(next)
+            }
         }
     }
 
-    private fun moveOutboxToBuffer() {
-        while (true) {
-            buffer.offer(outbox.tryReceive().getOrNull() ?: return)
-        }
+    /**
+     * Ktor's outgoing queue is unbounded, so a host that stops reading would let every message pile
+     * up there, past the [OutboundBuffer]'s limits. Waiting for each frame to be written keeps the
+     * backlog in the buffer, where the oldest state is dropped first.
+     */
+    private suspend fun DefaultClientWebSocketSession.deliver(envelope: Envelope) {
+        send(Frame.Text(EnvelopeCodec.encode(envelope)))
+        flush()
+        sentFrames.incrementAndFetch()
     }
 
-    private suspend fun bufferWhileWaiting(duration: Duration) {
-        withTimeoutOrNull(duration) {
-            for (envelope in outbox) buffer.offer(envelope)
+    /** Runs on the transport's single-threaded dispatcher, like everything else that touches [buffer]. */
+    private suspend fun moveOutboxToBuffer() {
+        for (envelope in outbox) {
+            inOutbox.decrementAndFetch()
+            buffer.offer(envelope)
+            queued.trySend(Unit)
         }
     }
 

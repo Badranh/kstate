@@ -37,6 +37,9 @@ internal class OutboundBuffer(
 
     fun poll(): Envelope? = queue.removeFirstOrNull()
 
+    /** Puts back at the front a message the socket didn't take. */
+    fun requeue(envelope: Envelope) = queue.addFirst(envelope)
+
     /** Drops what a reconnect re-sends anyway: the handshake, registrations and state. */
     fun dropReplayable() {
         queue.removeAll { it.msg.isReplayable() }

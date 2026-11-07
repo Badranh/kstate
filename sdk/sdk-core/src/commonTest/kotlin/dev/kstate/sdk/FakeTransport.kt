@@ -16,8 +16,9 @@ internal class FakeTransport(
     override val connection: StateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Connected)
     override val incoming = MutableSharedFlow<Envelope>(extraBufferCapacity = 16)
 
-    override fun send(envelope: Envelope) {
+    override fun send(envelope: Envelope): Boolean {
         sent += envelope
+        return true
     }
 
     override fun close() = Unit

@@ -9,8 +9,8 @@ internal interface KstateTransport {
     val connection: StateFlow<ConnectionState>
     val incoming: Flow<Envelope>
 
-    /** Non-suspending and buffered: safe to call from any thread. */
-    fun send(envelope: Envelope)
+    /** Non-suspending and buffered: safe to call from any thread. False once nothing more will be sent. */
+    fun send(envelope: Envelope): Boolean
 
     fun close()
 }
