@@ -2,7 +2,16 @@
 
 package dev.kstate.viewer.web
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,12 +19,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeViewport
 import dev.kstate.session.remote.RemoteSession
 import dev.kstate.session.wire.FromViewer
 import dev.kstate.session.wire.ViewerInput
 import dev.kstate.viewer.ui.KstateApp
+import dev.kstate.viewer.ui.theme.KstateTheme
 import dev.kstate.viewer.web.video.WebVideoScreen
+import dev.kstate.viewer.web.video.webCodecsAvailable
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonObject
@@ -81,10 +94,11 @@ private fun WebViewer(token: String?) {
 
 @Composable
 private fun Viewing(onAccessEnded: () -> Unit) {
+    val canDecode = remember { webCodecsAvailable() }
     val connection = remember { HostConnection(onAccessEnded) }
     val videos =
         remember {
-            VideoConnections {
+            VideoConnections(canDecode) {
                 deviceId,
                 event,
                 ->
@@ -96,7 +110,32 @@ private fun Viewing(onAccessEnded: () -> Unit) {
         connection.open()
         session.session.collect { view -> videos.show(view.devices.map { it.id }.toSet()) }
     }
-    KstateApp(session)
+    DisposableEffect(Unit) {
+        onDispose {
+            videos.close()
+            connection.close()
+        }
+    }
+    Column(Modifier.fillMaxSize()) {
+        if (!canDecode) NoVideoBanner()
+        Box(Modifier.weight(1f)) { KstateApp(session) }
+    }
+}
+
+/** Says why there are no pictures, so a guest on a plain-http link isn't left looking at placeholders. */
+@Composable
+private fun NoVideoBanner() {
+    KstateTheme {
+        Surface(Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.errorContainer) {
+            Text(
+                "This page can't play the device's screen: browsers only decode video over https or on " +
+                    "localhost. State, the timeline and comments still work. Ask the owner for the https link.",
+                Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                color = MaterialTheme.colorScheme.onErrorContainer,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
 }
 
 private fun WebVideoScreen.InputEvent.toWire(): ViewerInput =

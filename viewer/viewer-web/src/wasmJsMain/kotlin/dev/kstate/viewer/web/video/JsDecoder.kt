@@ -41,16 +41,28 @@ internal fun configureDecoder(
     codec: String,
 ): Unit = js("decoder.configure({ codec: codec, optimizeForLatency: true })")
 
+/** Null when the chunk was queued; otherwise why not (a closed decoder throws here). */
 @Suppress("UNUSED_PARAMETER")
 internal fun decodeChunk(
     decoder: JsDecoder,
     data: Int8Array,
     timestamp: Double,
     keyFrame: Boolean,
-): Unit =
-    js("decoder.decode(new EncodedVideoChunk({ type: keyFrame ? 'key' : 'delta', timestamp: timestamp, data: data }))")
+): String? =
+    js(
+        """{
+        try {
+            const type = keyFrame ? 'key' : 'delta';
+            decoder.decode(new EncodedVideoChunk({ type: type, timestamp: timestamp, data: data }));
+            return null;
+        } catch (e) {
+            return String(e);
+        }
+    }""",
+    )
 
 @Suppress("UNUSED_PARAMETER")
 internal fun closeDecoder(decoder: JsDecoder): Unit = js("{ if (decoder.state !== 'closed') decoder.close(); }")
 
+/** False outside a secure context, as on plain http to a LAN address: WebCodecs needs https or localhost. */
 internal fun webCodecsAvailable(): Boolean = js("typeof VideoDecoder !== 'undefined'")

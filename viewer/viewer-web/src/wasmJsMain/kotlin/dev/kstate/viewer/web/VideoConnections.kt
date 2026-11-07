@@ -20,8 +20,12 @@ import org.w3c.dom.CloseEvent
 import org.w3c.dom.MessageEvent
 import org.w3c.dom.WebSocket
 
-/** One `/video/{deviceId}` socket and WebCodecs screen per device the session shows. */
+/**
+ * One `/video/{deviceId}` socket and WebCodecs screen per device the session shows. Without
+ * WebCodecs ([canDecode] false) no socket is opened: the pictures could not be shown.
+ */
 internal class VideoConnections(
+    private val canDecode: Boolean,
     private val input: (deviceId: String, WebVideoScreen.InputEvent) -> Unit,
 ) {
     private class Feed(
@@ -35,7 +39,8 @@ internal class VideoConnections(
 
     val screens: StateFlow<Map<String, DeviceScreen>> = current.asStateFlow()
 
-    fun show(deviceIds: Set<String>) {
+    fun show(wanted: Set<String>) {
+        val deviceIds = if (canDecode) wanted else emptySet()
         (feeds.keys - deviceIds).forEach { id ->
             feeds.remove(id)?.let { feed ->
                 feed.wanted = false
@@ -51,6 +56,8 @@ internal class VideoConnections(
         current.value = feeds.mapValues { it.value.screen }
     }
 
+    fun close() = show(emptySet())
+
     private fun connect(
         deviceId: String,
         feed: Feed,
@@ -63,7 +70,8 @@ internal class VideoConnections(
         socket.onclose = { event ->
             val code = (event as CloseEvent).code.toInt()
             if (feed.wanted && code != CLOSE_NOT_ALLOWED && code != CLOSE_NO_DEVICE) {
-                window.setTimeout({ connect(deviceId, feed).let { null } }, RETRY_MILLIS)
+                // The device may have gone from the session while waiting: then stay closed.
+                window.setTimeout({ if (feed.wanted) connect(deviceId, feed).let { null } else null }, RETRY_MILLIS)
             }
         }
     }

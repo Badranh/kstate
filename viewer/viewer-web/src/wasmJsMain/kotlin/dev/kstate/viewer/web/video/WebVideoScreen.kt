@@ -1,6 +1,8 @@
 package dev.kstate.viewer.web.video
 
 import dev.kstate.session.wire.AvcCodec
+import dev.kstate.session.wire.DecoderFeed
+import dev.kstate.session.wire.PacketDecoder
 import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.TouchPhase
 import dev.kstate.viewer.client.VideoFrame
@@ -41,49 +43,45 @@ class WebVideoScreen(
     }
 
     private val live = MutableStateFlow<VideoFrame?>(null)
-    private var decoder: JsDecoder? = null
-    private var config = ByteArray(0)
+    private val feed = DecoderFeed(::BrowserDecoder)
 
     /** The last decoder error, if any. */
-    var lastError: String? = null
-        private set
-    private var waitingForKeyFrame = true
+    val lastError: String? get() = feed.lastError
 
     override val frames: StateFlow<VideoFrame?> = live.asStateFlow()
 
-    fun configure(config: ByteArray) {
-        this.config = config
-        decoder?.let(::closeDecoder)
-        decoder =
-            createDecoder(
-                onFrame = { width, height, rgba, timestamp ->
-                    live.value = VideoFrame(width, height, rgba.toByteArray(), timestamp.toLong())
-                },
-                onError = {
-                    lastError = it
-                    waitingForKeyFrame = true
-                },
-            ).also { configureDecoder(it, AvcCodec.fromConfig(config)) }
-        waitingForKeyFrame = true
-    }
+    fun configure(config: ByteArray) = feed.configure(config)
 
-    /** After (re)configuring or a decode error, pictures wait for the next key frame. */
     fun packet(
         hostTs: Long,
         keyFrame: Boolean,
         data: ByteArray,
-    ) {
-        val current = decoder ?: return
-        if (!keyFrame && waitingForKeyFrame) return
-        waitingForKeyFrame = false
-        // Annex B without a `description`: each key frame carries the SPS/PPS in band.
-        val chunk = if (keyFrame) config + data else data
-        decodeChunk(current, chunk.toInt8Array(), hostTs.toDouble(), keyFrame)
-    }
+    ) = feed.packet(hostTs, keyFrame, data)
 
-    fun close() {
-        decoder?.let(::closeDecoder)
-        decoder = null
+    fun close() = feed.close()
+
+    /** WebCodecs behind [PacketDecoder]: pictures come back as RGBA into [live]. */
+    private inner class BrowserDecoder(
+        config: ByteArray,
+        private val onError: (String) -> Unit,
+    ) : PacketDecoder {
+        private val decoder =
+            createDecoder(
+                onFrame = { width, height, rgba, timestamp ->
+                    live.value = VideoFrame(width, height, rgba.toByteArray(), timestamp.toLong())
+                },
+                onError = onError,
+            ).also { configureDecoder(it, AvcCodec.fromConfig(config)) }
+
+        override fun decode(
+            data: ByteArray,
+            hostTs: Long,
+            keyFrame: Boolean,
+        ) {
+            decodeChunk(decoder, data.toInt8Array(), hostTs.toDouble(), keyFrame)?.let(onError)
+        }
+
+        override fun close() = closeDecoder(decoder)
     }
 
     override fun frameAt(hostTs: Long): VideoFrame? = live.value

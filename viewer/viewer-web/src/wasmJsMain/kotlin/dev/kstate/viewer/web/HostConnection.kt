@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalWasmJsInterop::class)
+
 package dev.kstate.viewer.web
 
 import dev.kstate.session.remote.RemoteSession
@@ -19,26 +21,38 @@ internal class HostConnection(
 ) : ViewerLink {
     private var socket: WebSocket? = null
     private var delayMillis = FIRST_RETRY_MILLIS
+    private var closed = false
     lateinit var session: RemoteSession
 
     fun open() {
+        if (closed) return
         val opened = WebSocket(socketUrl("/ws/view"))
         socket = opened
         opened.onmessage = { event: MessageEvent ->
             delayMillis = FIRST_RETRY_MILLIS
-            event.data?.toString()?.let(::receive)
+            if (!closed) event.data?.toString()?.let(::receive)
         }
         opened.onclose = { event ->
             socket = null
-            val code = (event as CloseEvent).code.toInt()
-            if (code == CLOSE_NOT_ALLOWED) {
-                session.connectionLost(ACCESS_ENDED)
-                onAccessEnded()
-            } else {
-                session.connectionLost("Connection lost. Reconnecting…")
-                window.setTimeout({ open().let { null } }, delayMillis)
-                delayMillis = (delayMillis * 2).coerceAtMost(MAX_RETRY_MILLIS)
-            }
+            if (!closed) lost((event as CloseEvent).code.toInt())
+        }
+    }
+
+    /** For good: no reconnecting, and nothing more reaches [session]. */
+    fun close() {
+        closed = true
+        socket?.close()
+        socket = null
+    }
+
+    private fun lost(code: Int) {
+        if (code == CLOSE_NOT_ALLOWED) {
+            session.connectionLost(ACCESS_ENDED)
+            onAccessEnded()
+        } else {
+            session.connectionLost("Connection lost. Reconnecting…")
+            window.setTimeout({ open().let { null } }, delayMillis)
+            delayMillis = (delayMillis * 2).coerceAtMost(MAX_RETRY_MILLIS)
         }
     }
 
