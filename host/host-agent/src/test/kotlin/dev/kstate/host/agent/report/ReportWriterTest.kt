@@ -122,6 +122,23 @@ class ReportWriterTest {
     }
 
     @Test
+    fun aFindingShowsAThumbnailThatOpensTheFullPictureAndFoldsItsState() {
+        val card = html.substringAfter("<article class=finding>").substringBefore("</article>")
+
+        assertTrue("<a class=thumb href='img/${dark.id}.png'" in card, card)
+        assertTrue("<details><summary>Reproduce</summary>" in card, card)
+    }
+
+    @Test
+    fun aTitleWithPunctuationStillMakesATidyFolderName() {
+        val other =
+            ReportWriter(root, clock = { Instant.parse("2026-11-07T10:15:31Z") })
+                .write("Counter screen — end-to-end pass", emptyList(), emptyList(), map, captures)
+
+        assertTrue(other.fileName.toString().endsWith(" Counter screen end-to-end pass"), other.fileName.toString())
+    }
+
+    @Test
     fun everyVariantIsListedWithItsFlags() {
         assertTrue("/step → wallet" in html)
         assertTrue(Flag.BLANK.meaning in html)

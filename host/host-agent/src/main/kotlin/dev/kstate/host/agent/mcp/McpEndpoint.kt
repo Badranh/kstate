@@ -19,6 +19,9 @@ import java.security.MessageDigest
  * Kstate's MCP endpoint: the SDK's Streamable HTTP transport at `/mcp` (JSON replies, sessions, and
  * its DNS-rebinding protection, which keeps Host and Origin to this machine), behind a bearer token
  * so other local programs can't drive the app either. [server] makes the server for a new session.
+ *
+ * The token is checked in the call pipeline rather than with Ktor's `authenticate { }`: the SDK sets
+ * up Streamable HTTP for the whole application, so there is no route of ours to wrap.
  */
 fun Application.kstateMcp(
     token: String,

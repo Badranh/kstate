@@ -28,6 +28,8 @@ internal class TestTools(
     private fun explore() =
         tool(
             "explore",
+            "Explore a screen by state",
+            Effect.SHOWS,
             "Test one source's screen by state: Kstate makes variants from its schema (other sealed " +
                 "variants and enum values, null/present, empty and crowded lists, long/RTL/emoji text, " +
                 "0/negative/huge numbers), shows each as an overlay, captures it settled, flags what it can " +
@@ -40,16 +42,22 @@ internal class TestTools(
                 required = listOf("source"),
             ),
         ) {
-            val run = agent.explore(it.string("source"), it.optionalInt("limit") ?: DEFAULT_LIMIT)
+            val run =
+                agent.explore(
+                    it.string("source"),
+                    it.optionalInt("limit") ?: DEFAULT_LIMIT,
+                ) { done, total, label -> it.progress.report(done, total, label) }
             val tiles =
                 listOf("base" to run.baseline.png) +
                     run.results.mapNotNull { r -> r.capture?.let { c -> r.variant.id to c.png } }
-            reply(listOf(TextContent(summary(run).toString())) + sheets(tiles))
+            summary(run).let { s -> reply(listOf(TextContent(s.toString())) + sheets(tiles), structured = s) }
         }
 
     private fun variant() =
         tool(
             "variant",
+            "Look at a variant",
+            Effect.LOOKS,
             "One explored variant up close: its full screenshot, the exact state shown, and its flags.",
             input(
                 "run" to typed("string"),
@@ -76,6 +84,8 @@ internal class TestTools(
     private fun report() =
         tool(
             "report",
+            "Write the report",
+            Effect.WRITES,
             "Write the HTML report: your findings first (each pointing at a run+variant or a capture, " +
                 "so it reproduces), then every variant explored and the screens mapped. Returns the folder.",
             input("title" to typed("string"), "findings" to FINDINGS, required = listOf("title", "findings")),

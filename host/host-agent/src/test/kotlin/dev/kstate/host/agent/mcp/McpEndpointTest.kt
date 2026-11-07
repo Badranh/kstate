@@ -18,6 +18,7 @@ import io.modelcontextprotocol.kotlin.sdk.server.ServerOptions
 import io.modelcontextprotocol.kotlin.sdk.types.Implementation
 import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import io.modelcontextprotocol.kotlin.sdk.types.ToolAnnotations
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
@@ -31,9 +32,11 @@ class McpEndpointTest {
     private val echo =
         ToolSpec(
             "echo",
+            "Echo",
             "Says it back",
             JsonObject(mapOf("text" to JsonObject(mapOf("type" to JsonPrimitive("string"))))),
             listOf("text"),
+            ToolAnnotations(readOnlyHint = true),
         ) {
             ToolResults.text(it.string("text"))
         }
@@ -73,12 +76,14 @@ class McpEndpointTest {
             val client = Client(Implementation("test-client", "1"))
 
             client.connect(transport)
-            val tools = client.listTools().tools.map { it.name }
+            val tools = client.listTools().tools
             val reply = client.callTool("echo", mapOf("text" to "hello"))
             val failure = client.callTool("echo", emptyMap())
             client.close()
 
-            assertEquals(listOf("echo"), tools)
+            assertEquals(listOf("echo"), tools.map { it.name })
+            assertEquals("Echo", tools.single().title)
+            assertEquals(true, tools.single().annotations?.readOnlyHint)
             assertEquals("hello", (reply.content.single() as TextContent).text)
             assertEquals(true, failure.isError)
             assertTrue("\"text\" is required" in (failure.content.single() as TextContent).text)

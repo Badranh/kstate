@@ -1,5 +1,7 @@
 package dev.kstate.host.agent.variants
 
+import dev.kstate.protocol.JsonPointer
+import dev.kstate.protocol.JsonPointer.child
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -123,9 +125,9 @@ object SchemaVariants {
             schema.array("fields").forEach { field ->
                 val name = field.jsonObject.string("name") ?: return@forEach
                 if (field.jsonObject.flag("sensitive")) return@forEach
-                val child = obj[name] ?: return@forEach
+                val childValue = obj[name] ?: return@forEach
                 val childSchema = field.jsonObject["schema"] as? JsonObject ?: return@forEach
-                walk(childSchema, child, "$path/${JsonPointer.escape(name)}", depth + 1)
+                walk(childSchema, childValue, path.child(name), depth + 1)
             }
         }
 
@@ -192,7 +194,7 @@ object SchemaVariants {
             }
             add(path, "empty", VariantKind.COLLECTION, JsonArray(emptyList()))
             add(path, "many", VariantKind.COLLECTION, JsonArray(List(MANY) { items.first() }))
-            element?.let { walk(it, items.first(), "$path/0", depth + 1) }
+            element?.let { walk(it, items.first(), path.child(0), depth + 1) }
         }
 
         private fun add(

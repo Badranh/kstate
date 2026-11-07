@@ -9,7 +9,7 @@ import dev.kstate.viewer.client.ApplyMode
 import dev.kstate.viewer.client.CommandOutcome
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
-import kotlinx.serialization.json.add
+import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
@@ -23,6 +23,8 @@ internal class ActTools(
     private fun setState() =
         tool(
             "set_state",
+            "Set a state",
+            Effect.DRIVES,
             "Show a state in the app and return the settled screen. mode \"overlay\" (default) only displays it; " +
                 "\"write_through\" makes it the app's real state. Leave redacted values as they are.",
             input(
@@ -40,6 +42,8 @@ internal class ActTools(
     private fun release() =
         tool(
             "release",
+            "Release an overlay",
+            Effect.SHOWS,
             "Stop showing an overlay: the app shows its own state again.",
             input("source" to Params.SOURCE, "width" to Params.WIDTH, required = listOf("source")),
         ) { action(agent.release(it.string("source")), it) }
@@ -47,6 +51,8 @@ internal class ActTools(
     private fun tap() =
         tool(
             "tap",
+            "Tap",
+            Effect.DRIVES,
             "Tap at x, y given as fractions (0 to 1) of the screenshot's width and height. " +
                 "Returns the settled screen and what changed.",
             input(
@@ -61,6 +67,8 @@ internal class ActTools(
     private fun swipe() =
         tool(
             "swipe",
+            "Swipe",
+            Effect.DRIVES,
             "Drag from (x1, y1) to (x2, y2), fractions of the screen, to scroll or swipe.",
             input(
                 "x1" to Params.FRACTION,
@@ -84,6 +92,8 @@ internal class ActTools(
     private fun key() =
         tool(
             "key",
+            "Press a key",
+            Effect.DRIVES,
             "Press a key: back, home, enter, tab, delete, escape, or an Android keycode number.",
             input(
                 "key" to typed("string"),
@@ -102,6 +112,8 @@ internal class ActTools(
     private fun typeText() =
         tool(
             "type_text",
+            "Type text",
+            Effect.DRIVES,
             "Type text into the focused field.",
             input(
                 "text" to typed("string"),
@@ -115,18 +127,30 @@ internal class ActTools(
         result: ActionResult,
         args: ToolArguments,
     ): CallToolResult {
+        val shown = result.capture.shown(args)
         val text =
             buildJsonObject {
                 put("outcome", result.outcome.text())
                 put("capture", result.capture.id)
                 put("routeBefore", result.routeBefore.route())
                 put("route", result.capture.route.route())
-                putJsonArray("changedSources") { result.changedSources.forEach { add(it) } }
+                putJsonArray("changed") {
+                    result.changes.forEach { change ->
+                        addJsonObject {
+                            put("source", change.source)
+                            put("path", change.path.ifEmpty { "/" })
+                            change.before?.let { put("before", it) }
+                            change.after?.let { put("after", it) }
+                        }
+                    }
+                }
                 put("settled", result.capture.settled)
+                putImageSize(shown)
             }
         return reply(
-            listOf(TextContent(text.toString()), result.capture.image(args)),
+            listOf(TextContent(text.toString()), shown.image),
             isError = result.outcome !is CommandOutcome.Ok,
+            structured = text,
         )
     }
 

@@ -49,7 +49,8 @@ class ReportWriter(
         val stamp = NAME.format(clock().atZone(zone))
         val safeTitle =
             title
-                .replace(Regex("[^A-Za-z0-9 ._-]"), "")
+                .replace(Regex("[^\\p{L}\\p{N} ._-]"), " ")
+                .replace(Regex("\\s+"), " ")
                 .trim()
                 .take(MAX_TITLE)
                 .ifEmpty { "Report" }
@@ -134,7 +135,9 @@ class ReportWriter(
             if (findings.isEmpty()) body.append("<p class=muted>The agent reported nothing wrong.</p>")
             findings.forEachIndexed { i, finding ->
                 body.append("<article class=finding>")
-                images.src(finding.captureId)?.let { body.append("<img src='${it.esc()}' alt=''>") }
+                images.src(finding.captureId)?.let {
+                    body.append("<a class=thumb href='${it.esc()}' target=_blank><img src='${it.esc()}' alt=''></a>")
+                }
                 body.append(
                     finding.severity.name
                         .lowercase()
@@ -142,15 +145,18 @@ class ReportWriter(
                 )
                 body.append("<h3>${finding.title.esc()}</h3><p>${finding.description.esc()}</p>")
                 if (finding.state != null) {
+                    body.append("<details><summary>Reproduce</summary>")
                     body.append(
-                        "<p class=muted>Reproduce: show this state in " +
+                        "<p class=muted>Show this state in " +
                             "<code>${finding.sourceKey.orEmpty().esc()}</code> ",
                     )
                     body.append(
                         "(Kstate's Edit tab or the agent's <code>set_state</code>); " +
                             "saved as <code>states/finding-${i + 1}.json</code>.</p>",
                     )
-                    body.append("<pre>${PRETTY.encodeToString(JsonElement.serializer(), finding.state).esc()}</pre>")
+                    body.append(
+                        "<pre>${PRETTY.encodeToString(JsonElement.serializer(), finding.state).esc()}</pre></details>",
+                    )
                 }
                 body.append("</div></article>")
             }

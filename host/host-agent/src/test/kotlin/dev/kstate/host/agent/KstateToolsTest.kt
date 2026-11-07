@@ -104,6 +104,50 @@ class KstateToolsTest {
         }
 
     @Test
+    fun everyToolHasATitleAndSaysWhetherItOnlyLooks() =
+        runTest {
+            val (_, server) = server()
+            val readOnly = server.all().filter { it.annotations.readOnlyHint == true }.map { it.name }
+
+            assertTrue(server.all().all { !it.title.isNullOrBlank() })
+            assertEquals(listOf("overview", "get_state", "screenshot", "map", "variant"), readOnly)
+            assertEquals(
+                true,
+                server
+                    .all()
+                    .first { it.name == "set_state" }
+                    .annotations.destructiveHint,
+            )
+        }
+
+    @Test
+    fun jsonResultsAreAlsoStructured() =
+        runTest {
+            val (_, server) = server()
+
+            val result = server.call("overview")
+
+            assertEquals<JsonElement?>(json(result.texts().single()), result.structuredContent)
+        }
+
+    @Test
+    fun exploringReportsProgressVariantByVariant() =
+        runTest {
+            val (_, server) = server()
+            val steps = mutableListOf<Pair<Int, Int>>()
+
+            server.all().first { it.name == "explore" }.run(
+                json("""{"source":"${FakeApp.KEY}"}""").jsonObject,
+            ) { done, total, _ ->
+                steps +=
+                    done to total
+            }
+
+            val total = steps.first().second
+            assertEquals((1..total).map { it to total }, steps)
+        }
+
+    @Test
     fun theOverviewNamesTheSourceAndSaysItCanBeExplored() =
         runTest {
             val (_, server) = server()
@@ -123,7 +167,12 @@ class KstateToolsTest {
             val result = server.call("tap", """{"x":0.5,"y":0.8}""")
 
             assertEquals(1, result.images())
-            assertTrue("\"changedSources\":[\"${FakeApp.KEY}\"]" in result.texts().single())
+            val text = result.texts().single()
+            assertTrue(
+                "\"changed\":[{\"source\":\"${FakeApp.KEY}\",\"path\":\"/count\",\"before\":0,\"after\":1}]" in text,
+                text,
+            )
+            assertTrue("\"image\":{\"width\":90,\"height\":160" in text, text)
         }
 
     @Test

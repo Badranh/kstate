@@ -20,6 +20,8 @@ internal class LookTools(
     private fun overview() =
         tool(
             "overview",
+            "Session overview",
+            Effect.LOOKS,
             "Devices, their route (back stack), every state source with its capabilities, recent app events, " +
                 "and how much is mapped. Start here.",
             input(),
@@ -73,6 +75,8 @@ internal class LookTools(
     private fun getState() =
         tool(
             "get_state",
+            "Read a state",
+            Effect.LOOKS,
             "One source's current state, its schema, which paths are redacted, and what it allows.",
             input("source" to Params.SOURCE, required = listOf("source")),
         ) {
@@ -98,6 +102,8 @@ internal class LookTools(
     private fun screenshot() =
         tool(
             "screenshot",
+            "Screenshot",
+            Effect.LOOKS,
             "The device's screen once it has settled.",
             input(
                 "device" to Params.DEVICE,
@@ -105,20 +111,23 @@ internal class LookTools(
             ),
         ) {
             val capture = agent.driver.screenshot(it.optionalString("device"))
+            val shown = capture.shown(it)
             val text =
                 buildJsonObject {
                     put("capture", capture.id)
                     put("device", capture.deviceId)
                     put("route", capture.route.route())
                     put("settled", capture.settled)
-                    put("pixels", "${capture.width}x${capture.height}")
+                    putImageSize(shown)
                 }
-            reply(listOf(TextContent(text.toString()), capture.image(it)))
+            reply(listOf(TextContent(text.toString()), shown.image), structured = text)
         }
 
     private fun map() =
         tool(
             "map",
+            "Screen map",
+            Effect.LOOKS,
             "The screens seen so far while the app was used (route + states -> screen) and the steps between them, " +
                 "with a contact sheet of the screens.",
             input(),

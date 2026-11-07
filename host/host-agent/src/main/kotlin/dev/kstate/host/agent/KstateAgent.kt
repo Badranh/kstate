@@ -51,7 +51,9 @@ class KstateAgent(
     suspend fun explore(
         sourceKey: String,
         limit: Int,
-    ): ExploreRun = map.paused { explorer.explore(sourceKey, limit) }.also { synchronized(runs) { runs += it } }
+        onVariant: suspend (done: Int, total: Int, label: String) -> Unit = { _, _, _ -> },
+    ): ExploreRun =
+        map.paused { explorer.explore(sourceKey, limit, onVariant) }.also { synchronized(runs) { runs += it } }
 
     fun report(
         title: String,

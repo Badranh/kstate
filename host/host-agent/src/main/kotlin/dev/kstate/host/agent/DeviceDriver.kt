@@ -3,22 +3,35 @@ package dev.kstate.host.agent
 import dev.kstate.host.agent.capture.Capture
 import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.map.ScreenMap
+import dev.kstate.host.agent.settle.DeviceMark
 import dev.kstate.host.agent.settle.Settle
 import dev.kstate.host.agent.settle.SettleTiming
+import dev.kstate.session.diff.DiffEngine
 import dev.kstate.viewer.client.CommandOutcome
 import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.TouchPhase
 import kotlinx.coroutines.delay
+import kotlinx.serialization.json.JsonElement
 import kotlin.time.TimeSource
 
-/** What an action did: the screen after it, and what moved on the way. */
+/** One value that changed in a source's state, as a JSON Pointer with its old and new value. */
+data class StateChange(
+    val source: String,
+    val path: String,
+    val before: JsonElement?,
+    val after: JsonElement?,
+)
+
+/** What an action did: the screen after it, and every value that moved on the way. */
 data class ActionResult(
     val capture: Capture,
     val routeBefore: List<String>,
-    val changedSources: List<String>,
+    val changes: List<StateChange>,
     val outcome: CommandOutcome = CommandOutcome.Ok,
-)
+) {
+    val changedSources: List<String> get() = changes.map { it.source }.distinct()
+}
 
 /**
  * Looks at a device and works it like a finger would. Every action is noted on the [map] as the
@@ -89,20 +102,31 @@ class DeviceDriver(
         action: suspend (DeviceScreen) -> Unit,
     ): ActionResult {
         val (id, screen) = screen(deviceId)
-        val before =
-            source.session.value.devices
-                .firstOrNull { it.id == id }
+        val view = source.session.value
+        val before = view.devices.firstOrNull { it.id == id }
+        val mark = DeviceMark.of(view, id)
         map.note(note)
         action(screen)
-        val capture = capture(id, screen)
+        val settled = Settle.afterChange(screen.frames, source.session, id, mark, timing, time)
+        val capture = captures.take(source.session.value, id, settled) ?: throw AgentFailure("No picture from $id yet")
         val beforeStates = before?.sources.orEmpty().associate { it.key to it.state }
-        val changed =
-            capture.states
-                .filter { (key, state) -> beforeStates[key] != state }
-                .keys
-                .toList()
-        return ActionResult(capture, before?.route.orEmpty(), changed)
+        return ActionResult(capture, before?.route.orEmpty(), changes(beforeStates, capture.states))
     }
+
+    private fun changes(
+        before: Map<String, JsonElement?>,
+        after: Map<String, JsonElement?>,
+    ): List<StateChange> =
+        after.flatMap { (key, state) ->
+            val old = before[key]
+            if (state == old || state == null) {
+                emptyList()
+            } else {
+                diffs.diff(old, state).ops.map { StateChange(key, it.path, it.old, it.new) }
+            }
+        }
+
+    private val diffs = DiffEngine(maxOps = MAX_CHANGES)
 
     private suspend fun capture(
         deviceId: String,
@@ -128,6 +152,7 @@ class DeviceDriver(
         const val TAP_MILLIS = 60L
         const val SWIPE_STEPS = 12
         const val NOTE_TEXT = 30
+        const val MAX_CHANGES = 40
     }
 }
 

@@ -23,7 +23,8 @@ import kotlinx.serialization.json.JsonElement
 /**
  * One device with one source, whose screen is drawn from its state by [render], like a real UI.
  * A picture is only sent when the drawing changes, after [frameDelayMillis], as scrcpy does.
- * [onTap] is the app reacting to a tap; [crashesOn] says which states kill it.
+ * [onTap] is the app reacting to a tap; [crashesOn] says which states kill it. The new state reaches
+ * the host [stateDelayMillis] after the picture, as when the SDK throttles snapshots.
  */
 class FakeApp(
     private val scope: CoroutineScope,
@@ -34,6 +35,7 @@ class FakeApp(
     private val refuses: (JsonElement) -> Boolean = { false },
     route: List<String> = listOf("Checkout"),
     private val frameDelayMillis: Long = 30,
+    private val stateDelayMillis: Long = 0,
 ) : SessionSource {
     var onTap: (x: Float, y: Float) -> Unit = { _, _ -> }
     private var appState: JsonElement = initial
@@ -118,8 +120,15 @@ class FakeApp(
     private fun shown(): JsonElement = overlay ?: appState
 
     private fun publish() {
-        session.value = view()
         screen.redraw()
+        if (stateDelayMillis == 0L) {
+            session.value = view()
+        } else {
+            scope.launch {
+                delay(frameDelayMillis + stateDelayMillis)
+                session.value = view()
+            }
+        }
     }
 
     private fun view() =

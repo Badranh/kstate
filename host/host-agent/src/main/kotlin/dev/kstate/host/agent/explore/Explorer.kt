@@ -5,6 +5,7 @@ import dev.kstate.host.agent.capture.Capture
 import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.image.Fingerprints
 import dev.kstate.host.agent.image.Pngs
+import dev.kstate.host.agent.settle.DeviceMark
 import dev.kstate.host.agent.settle.Settle
 import dev.kstate.host.agent.settle.SettleTiming
 import dev.kstate.host.agent.variants.SchemaVariants
@@ -69,6 +70,7 @@ class Explorer(
     suspend fun explore(
         sourceKey: String,
         limit: Int,
+        onVariant: suspend (done: Int, total: Int, label: String) -> Unit = { _, _, _ -> },
     ): ExploreRun {
         val (device, view) = find(sourceKey)
         val screen = source.screens.value[device.id]
@@ -82,6 +84,7 @@ class Explorer(
         for (variant in variants) {
             val result = tryVariant(sourceKey, variant, device.id, screen, baseline, results)
             results += result
+            onVariant(results.size, variants.size, variant.label)
             if (Flag.CRASHED in result.flags || result.outcome == CommandOutcome.NotConnected) {
                 stopped = "The app disconnected after ${variant.label}; the rest were not tried."
                 break
@@ -99,13 +102,15 @@ class Explorer(
         baseline: Capture,
         earlier: List<VariantResult>,
     ): VariantResult {
+        val mark = DeviceMark.of(source.session.value, deviceId)
         val outcome = source.setState(sourceKey, variant.state, ApplyMode.OVERLAY)
         if (outcome !=
             CommandOutcome.Ok
         ) {
             return VariantResult(variant, outcome, capture = null, flags = setOf(Flag.REJECTED))
         }
-        val capture = capture(deviceId, screen)
+        val settled = Settle.afterChange(screen.frames, source.session, deviceId, mark, timing, time)
+        val capture = captures.take(source.session.value, deviceId, settled)
         val alive = live(sourceKey)
         val flags = mutableSetOf<Flag>()
         var duplicateOf: String? = null
