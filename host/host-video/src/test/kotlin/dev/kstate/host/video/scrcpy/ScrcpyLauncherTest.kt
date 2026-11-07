@@ -2,7 +2,12 @@ package dev.kstate.host.video.scrcpy
 
 import dev.kstate.host.adb.AdbDeviceTools
 import dev.kstate.host.adb.AdbException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import java.io.File
 import java.net.InetAddress
 import java.net.ServerSocket
@@ -175,6 +180,19 @@ class ScrcpyLauncherTest {
             launcher.start("emulator-5554", VideoProfile()).close()
 
             assertTrue(stopped)
+            assertEquals("unforward", adb.log.last())
+        }
+
+    @Test
+    fun aLaunchCancelledWhileConnectingStillStopsTheServerAndRemovesTheForward() =
+        runBlocking {
+            // The device never answers, as when it is unplugged or the app quits mid-launch.
+            val launching = launch(Dispatchers.IO) { launcher.start("emulator-5554", VideoProfile()) }
+            withTimeout(3.seconds) { while (spawned.isEmpty()) delay(10) }
+
+            launching.cancelAndJoin()
+
+            assertTrue(stopped, "the scrcpy server was left running")
             assertEquals("unforward", adb.log.last())
         }
 }

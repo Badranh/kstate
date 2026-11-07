@@ -3,6 +3,7 @@ package dev.kstate.host.video.scrcpy
 import dev.kstate.host.adb.AdbDeviceTools
 import dev.kstate.host.adb.AdbException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -74,19 +75,26 @@ class ScrcpyLauncher(
         ensureServer(serial)
         val sessionId = "%08x".format(scid())
         val port = freePort()
-        adb.forward(serial, port, "localabstract:scrcpy_$sessionId")
-        val process = spawner.spawn(adb.shellCommand(serial, serverCommand(sessionId, profile)))
+        var process: RunningProcess? = null
+        var video: Socket? = null
+        var connection: ScrcpyConnection? = null
         val cleanup = {
-            process.stop()
+            process?.stop()
             runBlocking(Dispatchers.IO) { runCatching { adb.removeForward(serial, port) } }
             Unit
         }
-        return try {
-            val video = connectVideo(port, process)
-            ScrcpyConnection(video, connect(port), cleanup)
-        } catch (failure: IOException) {
-            cleanup()
-            throw failure
+        try {
+            adb.forward(serial, port, "localabstract:scrcpy_$sessionId")
+            process = spawner.spawn(adb.shellCommand(serial, serverCommand(sessionId, profile)))
+            video = connectVideo(port, process)
+            connection = ScrcpyConnection(video, connect(port), cleanup)
+            return connection
+        } finally {
+            // Failed, timed out or cancelled (unplugged, the app quitting): leave nothing behind on the device.
+            if (connection == null) {
+                runCatching { video?.close() }
+                withContext(NonCancellable) { cleanup() }
+            }
         }
     }
 
@@ -135,7 +143,10 @@ class ScrcpyLauncher(
     private suspend fun readyVideoSocket(port: Int): Socket? =
         withContext(Dispatchers.IO) {
             val socket = runCatching { connect(port) }.getOrNull() ?: return@withContext null
+            // A blocking read ignores cancellation, so it gets a deadline of its own.
+            socket.soTimeout = READY_READ_MILLIS
             val first = runCatching { socket.getInputStream().read() }.getOrDefault(-1)
+            socket.soTimeout = 0
             if (first == DUMMY_BYTE) {
                 socket
             } else {
@@ -149,6 +160,7 @@ class ScrcpyLauncher(
     private companion object {
         const val REMOTE_PATH = "/data/local/tmp/kstate-scrcpy.jar"
         const val DUMMY_BYTE = 0
+        const val READY_READ_MILLIS = 500
 
         fun loopbackFreePort(): Int = ServerSocket(0, 1, InetAddress.getLoopbackAddress()).use { it.localPort }
     }
