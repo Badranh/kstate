@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,12 +22,16 @@ import dev.kstate.viewer.ui.theme.Kstate
 import dev.kstate.viewer.ui.timeline.Playback
 import dev.kstate.viewer.ui.timeline.Playhead
 
-/** The wordmark, whether we follow the app live or look back, the keys, and the play/pause button. */
+/**
+ * The wordmark, whether we follow the app live or look back, the keys, the host's own [actions]
+ * (record, share) and the play/pause button.
+ */
 @Composable
 fun TopBar(
     playback: Playback,
     narrow: Boolean,
     modifier: Modifier = Modifier,
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     Row(
         modifier.fillMaxWidth().height(BAR_HEIGHT).padding(horizontal = 16.dp),
@@ -50,6 +55,7 @@ fun TopBar(
                 color = MaterialTheme.colorScheme.outline,
             )
         }
+        actions()
         FilledTonalButton(onClick = playback::toggle) { Text(playback.toggleLabel()) }
     }
 }

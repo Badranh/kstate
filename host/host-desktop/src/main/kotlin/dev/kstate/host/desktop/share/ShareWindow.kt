@@ -60,6 +60,8 @@ fun ShareWindow(
                     Modifier.verticalScroll(rememberScrollState()).padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    HowTo()
+                    HorizontalDivider()
                     TunnelChooser(sharing)
                     HorizontalDivider()
                     Invites(sharing, collab)
@@ -69,6 +71,18 @@ fun ShareWindow(
             }
         }
     }
+}
+
+/** The three steps, so a first share needs no docs. */
+@Composable
+private fun HowTo() {
+    Text("Share this session", style = MaterialTheme.typography.titleMedium)
+    listOf(
+        "1. Pick how guests reach you, then Start sharing.",
+        "2. Make an invite link and send it. Guests open it in a browser and see the screen and state.",
+        "3. Guests watch at first. When one asks to drive, Allow appears above the panes in the main " +
+            "window; you can take control back any time.",
+    ).forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
 }
 
 @Composable

@@ -40,6 +40,7 @@ class DesktopSessions(
     private val clock: HostClock = HostClock.System,
     private val wallClock: () -> Long = System::currentTimeMillis,
     private val zone: ZoneId = ZoneId.systemDefault(),
+    private val saveFolders: SaveFolders = PreferencesSaveFolders(),
 ) {
     private val shownSource = MutableStateFlow(live)
     private val shownDir = MutableStateFlow<Path?>(null)
@@ -97,10 +98,37 @@ class DesktopSessions(
     }
 
     /** Saves the recording shown, or else the last one made, as one `.kstate` file. */
-    fun export(target: Path) {
-        val dir = shownDir.value ?: lastRecording ?: error("Nothing recorded yet")
-        archive.export(dir, target)
+    fun export(target: Path): Path = save(shownDir.value ?: lastRecording ?: error("Nothing recorded yet"), target)
+
+    /**
+     * Saves [recording] as one `.kstate` file at [target] (the extension is added when missing) and
+     * remembers its folder for the next Save dialog. Returns the file written.
+     */
+    fun save(
+        recording: Path,
+        target: Path,
+    ): Path {
+        val file =
+            if (target.fileName.toString().endsWith(
+                    EXTENSION,
+                )
+            ) {
+                target
+            } else {
+                target.resolveSibling("${target.fileName}$EXTENSION")
+            }
+        archive.export(recording, file)
+        saveFolders.last = file.parent
+        return file
     }
+
+    /** Where Save dialogs start: the folder last saved to while it still exists, else the library. */
+    val saveFolder: Path get() = saveFolders.last?.takeIf { it.isDirectory() } ?: library.recordings
+
+    fun suggestedFileName(recording: Path): String = "${recording.fileName}$EXTENSION"
+
+    /** The folder recordings are made in. */
+    val libraryFolder: Path get() = library.recordings
 
     val canExport: Boolean get() = shownDir.value != null || lastRecording != null
 
@@ -115,6 +143,7 @@ class DesktopSessions(
     }
 
     private companion object {
+        const val EXTENSION = ".kstate"
         val NAME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss")
     }
 }

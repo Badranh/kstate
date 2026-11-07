@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,11 +51,12 @@ import dev.kstate.viewer.ui.timeline.editShortcut
 import dev.kstate.viewer.ui.timeline.playbackShortcuts
 import dev.kstate.viewer.ui.timeline.rememberPlayback
 
-/** Root of the shared viewer UI, used by the desktop host and the web viewer. */
+/** Root of the shared viewer UI, used by the desktop host and the web viewer. [actions] go in the top bar. */
 @Composable
 fun KstateApp(
     source: SessionSource,
     modifier: Modifier = Modifier,
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     val live by source.session.collectAsState()
     val screens by source.screens.collectAsState()
@@ -90,7 +92,7 @@ fun KstateApp(
                             DetailTab.EDIT
                     },
                 ) {
-                    TopBar(playback, narrow)
+                    TopBar(playback, narrow, actions = actions)
                     session.problem?.let { ProblemBanner(it) }
                     collaboration?.let { ParticipantBar(it) }
                     val comments = collaboration?.let { commentsTab(it, playback, timeline.start, selected) }

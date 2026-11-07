@@ -29,6 +29,7 @@ class DesktopSessionsTest {
     private val engine = SessionEngine(clock = { 1 })
     private val live: SessionSource = FakeLiveSource(emptyList())
     private val video = VideoTimeline()
+    private val folders = InMemorySaveFolders()
     private val sessions =
         DesktopSessions(
             live = live,
@@ -39,6 +40,7 @@ class DesktopSessionsTest {
             clock = { 5 },
             wallClock = { 1_762_351_200_000 },
             zone = ZoneOffset.UTC,
+            saveFolders = folders,
         )
 
     init {
@@ -105,5 +107,54 @@ class DesktopSessionsTest {
     @Test
     fun exportingWithNothingRecordedIsRefused() {
         assertFailsWith<IllegalStateException> { sessions.export(root.resolve("x.kstate")) }
+    }
+
+    @Test
+    fun aStoppedRecordingIsSavedWhereTheUserChoseAndOpensFromThere() {
+        sessions.startRecording()
+        val dir = checkNotNull(sessions.stopRecording())
+
+        val file = sessions.save(dir, root.resolve("chosen/Login bug"))
+        sessions.open(file)
+
+        assertEquals(root.resolve("chosen/Login bug.kstate"), file)
+        assertTrue(file.exists())
+        assertEquals(SessionKind.Recording("Session 2025-11-05 14.00.00"), sessions.shown.value.kind)
+    }
+
+    @Test
+    fun saveDialogsStartInTheLibraryUntilTheUserSavesSomewhereElse() {
+        assertEquals(root.resolve("Recordings"), sessions.saveFolder)
+        sessions.startRecording()
+        val dir = checkNotNull(sessions.stopRecording())
+
+        sessions.save(dir, root.resolve("chosen/a.kstate"))
+
+        assertEquals(root.resolve("chosen"), sessions.saveFolder)
+    }
+
+    @Test
+    fun exportingAlsoRemembersTheFolder() {
+        sessions.startRecording()
+        sessions.stopRecording()
+
+        sessions.export(root.resolve("out/b.kstate"))
+
+        assertEquals(root.resolve("out"), sessions.saveFolder)
+    }
+
+    @Test
+    fun aRememberedFolderThatIsGoneFallsBackToTheLibrary() {
+        folders.last = root.resolve("deleted")
+
+        assertEquals(root.resolve("Recordings"), sessions.saveFolder)
+    }
+
+    @Test
+    fun theSuggestedFileIsNamedAfterTheRecording() {
+        assertEquals(
+            "Session 2025-11-05 14.00.00.kstate",
+            sessions.suggestedFileName(root.resolve("Recordings/Session 2025-11-05 14.00.00")),
+        )
     }
 }

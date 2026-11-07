@@ -44,13 +44,15 @@ fun main() {
                 exitApplication()
             },
             title = windowTitle(recording, shownRecording),
-            state = rememberWindowState(width = 1200.dp, height = 800.dp),
+            state = rememberWindowState(width = 1080.dp, height = 720.dp),
         ) {
             DesktopMenu(sessions, onShare = { sharingOpen = true })
             Column {
                 SharingBanner(shared)
                 // A different session starts the viewer afresh: its playhead, selection and tabs.
-                key(shown) { KstateApp(shown) }
+                key(shown) {
+                    KstateApp(shown) { HostActions(sessions, recording, shared, onShare = { sharingOpen = true }) }
+                }
             }
         }
         if (sharingOpen) ShareWindow(sharing, collab, onClose = { sharingOpen = false })
