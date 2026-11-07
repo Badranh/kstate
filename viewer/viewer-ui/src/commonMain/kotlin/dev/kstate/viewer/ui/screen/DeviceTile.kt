@@ -23,7 +23,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
@@ -106,9 +105,8 @@ private fun Screen(
             .deviceTouches(screen, enabled = live, videoRect = videoRect, onTouch = { focus.requestFocus() }),
         contentAlignment = Alignment.Center,
     ) {
-        val image = picture.image
         val frameSize = picture.frameSize
-        if (image == null || frameSize == null) {
+        if (frameSize == null) {
             Text(
                 "Waiting for video…",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -116,7 +114,7 @@ private fun Screen(
             )
         } else {
             LaunchedEffect(frameSize, box) { requestOutputSize(screen, frameSize, box) }
-            VideoCanvas(image)
+            VideoCanvas(picture)
         }
     }
 }
@@ -132,8 +130,9 @@ private fun requestOutputSize(
 }
 
 @Composable
-private fun VideoCanvas(image: ImageBitmap) {
+private fun VideoCanvas(picture: TilePicture) {
     Canvas(Modifier.fillMaxSize()) {
+        val image = picture.image() ?: return@Canvas
         val rect = fit(image.width, image.height, size.width, size.height)
         drawImage(
             image = image,

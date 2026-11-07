@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.referentialEqualityPolicy
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -19,18 +20,33 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-/** What a tile draws, and the size of the frame behind it. */
+/**
+ * What a tile draws. [frame] is state that changes with every picture, so whatever draws it redraws;
+ * [frameSize] only changes with the size, so layout doesn't recompose per picture.
+ */
 internal class TilePicture {
-    var image: ImageBitmap? by mutableStateOf(null)
+    var frame: VideoFrame? by mutableStateOf(null, referentialEqualityPolicy())
         private set
     var frameSize: IntSize? by mutableStateOf(null)
         private set
 
     private val bitmap = FrameBitmap()
+    private var installed: VideoFrame? = null
+    private var image: ImageBitmap? = null
 
     fun show(frame: VideoFrame) {
-        image = bitmap.show(frame)
+        this.frame = frame
         frameSize = IntSize(frame.width, frame.height)
+    }
+
+    /** The newest picture as an image. Read it while drawing, so a new picture only redraws. */
+    fun image(): ImageBitmap? {
+        val newest = frame ?: return null
+        if (newest !== installed) {
+            image = bitmap.show(newest)
+            installed = newest
+        }
+        return image
     }
 }
 
