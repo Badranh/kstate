@@ -41,6 +41,12 @@ class VideoRecordWriter(
         (if (flags and VideoFiles.FLAG_CONFIG != 0) CONFIG_BIT else 0L) or
             (if (flags and VideoFiles.FLAG_KEY_FRAME != 0) KEY_FRAME_BIT else 0L)
 
+    /** The stream first, then the index: an index entry never points at bytes not yet on disk. */
+    fun flush() {
+        stream.flush()
+        index.flush()
+    }
+
     override fun close() {
         stream.use { it.flush() }
         index.use { it.flush() }

@@ -438,3 +438,14 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   `Hello`, but the host has no token of its own to compare it with. Closing this needs a pairing step
   (the host hands the app a token through adb or simctl). That is a feature, recorded here so it is
   not mistaken for done.
+
+## 2026-11-07: A recording survives a crash
+- The manifest is written at the start and whenever a device's video joins, each time to a temp
+  file moved over the old one, so the folder always opens. Files are flushed whenever the writer's
+  queue drains (stream before index, so the index never points past the data): a crash loses at
+  most what was still queued.
+- Opening drops what a crash leaves (a half-written last timeline line, a partial last index entry,
+  index entries past the end of the stream) and ends the recording at its last input or picture.
+  A damaged line anywhere but last is still an error; reads stay bounds-checked.
+- The first failed write stops further writing and makes `stop()` throw, instead of a "finished"
+  recording that silently lacks its second half. Saving on quit is the shutdown work in Tier 3.

@@ -15,8 +15,10 @@ import dev.kstate.session.SourceKey
 import dev.kstate.session.wire.RecordingFormatException
 import dev.kstate.session.wire.TimelineLines
 import kotlinx.serialization.json.JsonPrimitive
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
 import kotlin.test.Test
@@ -119,6 +121,71 @@ class SessionRecorderTest {
         assertEquals(listOf(500L, 900L, 1_100L, 1_200L), video.frameTimes())
         assertEquals(listOf(500L, 900L, 1_100L), video.gopAt(1_150)?.samples?.map { it.hostTs })
         assertContentEquals(byteArrayOf(0x68), video.gopAt(1_200)?.config)
+    }
+
+    @Test
+    fun aRecordingThatWasNeverStoppedStillOpensWithEverythingWritten() {
+        receive(hello)
+        receive(SourceRegistered("Counter-1", "Counter", "StateFlow"))
+        receive(snapshot(1))
+        val timeline = VideoTimeline()
+        timeline.append(VideoSample(500, keyFrame = true, data = byteArrayOf(1)))
+        val recorder = recorder().also { it.start() }
+        recorder.addVideo("emulator-5554", timeline)
+        now = 3_000
+        receive(snapshot(2))
+        timeline.append(VideoSample(2_900, keyFrame = false, data = byteArrayOf(2)))
+
+        recorder.checkpoint()
+        val crashed = RecordedSession.open(dir)
+
+        assertEquals(
+            listOf(1L, 2L),
+            crashed.engine.timeline
+                .history(counter)
+                .map { it.snapshot.seq },
+        )
+        assertEquals(listOf(500L, 2_900L), crashed.videos.getValue("emulator-5554").frameTimes())
+        assertEquals(
+            "emulator-5554",
+            crashed.manifest.devices
+                .single()
+                .video,
+        )
+        assertEquals(3_000L, crashed.manifest.endHostTs)
+    }
+
+    @Test
+    fun aHalfWrittenLastLineOrIndexEntryIsDropped() {
+        receive(hello)
+        receive(SourceRegistered("Counter-1", "Counter", "StateFlow"))
+        receive(snapshot(1))
+        val timeline = VideoTimeline()
+        timeline.append(VideoSample(500, keyFrame = true, data = byteArrayOf(1)))
+        val recorder = recorder().also { it.start() }
+        recorder.addVideo("emulator-5554", timeline)
+        recorder.checkpoint()
+
+        Files.writeString(dir.resolve(SessionFolder.TIMELINE), "{\"seq\":9,\"hostTs\":", StandardOpenOption.APPEND)
+        Files.write(SessionFolder.video(dir, "emulator-5554").index, byteArrayOf(0, 0, 0, 1), StandardOpenOption.APPEND)
+        val crashed = RecordedSession.open(dir)
+
+        assertEquals(
+            listOf(1L),
+            crashed.engine.timeline
+                .history(counter)
+                .map { it.snapshot.seq },
+        )
+        assertEquals(listOf(500L), crashed.videos.getValue("emulator-5554").frameTimes())
+    }
+
+    @Test
+    fun aWriteThatFailsMakesStopFailInsteadOfClaimingARecording() {
+        val recorder = recorder().also { it.start() }
+        dir.resolve(SessionFolder.VIDEO_DIR).toFile().deleteRecursively()
+        recorder.addVideo("emulator-5554", VideoTimeline())
+
+        assertFailsWith<IOException> { recorder.stop() }
     }
 
     @Test

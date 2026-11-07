@@ -68,19 +68,22 @@ class VideoFilesTest {
     }
 
     @Test
-    fun anIndexPointingOutsideTheStreamIsRefused() {
+    fun indexEntriesPastTheEndOfTheStreamAreDroppedAsACrashLeavesThem() {
         record()
         files.stream.writeBytes(ByteArray(4))
 
-        assertFailsWith<RecordingFormatException> { RecordedVideo.open(files).gopAt(50) }
+        val video = RecordedVideo.open(files)
+
+        assertEquals(emptyList(), video.frameTimes())
+        assertNull(video.gopAt(50))
     }
 
     @Test
-    fun aTruncatedIndexIsRefused() {
+    fun aHalfWrittenLastIndexEntryIsDropped() {
         record()
         files.index.writeBytes(ByteArray(VideoRecordWriter.INDEX_ENTRY_BYTES + 3))
 
-        assertFailsWith<RecordingFormatException> { RecordedVideo.open(files) }
+        assertEquals(listOf(0L), RecordedVideo.open(files).frameTimes())
     }
 
     @Test

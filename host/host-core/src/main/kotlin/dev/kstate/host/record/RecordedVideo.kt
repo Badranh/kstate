@@ -68,16 +68,18 @@ class RecordedVideo private constructor(
     companion object {
         const val MAX_PACKET_BYTES: Int = 16 * 1024 * 1024
 
-        /** Throws [RecordingFormatException] when the index is damaged or out of order. */
+        /** Throws [RecordingFormatException] when the index is out of order. */
         fun open(files: VideoFiles): RecordedVideo {
+            // A trailing partial entry, or entries past the end of the stream, are what a crash leaves.
             val size = Files.size(files.index)
-            formatCheck(size % VideoRecordWriter.INDEX_ENTRY_BYTES == 0L) { "video index is truncated" }
+            val streamSize = Files.size(files.stream)
             val entries =
-                DataInputStream(Files.newInputStream(files.index).buffered()).use { input ->
-                    List((size / VideoRecordWriter.INDEX_ENTRY_BYTES).toInt()) {
-                        Entry(input.readLong(), input.readLong(), input.readUnsignedByte())
-                    }
-                }
+                DataInputStream(Files.newInputStream(files.index).buffered())
+                    .use { input ->
+                        List((size / VideoRecordWriter.INDEX_ENTRY_BYTES).toInt()) {
+                            Entry(input.readLong(), input.readLong(), input.readUnsignedByte())
+                        }
+                    }.takeWhile { it.offset + VideoRecordWriter.HEADER_BYTES <= streamSize }
             entries.zipWithNext().forEach { (previous, next) ->
                 formatCheck(next.hostTs >= previous.hostTs && next.offset > previous.offset) {
                     "video index goes back at ${next.offset}"
