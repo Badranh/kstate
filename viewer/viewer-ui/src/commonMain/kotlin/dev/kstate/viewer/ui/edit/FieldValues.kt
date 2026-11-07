@@ -33,7 +33,10 @@ internal object FieldValues {
             FieldKind.INTEGER to
                 { _, text -> text.toLongOrNull()?.let { ok(JsonPrimitive(it)) } ?: error("a whole number") },
             FieldKind.DECIMAL to
-                { _, text -> text.toDoubleOrNull()?.let { ok(JsonPrimitive(it)) } ?: error("a number") },
+                { _, text ->
+                    text.toDoubleOrNull()?.takeIf { it.isFinite() }?.let { ok(JsonPrimitive(it)) }
+                        ?: error("a number")
+                },
             FieldKind.BOOLEAN to
                 { _, text -> text.toBooleanStrictOrNull()?.let { ok(JsonPrimitive(it)) } ?: error("true or false") },
             FieldKind.CHOICE to

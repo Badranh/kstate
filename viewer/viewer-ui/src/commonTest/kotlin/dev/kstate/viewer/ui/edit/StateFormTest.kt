@@ -2,6 +2,8 @@ package dev.kstate.viewer.ui.edit
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -119,11 +121,54 @@ class StateFormTest {
 
     @Test
     fun anEmptyNullableFieldIsNullAndAnEmptyRequiredNumberIsAnError() {
-        assertIs<FormResult.Valid>(StateForm.build(state, fields, edits = mapOf("/score" to "")))
+        val scored =
+            json(
+                """{"name":"Ada","age":36,"score":2.5,"active":true,"mode":"DARK",""" +
+                    """"address":{"city":"London"},"tags":["a"],"pin":"<redacted>"}""",
+            )
+        val cleared =
+            StateForm.build(
+                scored,
+                StateForm.fields(schema, scored, listOf("/pin")),
+                edits =
+                    mapOf("/score" to ""),
+            )
+
+        assertEquals(JsonNull, (assertIs<FormResult.Valid>(cleared).json as JsonObject)["score"])
         assertEquals(
             mapOf("/age" to "a whole number"),
             (StateForm.build(state, fields, mapOf("/age" to "")) as FormResult.Invalid).errors,
         )
+    }
+
+    @Test
+    fun aValueNobodyTouchedIsSentExactlyAsItWas() {
+        val nickSchema =
+            json(
+                """{"kind":"CLASS","fields":[
+                  {"name":"nick","schema":{"kind":"STRING","nullable":true}},
+                  {"name":"age","schema":{"kind":"INT","nullable":false}}]}""",
+            )
+        val current = json("""{"nick":"","age":36}""")
+
+        val built =
+            StateForm.build(
+                current,
+                StateForm.fields(nickSchema, current, emptyList()),
+                edits =
+                    mapOf("/age" to "37"),
+            )
+
+        assertEquals(json("""{"nick":"","age":37}"""), assertIs<FormResult.Valid>(built).json)
+    }
+
+    @Test
+    fun aDecimalMustBeAFiniteNumber() {
+        listOf("NaN", "Infinity", "-Infinity", "1e400").forEach { text ->
+            val result = StateForm.build(state, fields, edits = mapOf("/score" to text))
+
+            assertEquals(mapOf("/score" to "a number"), assertIs<FormResult.Invalid>(result).errors, text)
+        }
     }
 
     @Test

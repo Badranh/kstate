@@ -14,17 +14,21 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import dev.kstate.viewer.client.ApplyMode
 import dev.kstate.viewer.client.CommandOutcome
+import dev.kstate.viewer.client.SourceCapabilities
 import dev.kstate.viewer.client.SourceView
 import dev.kstate.viewer.ui.actions.outcomeText
 import kotlinx.coroutines.launch
@@ -41,11 +45,15 @@ fun StateEditor(
     send: suspend (JsonElement, ApplyMode) -> CommandOutcome,
     modifier: Modifier = Modifier,
 ) {
-    val fields = remember(source.key, state) { StateForm.fields(source.schema, state, source.redactedPaths) }
+    var base by remember(source.key) { mutableStateOf(state) }
+    val fields = remember(source.key, base) { StateForm.fields(source.schema, base, source.redactedPaths) }
     var raw by remember(source.key) { mutableStateOf(fields.isEmpty()) }
-    val edits = remember(source.key, state) { mutableStateMapOf<String, String>() }
-    var text by remember(source.key, state) { mutableStateOf(JsonEdit.initialText(state)) }
-    var errors by remember(source.key, state) { mutableStateOf<Map<String, String>>(emptyMap()) }
+    val edits = remember(source.key, base) { mutableStateMapOf<String, String>() }
+    var text by remember(source.key, base) { mutableStateOf(JsonEdit.initialText(base)) }
+    var errors by remember(source.key, base) { mutableStateOf<Map<String, String>>(emptyMap()) }
+    val touched by rememberUpdatedState(edits.isNotEmpty() || text != JsonEdit.initialText(base))
+    // After composition, not during it: writing a state already read in this pass would loop.
+    LaunchedEffect(state) { base = EditBase.next(base, state, touched) }
     var message by remember(source.key) { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
@@ -58,7 +66,7 @@ fun StateEditor(
                         source.redactedPaths,
                     )
                 } else {
-                    StateForm.build(state, fields, edits)
+                    StateForm.build(base, fields, edits)
                 }
         ) {
             is FormResult.Invalid -> {
@@ -76,39 +84,70 @@ fun StateEditor(
         modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        if (EditBase.behind(base, state)) StaleHint(onReload = { base = state })
         if (raw) {
-            OutlinedTextField(
-                text,
-                {
-                    text = it
-                },
-                Modifier.fillMaxWidth(),
-                textStyle =
-                    MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = FontFamily.Monospace,
-                    ),
-            )
-            errors.forEach { (path, error) ->
-                Text("${path.ifEmpty { "JSON" }}: $error", color = MaterialTheme.colorScheme.error)
-            }
+            RawEditor(text, errors, onChange = { text = it })
         } else {
             fields.forEach { field ->
-                FieldEditor(field, edits[field.path] ?: field.text, errors[field.path]) {
-                    edits[field.path] =
-                        it
-                }
+                FieldEditor(field, edits[field.path] ?: field.text, errors[field.path]) { edits[field.path] = it }
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (source.capabilities.overlay) Button(onClick = { submit(ApplyMode.OVERLAY) }) { Text("Show") }
-            if (source.capabilities.writeThrough) {
-                Button(
-                    onClick = { submit(ApplyMode.WRITE_THROUGH) },
-                ) { Text("Write into app") }
-            }
-            if (fields.isNotEmpty()) TextButton(onClick = { raw = !raw }) { Text(if (raw) "Form" else "Raw JSON") }
-        }
+        EditActions(source.capabilities, hasForm = fields.isNotEmpty(), raw, onSubmit = ::submit, onToggleRaw = {
+            raw =
+                !raw
+        })
         message?.let { Text(it) }
+    }
+}
+
+/** Show it, write it into the app, or switch between the form and raw JSON. */
+@Composable
+private fun EditActions(
+    capabilities: SourceCapabilities,
+    hasForm: Boolean,
+    raw: Boolean,
+    onSubmit: (ApplyMode) -> Unit,
+    onToggleRaw: () -> Unit,
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (capabilities.overlay) Button(onClick = { onSubmit(ApplyMode.OVERLAY) }) { Text("Show") }
+        if (capabilities.writeThrough) {
+            Button(
+                onClick = { onSubmit(ApplyMode.WRITE_THROUGH) },
+            ) { Text("Write into app") }
+        }
+        if (hasForm) TextButton(onClick = onToggleRaw) { Text(if (raw) "Form" else "Raw JSON") }
+    }
+}
+
+/** The app's state moved on since the edit began; the edit stays until the person reloads. */
+@Composable
+private fun StaleHint(onReload: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            "The app's state changed since you started editing.",
+            Modifier.weight(1f),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        TextButton(onClick = onReload) { Text("Reload") }
+    }
+}
+
+@Composable
+private fun RawEditor(
+    text: String,
+    errors: Map<String, String>,
+    onChange: (String) -> Unit,
+) {
+    OutlinedTextField(
+        text,
+        onChange,
+        Modifier.fillMaxWidth(),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+    )
+    errors.forEach { (path, error) ->
+        Text("${path.ifEmpty { "JSON" }}: $error", color = MaterialTheme.colorScheme.error)
     }
 }
 

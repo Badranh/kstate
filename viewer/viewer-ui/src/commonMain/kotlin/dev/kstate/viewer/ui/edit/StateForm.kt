@@ -61,9 +61,11 @@ object StateForm {
         edits: Map<String, String>,
     ): FormResult {
         val errors = linkedMapOf<String, String>()
+        // Only what the person changed: re-reading an untouched value from its text can change it
+        // (an empty nullable string would come back as null).
         val json =
-            fields.filterNot { it.locked }.fold(state) { current, field ->
-                val parsed = FieldValues.parse(field, edits[field.path] ?: field.text)
+            fields.filter { !it.locked && it.path in edits }.fold(state) { current, field ->
+                val parsed = FieldValues.parse(field, edits.getValue(field.path))
                 parsed.error?.let { errors[field.path] = it }
                 parsed.value?.let { JsonPointer.replace(current, field.path, it) } ?: current
             }
