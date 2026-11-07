@@ -8,4 +8,5 @@ enum class SampleTab(
     Counter("MVVM", "+"),
     Form("Orbit", "@"),
     List("Decompose", "≡"),
+    Checkout("Nested", "€"),
 }
