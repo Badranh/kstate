@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -93,20 +95,25 @@ private fun TimelineRows(
     }
 }
 
+/**
+ * Tap or drag to seek. The detectors are keyed on nothing: a live timeline's end moves every tick,
+ * and restarting them then would drop a drag half way. They read the latest timeline instead.
+ */
+@Composable
 private fun Modifier.seekGestures(
     timeline: TimelineView,
     onSeek: (Long) -> Unit,
-): Modifier =
-    pointerInput(timeline.start, timeline.end) {
-        detectTapGestures { onSeek(TimelineScale(timeline.start, timeline.end, size.width.toFloat()).time(it.x)) }
-    }.pointerInput(timeline.start, timeline.end) {
-        detectDragGestures {
-            change,
-            _,
-            ->
-            onSeek(TimelineScale(timeline.start, timeline.end, size.width.toFloat()).time(change.position.x))
-        }
-    }
+): Modifier {
+    val current by rememberUpdatedState(timeline)
+    val seek by rememberUpdatedState(onSeek)
+
+    fun timeAt(
+        x: Float,
+        width: Int,
+    ) = TimelineScale(current.start, current.end, width.toFloat()).time(x)
+    return pointerInput(Unit) { detectTapGestures { seek(timeAt(it.x, size.width)) } }
+        .pointerInput(Unit) { detectDragGestures { change, _ -> seek(timeAt(change.position.x, size.width)) } }
+}
 
 private fun DrawScope.drawLanes(
     lanes: List<Lane>,

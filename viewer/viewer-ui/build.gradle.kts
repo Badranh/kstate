@@ -14,6 +14,11 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)
         }
+        // Real Compose UI tests (gestures, keys, drawing) on the JVM, with Skia for this machine.
+        jvmTest.dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation(compose.desktop.uiTestJUnit4)
+        }
     }
 }
 
