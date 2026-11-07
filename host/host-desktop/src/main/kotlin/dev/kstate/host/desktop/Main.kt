@@ -22,13 +22,17 @@ import dev.kstate.host.desktop.share.SharingBanner
 import dev.kstate.session.SessionEngine
 import dev.kstate.viewer.ui.KstateApp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import org.jetbrains.skia.Image
 import org.koin.core.context.startKoin
+import kotlin.system.exitProcess
 
 fun main() {
     // Kstate is dark only, so the window's own title bar is too.
     System.setProperty("apple.awt.application.appearance", "NSAppearanceNameDarkAqua")
+    // Every Ktor server would add its own slow shutdown hook (seconds each); Kstate's quit stops them.
+    System.setProperty("io.ktor.server.engine.ShutdownHook", "false")
     val koin = startKoin { modules(hostModule()) }.koin
     val runtime = koin.get<HostRuntime>()
     val sessions = koin.get<DesktopSessions>()
@@ -36,7 +40,20 @@ fun main() {
     val collab = koin.get<CollabSession>()
     val agentAccess = koin.get<AgentAccess>()
     val agent = koin.get<KstateAgent>()
-    traceSnapshots(koin.get<SessionEngine>().session, koin.get<CoroutineScope>())
+    val scope = koin.get<CoroutineScope>()
+    traceSnapshots(koin.get<SessionEngine>().session, scope)
+    val quit =
+        QuitSequence(
+            listOf(
+                QuitSequence.Step("save the recording") { sessions.stopRecording() },
+                QuitSequence.Step("stop sharing") { sharing.stop() },
+                QuitSequence.Step("stop agent access") { agentAccess.stop() },
+                QuitSequence.Step("stop the devices") { runtime.stop() },
+                QuitSequence.Step("stop background work") { scope.coroutineContext[Job]?.cancelAndJoin() },
+            ),
+        )
+    // SIGTERM, Cmd+Q and the window all end here, once.
+    Runtime.getRuntime().addShutdownHook(Thread({ report(quit.run()) }, "kstate-quit"))
     runtime.start()
     application {
         val shown by sessions.shown.collectAsState()
@@ -47,13 +64,7 @@ fun main() {
         var agentOpen by remember { mutableStateOf(false) }
         val agentState by agentAccess.state.collectAsState()
         Window(
-            onCloseRequest = {
-                sharing.stop()
-                agentAccess.stop()
-                sessions.stopRecording()
-                runBlocking { runtime.stop() }
-                exitApplication()
-            },
+            onCloseRequest = ::exitApplication,
             title = windowTitle(recording, shownRecording),
             icon = AppIcon,
             state = rememberWindowState(width = 1080.dp, height = 720.dp),
@@ -77,6 +88,13 @@ fun main() {
         if (sharingOpen) ShareWindow(sharing, collab, onClose = { sharingOpen = false })
         if (agentOpen) AgentWindow(agentAccess, agent.reports, onClose = { agentOpen = false })
     }
+    report(quit.run())
+    exitProcess(0)
+}
+
+/** Quitting can't show a dialog any more, so what didn't stop cleanly goes to the log. */
+private fun report(unfinished: List<QuitSequence.Unfinished>) {
+    unfinished.forEach { System.err.println("Kstate quit: $it") }
 }
 
 /** The window and Dock icon while running from a build; the packaged app uses `icons/kstate.icns`. */
