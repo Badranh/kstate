@@ -5,19 +5,25 @@ import dev.kstate.host.timeline.VideoListener
 import dev.kstate.host.timeline.VideoSample
 import dev.kstate.session.wire.VideoWire
 import dev.kstate.session.wire.VideoWireFrame
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.Frame
+import io.ktor.websocket.close
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
  * One `/video/{deviceId}` socket: the current GOP with its config so the picture starts at once,
  * then every packet. A viewer that can't keep up loses packets up to the next key frame instead
- * of queueing: late video is worse than a skipped second.
+ * of queueing: late video is worse than a skipped second. The socket closes as soon as [allowed]
+ * says the viewer may no longer watch, as when their invite is revoked or expires.
  */
 internal class VideoRelay(
     private val lease: RemoteVideoLease,
+    private val allowed: Flow<Boolean>,
     private val capacity: Int = DEFAULT_CAPACITY,
 ) {
     private val queue = Channel<ByteArray>(capacity)
@@ -54,9 +60,15 @@ internal class VideoRelay(
         try {
             coroutineScope {
                 val sending = launch { for (bytes in queue) socket.send(Frame.Binary(true, bytes)) }
+                val watching =
+                    launch {
+                        allowed.first { !it }
+                        socket.close(CloseReason(ViewServer.CLOSE_NOT_ALLOWED, "access ended"))
+                    }
                 // The viewer sends nothing here; reading only tells us when it leaves.
                 for (ignored in socket.incoming) Unit
                 sending.cancel()
+                watching.cancel()
             }
         } finally {
             subscription.close()

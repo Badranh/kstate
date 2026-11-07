@@ -22,6 +22,7 @@ import io.ktor.server.websocket.pingPeriod
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.close
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -101,14 +102,14 @@ class ViewServer(
                 }
             }
             webSocket("/video/{deviceId}") {
-                withSession {
+                withSession { id ->
                     val lease = call.parameters["deviceId"]?.let(video::acquire)
                     if (lease ==
                         null
                     ) {
                         close(CloseReason(CLOSE_NO_DEVICE, "no such device"))
                     } else {
-                        VideoRelay(lease).run(this)
+                        VideoRelay(lease, allowed = collab.changes.map { collab.isMember(id) }).run(this)
                     }
                 }
             }

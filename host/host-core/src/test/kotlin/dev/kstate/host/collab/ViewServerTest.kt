@@ -402,6 +402,28 @@ class ViewServerTest {
         }
 
     @Test
+    fun revokingTheInviteAlsoClosesTheVideo(): Unit =
+        runBlocking {
+            video.timeline.setConfig(byteArrayOf(0x67))
+            video.timeline.append(VideoSample(10, keyFrame = true, data = byteArrayOf(1)))
+            val invite = collab.invites.create()
+            val cookie = join(token = invite.token).sessionCookie()
+
+            var reason: CloseReason? = null
+            client.webSocket("ws://127.0.0.1:$port/video/emulator-5554", request = {
+                header(HttpHeaders.Cookie, cookie)
+                header(HttpHeaders.Origin, origin)
+            }) {
+                withTimeout(5.seconds) { incoming.receive() }
+                collab.invites.revoke(invite.id)
+                reason = closedWith()
+            }
+
+            assertEquals(ViewServer.CLOSE_NOT_ALLOWED, reason?.code)
+            withTimeout(5.seconds) { while (video.released == 0) kotlinx.coroutines.delay(10) }
+        }
+
+    @Test
     fun videoOfAnUnknownDeviceOrWithoutASessionIsClosed(): Unit =
         runBlocking {
             val cookie = join().sessionCookie()
