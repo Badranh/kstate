@@ -9,11 +9,12 @@ import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
 import java.nio.file.Path
 
-/** File menu: record the live session, open and export recordings, go back to live, share. */
+/** File menu: record the live session, open and export recordings, go back to live, agent testing, share. */
 @Composable
 fun FrameWindowScope.DesktopMenu(
     sessions: DesktopSessions,
     onShare: () -> Unit,
+    onAgent: () -> Unit,
 ) {
     val recording by sessions.recording.collectAsState()
     val shownRecording by sessions.shownRecording.collectAsState()
@@ -40,6 +41,7 @@ fun FrameWindowScope.DesktopMenu(
                 onClick = sessions::showLive,
             )
             Separator()
+            Item("Agent testing…", shortcut = KeyShortcut(Key.A, meta = true, shift = true), onClick = onAgent)
             Item("Share session…", shortcut = KeyShortcut(Key.S, meta = true, shift = true), onClick = onShare)
         }
     }

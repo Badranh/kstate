@@ -15,25 +15,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
+import dev.kstate.host.desktop.agent.AgentState
+import dev.kstate.viewer.ui.chrome.HeartbeatDot
 import dev.kstate.viewer.ui.theme.Kstate
 
-/** Record and Share in the top bar, so neither is only in the File menu. */
+/** Record, Agent and Share in the top bar, so none is only in the File menu. */
 @Composable
 fun FrameWindowScope.HostActions(
     sessions: DesktopSessions,
     recording: ActiveRecording?,
     shared: SharingState,
+    agent: AgentState,
     onShare: () -> Unit,
+    onAgent: () -> Unit,
 ) {
     if (recording == null) {
-        OutlinedButton(onClick = sessions::startRecording) { Dotted("Record", MaterialTheme.colorScheme.error) }
+        OutlinedButton(onClick = sessions::startRecording) {
+            Dotted("Record", MaterialTheme.colorScheme.error, beating = false)
+        }
     } else {
         OutlinedButton(onClick = { stopAndSaveRecording(sessions) }) {
-            Dotted("Stop and save", MaterialTheme.colorScheme.error)
+            Dotted("Stop and save", MaterialTheme.colorScheme.error, beating = true)
+        }
+    }
+    OutlinedButton(onClick = onAgent) {
+        if (agent is AgentState.On) {
+            Dotted(
+                "Agent",
+                MaterialTheme.colorScheme.primary,
+                beating = true,
+            )
+        } else {
+            Text("Agent")
         }
     }
     OutlinedButton(onClick = onShare) {
-        if (shared is SharingState.On) Dotted("Sharing", Kstate.colors.live) else Text("Share session")
+        if (shared is SharingState.On) Dotted("Sharing", Kstate.colors.live, beating = true) else Text("Share session")
     }
 }
 
@@ -41,9 +58,10 @@ fun FrameWindowScope.HostActions(
 private fun Dotted(
     label: String,
     dot: Color,
+    beating: Boolean,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Box(Modifier.size(8.dp).background(dot, CircleShape))
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        HeartbeatDot(dot, beating)
         Text(label)
     }
 }

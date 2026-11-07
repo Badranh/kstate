@@ -479,6 +479,33 @@ Build in this order; each milestone ends with a working demo on the sample app a
 - [ ] Simulator discovery, shared iOS gateway, `ios-capture` (or idb) video, idb input.
 - [ ] Accepted when an Android emulator and an iOS Simulator run side by side in one session.
 
+**M9: Agent testing over MCP**
+
+Test screens by setting state, not by scanning the UI. Kstate already has every source's state and
+schema, can set any state as an overlay, and has the live video, so an agent needs no view tree or
+label detection. Kstate serves MCP on `127.0.0.1` (bearer token, Origin checked, off until the
+Owner turns it on); the connected agent (e.g. Claude Code) judges the pictures, Kstate holds no
+API key. Logic lives in `host/host-agent` behind ports; host-desktop wires it.
+
+1. **Map:** while anyone uses the app, each settled screen (no new video frame for 300 ms) is paired
+   with the route (`Nav` stack) and the source states that produced it; each change is a
+   transition with its cause (agent input, app events) and the state paths that changed.
+2. **Explore:** for one source, variants generated from its schema (each sealed variant and enum
+   value, null, empty/one/many items, long and right-to-left text, 0/negative/huge numbers;
+   redacted fields skipped) are applied as overlays, each captured once settled, then released.
+3. **Pre-check:** Kstate flags rejected states, disconnects/crashes, no visual change despite a
+   state change, blank screens and near-duplicates, and makes contact sheets so the agent reviews
+   many states per image.
+4. **Judge and report:** the agent sends findings; Kstate writes an HTML report (gallery, flags,
+   findings) where every finding carries the exact state to inject, so each one reproduces.
+
+Tools: `overview`, `get_state`, `set_state`, `release`, `screenshot`, `tap`, `swipe`, `key`,
+`text`, `map`, `explore`, `variant`, `report`.
+
+- [ ] Accepted when Claude Code, connected over MCP to Kstate with the sample app on an emulator,
+  maps the three screens, explores each one's state, and produces a report whose findings each
+  reproduce by injecting their state.
+
 **M8: 0.1 release**
 
 - [ ] Publish `protocol`, `sdk-*` and adapters to Maven Central; notarized DMG on GitHub Releases.

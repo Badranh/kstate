@@ -118,6 +118,8 @@ data class DeviceView(
     val label: String,
     val connected: Boolean,
     val sources: List<SourceView>,
+    /** The app's back stack, root first, as it reported it; the screen showing is the last. */
+    val route: List<String> = emptyList(),
 )
 
 data class SourceView(

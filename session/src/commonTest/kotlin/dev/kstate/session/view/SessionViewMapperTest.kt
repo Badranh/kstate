@@ -33,6 +33,15 @@ class SessionViewMapperTest {
     private val snapshot = StateSnapshot("Counter-1", 4, JsonPrimitive(2), Encoding.SERIALIZER)
 
     @Test
+    fun aDeviceCarriesTheRouteItsAppReported() {
+        val app = AppConnection("emulator-5554", 1, hello, connected = true, nav = listOf("Checkout", "Payment"))
+
+        val view = SessionViewMapper.map(Session(apps = mapOf("emulator-5554" to app)), emptyList(), problem = null)
+
+        assertEquals(listOf("Checkout", "Payment"), view.devices.single().route)
+    }
+
+    @Test
     fun groupsSourcesUnderTheirDevice() {
         val session =
             Session(

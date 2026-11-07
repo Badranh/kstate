@@ -1,0 +1,222 @@
+package dev.kstate.host.agent
+
+import dev.kstate.host.agent.image.Picture
+import dev.kstate.viewer.client.ApplyMode
+import dev.kstate.viewer.client.CommandOutcome
+import dev.kstate.viewer.client.DeviceScreen
+import dev.kstate.viewer.client.DeviceView
+import dev.kstate.viewer.client.EventView
+import dev.kstate.viewer.client.SessionSource
+import dev.kstate.viewer.client.SessionView
+import dev.kstate.viewer.client.SourceCapabilities
+import dev.kstate.viewer.client.SourceView
+import dev.kstate.viewer.client.TimelineView
+import dev.kstate.viewer.client.TouchPhase
+import dev.kstate.viewer.client.VideoFrame
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonElement
+
+/**
+ * One device with one source, whose screen is drawn from its state by [render], like a real UI.
+ * A picture is only sent when the drawing changes, after [frameDelayMillis], as scrcpy does.
+ * [onTap] is the app reacting to a tap; [crashesOn] says which states kill it.
+ */
+class FakeApp(
+    private val scope: CoroutineScope,
+    initial: JsonElement,
+    private val schema: JsonElement?,
+    private val render: (JsonElement) -> Picture,
+    private val crashesOn: (JsonElement) -> Boolean = { false },
+    private val refuses: (JsonElement) -> Boolean = { false },
+    route: List<String> = listOf("Checkout"),
+    private val frameDelayMillis: Long = 30,
+) : SessionSource {
+    var onTap: (x: Float, y: Float) -> Unit = { _, _ -> }
+    private var appState: JsonElement = initial
+    private var overlay: JsonElement? = null
+    private var connected = true
+    private var currentRoute = route
+    private var events = emptyList<EventView>()
+    val applied = mutableListOf<JsonElement>()
+    var releases = 0
+
+    private val screen = Screen()
+    override val session = MutableStateFlow(view())
+    override val screens: StateFlow<Map<String, DeviceScreen>> = MutableStateFlow(mapOf(DEVICE to screen))
+
+    /** The app changing its own state, as after a tap. */
+    fun emit(
+        state: JsonElement,
+        route: List<String> = currentRoute,
+        event: String? = null,
+    ) {
+        appState = state
+        currentRoute = route
+        event?.let {
+            events =
+                listOf(EventView(hostTs = now(), deviceId = DEVICE, sourceId = SOURCE, name = it, args = null)) + events
+        }
+        publish()
+    }
+
+    override fun now(): Long = 0
+
+    override fun sessionAt(hostTs: Long) = session.value
+
+    override fun timeline() = TimelineView(0, 0, emptyList(), emptyList())
+
+    override suspend fun restore(
+        sourceKey: String,
+        seq: Long,
+        mode: ApplyMode,
+    ) = CommandOutcome.Ok
+
+    override suspend fun setState(
+        sourceKey: String,
+        state: JsonElement,
+        mode: ApplyMode,
+    ): CommandOutcome =
+        when {
+            !connected -> {
+                CommandOutcome.NotConnected
+            }
+
+            refuses(state) -> {
+                CommandOutcome.Refused("the app said no", path = null)
+            }
+
+            else -> {
+                applied += state
+                if (crashesOn(state)) {
+                    connected = false
+                } else if (mode == ApplyMode.OVERLAY) {
+                    overlay = state
+                } else {
+                    appState = state
+                }
+                publish()
+                CommandOutcome.Ok
+            }
+        }
+
+    override suspend fun freeze(
+        sourceKey: String,
+        frozen: Boolean,
+    ) = CommandOutcome.Ok
+
+    override suspend fun release(sourceKey: String): CommandOutcome {
+        releases++
+        overlay = null
+        publish()
+        return CommandOutcome.Ok
+    }
+
+    private fun shown(): JsonElement = overlay ?: appState
+
+    private fun publish() {
+        session.value = view()
+        screen.redraw()
+    }
+
+    private fun view() =
+        SessionView(
+            devices =
+                listOf(
+                    DeviceView(
+                        DEVICE,
+                        "sample on Pixel",
+                        connected,
+                        listOf(
+                            SourceView(
+                                key = KEY,
+                                name = "Checkout",
+                                live = connected,
+                                state = shown(),
+                                changedPaths = emptySet(),
+                                seq = applied.size.toLong(),
+                                capabilities = SourceCapabilities(overlay = true, writeThrough = true, decode = true),
+                                schema = schema,
+                                redactedPaths = emptyList(),
+                                overridden = overlay != null,
+                            ),
+                        ),
+                        route = currentRoute,
+                    ),
+                ),
+            events = events,
+        )
+
+    private inner class Screen : DeviceScreen {
+        private var drawn: Picture = render(shown())
+        override val frames = MutableStateFlow<VideoFrame?>(frame(drawn))
+
+        fun redraw() {
+            if (!connected) return
+            val next = render(shown())
+            if (next.rgba.contentEquals(drawn.rgba)) return
+            drawn = next
+            scope.launch {
+                delay(frameDelayMillis)
+                frames.value = frame(next)
+            }
+        }
+
+        override fun frameAt(hostTs: Long) = frames.value
+
+        override fun setOutputSize(
+            width: Int,
+            height: Int,
+        ) = Unit
+
+        override fun touch(
+            phase: TouchPhase,
+            x: Float,
+            y: Float,
+        ) {
+            if (phase == TouchPhase.UP) onTap(x, y)
+        }
+
+        override fun scroll(
+            x: Float,
+            y: Float,
+            horizontal: Float,
+            vertical: Float,
+        ) = Unit
+
+        override fun key(keycode: Int) = Unit
+
+        override fun text(text: String) = Unit
+    }
+
+    private fun frame(picture: Picture) = VideoFrame(picture.width, picture.height, picture.rgba, hostTs = 0)
+
+    companion object {
+        const val DEVICE = "emulator-5554"
+        const val SOURCE = "Checkout-1"
+        const val KEY = "$DEVICE/$SOURCE"
+
+        /** A 90 by 160 screen, dark, with a light bar for each of [bars] (row, length in pixels). */
+        fun bars(vararg bars: Pair<Int, Int>): Picture {
+            val width = 90
+            val height = 160
+            val rgba = ByteArray(width * height * 4) { if (it % 4 == 3) -1 else 20 }
+            bars.forEach { (row, length) ->
+                for (y in row * 10 until row * 10 + 6) {
+                    for (x in 4 until (4 + length).coerceAtMost(width)) {
+                        val i = (y * width + x) * 4
+                        rgba[i] = -26
+                        rgba[i + 1] = -26
+                        rgba[i + 2] = -26
+                    }
+                }
+            }
+            return Picture(width, height, rgba)
+        }
+
+        val blank: Picture get() = Picture(90, 160, ByteArray(90 * 160 * 4) { -6 })
+    }
+}

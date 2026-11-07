@@ -45,6 +45,7 @@ include(":sdk:adapters:adapter-rx")
 include(":host:host-core")
 include(":host:host-video")
 include(":host:host-tunnel")
+include(":host:host-agent")
 include(":host:host-desktop")
 
 include(":viewer:viewer-ui")

@@ -1,0 +1,213 @@
+package dev.kstate.host.agent
+
+import dev.kstate.host.agent.image.Picture
+import dev.kstate.host.agent.settle.SettleTiming
+import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
+import io.modelcontextprotocol.kotlin.sdk.types.ImageContent
+import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import java.nio.file.Files
+import kotlin.io.path.exists
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+/** The tools end to end: JSON-RPC in, the fake app reacting, text and pictures out. */
+class KstateToolsTest {
+    private fun json(text: String): JsonElement = Json.parseToJsonElement(text)
+
+    private val schema =
+        json(
+            """{"kind":"CLASS","fields":[{"name":"count","schema":{"kind":"INT"}},""" +
+                """{"name":"mode","schema":{"kind":"ENUM","values":["LIGHT","DARK"]}}]}""",
+        )
+
+    private fun state(
+        count: Int,
+        mode: String = "LIGHT",
+    ) = JsonObject(mapOf("count" to JsonPrimitive(count), "mode" to JsonPrimitive(mode)))
+
+    private fun render(state: JsonElement): Picture {
+        val obj = state.jsonObject
+        if (obj.getValue("mode").jsonPrimitive.content == "DARK") return FakeApp.blank
+        return FakeApp.bars(
+            0 to 10 +
+                obj
+                    .getValue("count")
+                    .jsonPrimitive.content
+                    .toInt()
+                    .coerceIn(0, 70),
+        )
+    }
+
+    private val reports = Files.createTempDirectory("kstate-agent-reports")
+
+    private fun TestScope.server(): Pair<FakeApp, KstateTools> {
+        val app = FakeApp(backgroundScope, state(0), schema, ::render)
+        var count = 0
+        app.onTap = { _, y -> if (y > 0.5f) app.emit(state(++count), event = "increment") }
+        val agent =
+            KstateAgent(
+                app,
+                reports,
+                SettleTiming(quietMillis = 300, graceMillis = 600, timeoutMillis = 3_000),
+                testScheduler.timeSource,
+            )
+        backgroundScope.launch { agent.map.run() }
+        return app to KstateTools(agent)
+    }
+
+    private suspend fun KstateTools.call(
+        tool: String,
+        arguments: String = "{}",
+    ): CallToolResult = all().first { it.name == tool }.run(json(arguments).jsonObject)
+
+    private fun CallToolResult.texts(): List<String> = content.filterIsInstance<TextContent>().map { it.text }
+
+    private fun CallToolResult.images(): Int = content.count { it is ImageContent }
+
+    private fun CallToolResult.isError() = isError == true
+
+    @Test
+    fun everyToolIsListed() =
+        runTest {
+            val (_, server) = server()
+            val tools = server.all().map { it.name }
+
+            assertEquals(
+                listOf(
+                    "overview",
+                    "get_state",
+                    "screenshot",
+                    "map",
+                    "set_state",
+                    "release",
+                    "tap",
+                    "swipe",
+                    "key",
+                    "type_text",
+                    "explore",
+                    "variant",
+                    "report",
+                ),
+                tools,
+            )
+        }
+
+    @Test
+    fun theOverviewNamesTheSourceAndSaysItCanBeExplored() =
+        runTest {
+            val (_, server) = server()
+
+            val text = server.call("overview").texts().single()
+
+            assertTrue(FakeApp.KEY in text)
+            assertTrue("\"explorable\":true" in text)
+            assertTrue("\"route\":\"Checkout\"" in text)
+        }
+
+    @Test
+    fun aTapReturnsTheNewScreenAndWhatChanged() =
+        runTest {
+            val (_, server) = server()
+
+            val result = server.call("tap", """{"x":0.5,"y":0.8}""")
+
+            assertEquals(1, result.images())
+            assertTrue("\"changedSources\":[\"${FakeApp.KEY}\"]" in result.texts().single())
+        }
+
+    @Test
+    fun tapsAreMappedWithTheirCause() =
+        runTest {
+            val (_, server) = server()
+            server.call("screenshot")
+            server.call("tap", """{"x":0.5,"y":0.8}""")
+
+            val text = server.call("map").texts().single()
+
+            assertTrue("tap 0.50, 0.80" in text, text)
+            assertTrue("event increment" in text, text)
+        }
+
+    @Test
+    fun exploringFlagsTheBlankDarkModeAndReturnsContactSheets() =
+        runTest {
+            val (_, server) = server()
+
+            val result = server.call("explore", """{"source":"${FakeApp.KEY}"}""")
+            val text = result.texts().single()
+
+            assertTrue(result.images() >= 1)
+            assertTrue("/mode → DARK" in text)
+            assertTrue("almost nothing on screen" in text)
+        }
+
+    @Test
+    fun aFindingOnAVariantReproducesWithItsState() =
+        runTest {
+            val (_, server) = server()
+            val run = server.call("explore", """{"source":"${FakeApp.KEY}"}""").texts().single()
+            val variant = Regex(""""id":"(v\d+)","label":"/mode → DARK"""").find(run)!!.groupValues[1]
+
+            val reply =
+                server.call(
+                    "report",
+                    """{"title":"Counter pass","findings":[{"title":"Dark mode is empty","severity":"high",""" +
+                        """"description":"Nothing is drawn.","run":"r1","variant":"$variant"}]}""",
+                )
+            val folder =
+                reply
+                    .texts()
+                    .single()
+                    .substringAfter("Report written: ")
+                    .removeSuffix("/index.html")
+
+            assertTrue(
+                java.nio.file.Path
+                    .of(folder, "index.html")
+                    .exists(),
+            )
+            assertTrue(
+                Files
+                    .readString(
+                        java.nio.file.Path
+                            .of(folder, "states/finding-1.json"),
+                    ).contains("\"DARK\""),
+            )
+        }
+
+    @Test
+    fun aStateTheAppRefusesIsAnErrorTheAgentSees() =
+        runTest {
+            val app =
+                FakeApp(backgroundScope, state(0), schema, ::render, refuses = {
+                    it.jsonObject["count"] ==
+                        JsonPrimitive(-5)
+                })
+            val server = KstateTools(KstateAgent(app, reports, time = testScheduler.timeSource))
+
+            val result = server.call("set_state", """{"source":"${FakeApp.KEY}","state":{"count":-5,"mode":"LIGHT"}}""")
+
+            assertTrue(result.isError())
+            assertTrue("refused: the app said no" in result.texts().single())
+        }
+
+    @Test
+    fun aWrongSourceOrKeyIsExplainedToTheAgent() =
+        runTest {
+            val (_, server) = server()
+
+            assertTrue("No source" in server.call("get_state", """{"source":"nope"}""").texts().single())
+            assertTrue(server.call("key", """{"key":"jump"}""").isError())
+        }
+}

@@ -11,7 +11,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import dev.kstate.host.agent.KstateAgent
 import dev.kstate.host.collab.CollabSession
+import dev.kstate.host.desktop.agent.AgentAccess
+import dev.kstate.host.desktop.agent.AgentWindow
 import dev.kstate.host.desktop.share.ShareWindow
 import dev.kstate.host.desktop.share.SharingBanner
 import dev.kstate.session.SessionEngine
@@ -28,6 +31,8 @@ fun main() {
     val sessions = koin.get<DesktopSessions>()
     val sharing = koin.get<Sharing>()
     val collab = koin.get<CollabSession>()
+    val agentAccess = koin.get<AgentAccess>()
+    val agent = koin.get<KstateAgent>()
     traceSnapshots(koin.get<SessionEngine>().session, koin.get<CoroutineScope>())
     runtime.start()
     application {
@@ -36,9 +41,12 @@ fun main() {
         val shownRecording by sessions.shownRecording.collectAsState()
         val shared by sharing.state.collectAsState()
         var sharingOpen by remember { mutableStateOf(false) }
+        var agentOpen by remember { mutableStateOf(false) }
+        val agentState by agentAccess.state.collectAsState()
         Window(
             onCloseRequest = {
                 sharing.stop()
+                agentAccess.stop()
                 sessions.stopRecording()
                 runBlocking { runtime.stop() }
                 exitApplication()
@@ -46,15 +54,23 @@ fun main() {
             title = windowTitle(recording, shownRecording),
             state = rememberWindowState(width = 1080.dp, height = 720.dp),
         ) {
-            DesktopMenu(sessions, onShare = { sharingOpen = true })
+            DesktopMenu(sessions, onShare = { sharingOpen = true }, onAgent = { agentOpen = true })
             Column {
                 SharingBanner(shared)
                 // A different session starts the viewer afresh: its playhead, selection and tabs.
                 key(shown) {
-                    KstateApp(shown) { HostActions(sessions, recording, shared, onShare = { sharingOpen = true }) }
+                    KstateApp(shown) {
+                        HostActions(sessions, recording, shared, agentState, onShare = {
+                            sharingOpen = true
+                        }, onAgent = {
+                            agentOpen =
+                                true
+                        })
+                    }
                 }
             }
         }
         if (sharingOpen) ShareWindow(sharing, collab, onClose = { sharingOpen = false })
+        if (agentOpen) AgentWindow(agentAccess, agent.reports, onClose = { agentOpen = false })
     }
 }

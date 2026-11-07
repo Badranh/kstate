@@ -403,3 +403,27 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 - The state tree is coloured like code (keys, strings, numbers, booleans, null, redacted) and
   marks a changed value with a green bar on the left and a light tint. Its chevrons are drawn,
   not ▾/▸ glyphs, which the web viewer's font doesn't have.
+
+## 2026-11-07: Agent testing over MCP (M9)
+- An agent tests screens by setting state, not by scanning the UI: Kstate has every source's state
+  and schema, shows any state as an overlay, and has the live video, so no view tree or label
+  detection is needed. Judging the pictures is the connected agent's job; Kstate holds no API key.
+- MCP is the official Kotlin SDK (`io.modelcontextprotocol:kotlin-sdk-server` 0.16): its
+  Streamable HTTP transport with JSON replies and its DNS-rebinding protection (Host and Origin
+  must be this machine). Kstate adds only a bearer token in front of `/mcp`, compared in constant
+  time, kept in `~/Library/Application Support/Kstate/agent-token` (owner-only, survives
+  restarts, "New token" locks old agents out). Loopback only, port 47900, off until the Owner
+  turns it on. The tools are plain `ToolSpec`s registered with `Server.addTool`, so their tests
+  run on virtual time without a transport; one test drives them with the SDK's own client.
+- "Settled" means no new picture for 300 ms: scrcpy only sends a frame when the screen changes.
+  The first change may take 700 ms; an animation is cut at 4 s and marked still moving. The clock
+  is injected, so the timing is tested on virtual time.
+- Same screen or not is a 32×64 grid of average brightness: a cell changes past 6 levels, one
+  stray cell (a caret) is allowed. A difference hash was tried first and missed real changes on
+  flat UI areas.
+- Variants come from the schema, most telling first: other sealed variants and enum values,
+  null/present, empty/crowded lists, long/RTL/emoji text, 0/negative/huge numbers, flipped
+  booleans. Redacted and sensitive values are never touched. Schemas now list a sealed type's
+  leaves with the exact tag to write (`$type`/`$class` for reflection, `type` for kotlinx).
+- The map pauses while exploring, so made-up overlays never become screens. A cause noted while a
+  screen is still settling belongs to the next step, not to that screen.

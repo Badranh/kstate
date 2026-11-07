@@ -8,6 +8,7 @@ dependencies {
     implementation(projects.host.hostCore)
     implementation(projects.host.hostVideo)
     implementation(projects.host.hostTunnel)
+    implementation(projects.host.hostAgent)
     implementation(projects.viewer.viewerUi)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)

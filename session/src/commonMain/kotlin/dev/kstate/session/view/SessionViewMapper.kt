@@ -107,6 +107,7 @@ object SessionViewMapper {
                 ?: "$id (${attached?.model ?: "unknown"}), waiting for an app",
         connected = app?.connected == true,
         sources = sources.map(::source),
+        route = app?.nav.orEmpty(),
     )
 
     private fun source(track: SourceTrack) =
