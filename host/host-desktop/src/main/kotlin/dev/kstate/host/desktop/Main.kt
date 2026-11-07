@@ -7,6 +7,8 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -21,6 +23,7 @@ import dev.kstate.session.SessionEngine
 import dev.kstate.viewer.ui.KstateApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.skia.Image
 import org.koin.core.context.startKoin
 
 fun main() {
@@ -52,6 +55,7 @@ fun main() {
                 exitApplication()
             },
             title = windowTitle(recording, shownRecording),
+            icon = AppIcon,
             state = rememberWindowState(width = 1080.dp, height = 720.dp),
         ) {
             DesktopMenu(sessions, onShare = { sharingOpen = true }, onAgent = { agentOpen = true })
@@ -73,4 +77,13 @@ fun main() {
         if (sharingOpen) ShareWindow(sharing, collab, onClose = { sharingOpen = false })
         if (agentOpen) AgentWindow(agentAccess, agent.reports, onClose = { agentOpen = false })
     }
+}
+
+/** The window and Dock icon while running from a build; the packaged app uses `icons/kstate.icns`. */
+private val AppIcon: BitmapPainter by lazy {
+    val bytes =
+        checkNotNull(object {}.javaClass.getResourceAsStream("/kstate-icon.png")) {
+            "kstate-icon.png is missing"
+        }.use { it.readBytes() }
+    BitmapPainter(Image.makeFromEncoded(bytes).toComposeImageBitmap())
 }

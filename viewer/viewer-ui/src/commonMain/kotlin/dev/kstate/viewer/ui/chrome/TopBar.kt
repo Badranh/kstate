@@ -63,7 +63,7 @@ fun TopBar(
 @Composable
 private fun Wordmark() {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Box(Modifier.size(10.dp).background(MaterialTheme.colorScheme.primary, CircleShape))
+        LogoMark()
         Text("kstate", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
     }
 }
