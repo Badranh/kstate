@@ -427,3 +427,14 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   leaves with the exact tag to write (`$type`/`$class` for reflection, `type` for kotlinx).
 - The map pauses while exploring, so made-up overlays never become screens. A cause noted while a
   screen is still settling belongs to the next step, not to that screen.
+
+## 2026-11-07: Who may connect as the app
+- The app gateway refuses any request that carries an `Origin` header, and closes a connection on a
+  frame over 16 MB (`JsonLimits.MAX_LINE_CHARS`). Apps connect with the SDK's Ktor client, which
+  sends no Origin; browsers always send one. So a web page the user visits can no longer open
+  `ws://127.0.0.1:<port>/ws/app`, pose as the app, inject states and read the commands.
+- Still open: another app on the same device can reach the gateway through `adb reverse`, and so can
+  another program on this Mac that sends no Origin. `KstateConfig.pairingToken` reaches the host in
+  `Hello`, but the host has no token of its own to compare it with. Closing this needs a pairing step
+  (the host hands the app a token through adb or simctl). That is a feature, recorded here so it is
+  not mistaken for done.
