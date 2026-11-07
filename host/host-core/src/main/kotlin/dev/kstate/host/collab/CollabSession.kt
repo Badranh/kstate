@@ -98,6 +98,11 @@ class CollabSession(
         const val MAX_NAME_CHARS: Int = 40
         const val MAX_COMMENT_CHARS: Int = 2_000
         const val MAX_COMMENTS: Int = 1_000
+        const val MAX_COMMENTS_PER_MINUTE: Int = 20
+        const val MAX_MEMBERS_PER_INVITE: Int = 25
+
+        /** Longer than any real source key, such as `emulator-5554/Checkout-3`. */
+        const val MAX_SOURCE_KEY_CHARS: Int = 200
         const val DEFAULT_INVITE_TTL_MILLIS: Long = 8 * 60 * 60 * 1000L
     }
 }

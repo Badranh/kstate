@@ -31,6 +31,9 @@ internal class CollabState(
                 Member(Participant(CollabSession.OWNER_ID, "Owner", Role.OWNER, online = true), null, null),
         )
     val comments = mutableListOf<Comment>()
+
+    /** When each guest last posted, newest last, within the past minute: for the rate limit. */
+    val recentPosts = mutableMapOf<String, ArrayDeque<Long>>()
     val driveRequests = linkedSetOf<String>()
     var driverMayShowStates = false
     private var ids = 0
@@ -61,5 +64,9 @@ internal class CollabState(
     fun removeMember(participantId: String) {
         members.remove(participantId)
         driveRequests.remove(participantId)
+        recentPosts.remove(participantId)
     }
 }
+
+/** A guest's source key as kept: null when longer than any real one, so a guest can't store megabytes in it. */
+internal fun String?.asSourceKey(): String? = this?.takeIf { it.length <= CollabSession.MAX_SOURCE_KEY_CHARS }

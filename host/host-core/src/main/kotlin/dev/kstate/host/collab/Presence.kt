@@ -12,7 +12,7 @@ class Presence internal constructor(
         participantId: String,
         sourceKey: String?,
         at: Long?,
-    ) = state.edit { updateParticipant(participantId) { it.copy(watching = sourceKey, at = at) } }
+    ) = state.edit { updateParticipant(participantId) { it.copy(watching = sourceKey.asSourceKey(), at = at) } }
 
     private fun tabs(
         participantId: String,

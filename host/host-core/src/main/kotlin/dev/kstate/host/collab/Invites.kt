@@ -54,13 +54,18 @@ class Invites internal constructor(
         name: String,
     ): JoinedViewer? =
         state.edit {
-            invites.values.firstOrNull { it.token == token && it.expiresAtMillis > wallMillis() }?.let { invite ->
-                val id = nextId("p")
-                val session = token()
-                members[id] =
-                    Member(Participant(id, displayName(name), Role.VIEWER, online = false), invite.id, session)
-                JoinedViewer(id, session)
-            }
+            invites.values
+                .firstOrNull { it.token == token && it.expiresAtMillis > wallMillis() }
+                ?.takeIf { invite ->
+                    members.values.count { it.inviteId == invite.id } <
+                        CollabSession.MAX_MEMBERS_PER_INVITE
+                }?.let { invite ->
+                    val id = nextId("p")
+                    val session = token()
+                    members[id] =
+                        Member(Participant(id, displayName(name), Role.VIEWER, online = false), invite.id, session)
+                    JoinedViewer(id, session)
+                }
         }
 
     /** The participant a session cookie belongs to, while its invite is valid. */

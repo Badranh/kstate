@@ -10,7 +10,10 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.request.contentLength
+import io.ktor.server.request.receiveChannel
 import io.ktor.server.request.receiveText
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -20,9 +23,11 @@ import io.ktor.server.websocket.DefaultWebSocketServerSession
 import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.pingPeriod
 import io.ktor.server.websocket.webSocket
+import io.ktor.utils.io.readRemaining
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.close
 import kotlinx.coroutines.flow.map
+import kotlinx.io.readString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -126,33 +131,47 @@ class ViewServer(
         }
     }
 
+    /** Origin first and size second, both before reading: a stranger's body is never buffered. */
     private suspend fun join(call: ApplicationCall) {
-        val request =
-            try {
-                json.decodeFromString(JoinRequest.serializer(), call.receiveText().take(MAX_JOIN_CHARS))
-            } catch (_: SerializationException) {
-                null
-            } catch (_: IllegalArgumentException) {
-                null
-            }
-        val joined =
-            request
-                ?.takeIf {
-                    RequestChecks.sameOrigin(
-                        call.request,
-                    )
-                }?.let { collab.invites.join(it.token, it.name) }
-        if (joined == null) {
-            call.respondText("invite not valid", status = HttpStatusCode.Forbidden)
-            return
+        val body = if (RequestChecks.sameOrigin(call.request)) boundedBody(call) else null
+        when {
+            !RequestChecks.sameOrigin(call.request) -> call.respondText(NOT_VALID, status = HttpStatusCode.Forbidden)
+            body == null -> call.respond(HttpStatusCode.PayloadTooLarge)
+            else -> welcome(call, decodeJoin(body)?.let { collab.invites.join(it.token, it.name) })
         }
-        call.response.cookies.append(
-            RequestChecks.sessionCookie(joined.sessionToken, RequestChecks.overHttps(call.request)),
-        )
-        call.respondText(
-            JsonObject(mapOf("participantId" to JsonPrimitive(joined.participantId))).toString(),
-            ContentType.Application.Json,
-        )
+    }
+
+    private fun decodeJoin(body: String): JoinRequest? =
+        try {
+            json.decodeFromString(JoinRequest.serializer(), body)
+        } catch (_: SerializationException) {
+            null
+        } catch (_: IllegalArgumentException) {
+            null
+        }
+
+    private suspend fun welcome(
+        call: ApplicationCall,
+        joined: JoinedViewer?,
+    ) {
+        if (joined == null) {
+            call.respondText(NOT_VALID, status = HttpStatusCode.Forbidden)
+        } else {
+            call.response.cookies.append(
+                RequestChecks.sessionCookie(joined.sessionToken, RequestChecks.overHttps(call.request)),
+            )
+            call.respondText(
+                JsonObject(mapOf("participantId" to JsonPrimitive(joined.participantId))).toString(),
+                ContentType.Application.Json,
+            )
+        }
+    }
+
+    /** The request body, or null when it is longer than a join can be. Reads at most one byte more. */
+    private suspend fun boundedBody(call: ApplicationCall): String? {
+        if ((call.request.contentLength() ?: 0L) > MAX_JOIN_CHARS) return null
+        val text = call.receiveChannel().readRemaining(MAX_JOIN_CHARS + 1L).readString()
+        return text.takeIf { it.length <= MAX_JOIN_CHARS }
     }
 
     private suspend fun DefaultWebSocketServerSession.withSession(
@@ -191,6 +210,7 @@ class ViewServer(
 
         private const val INDEX = "index.html"
         private const val MAX_JOIN_CHARS = 4_096
+        private const val NOT_VALID = "invite not valid"
         private const val MAX_FRAME_BYTES = 4L * 1024 * 1024
         private const val STOP_GRACE_MILLIS = 100L
         private const val STOP_TIMEOUT_MILLIS = 1_000L

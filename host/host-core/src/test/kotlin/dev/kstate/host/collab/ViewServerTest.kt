@@ -402,6 +402,19 @@ class ViewServerTest {
         }
 
     @Test
+    fun anOversizedJoinIsRefusedWithoutReadingItAll(): Unit =
+        runBlocking {
+            val response =
+                client.post("$origin/api/join") {
+                    header(HttpHeaders.Origin, origin)
+                    contentType(ContentType.Application.Json)
+                    setBody("x".repeat(1_000_000))
+                }
+
+            assertEquals(HttpStatusCode.PayloadTooLarge, response.status)
+        }
+
+    @Test
     fun revokingTheInviteAlsoClosesTheVideo(): Unit =
         runBlocking {
             video.timeline.setConfig(byteArrayOf(0x67))

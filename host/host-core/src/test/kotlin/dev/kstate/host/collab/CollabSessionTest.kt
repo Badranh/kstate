@@ -203,6 +203,64 @@ class CollabSessionTest {
     }
 
     @Test
+    fun aSourceKeyLongerThanAnyRealOneIsDropped() {
+        val viewer = joined().participantId
+        val huge = "d/" + "x".repeat(10_000)
+
+        collab.comments.post(viewer, "look", hostTs = 90, sourceKey = huge)
+        collab.presence.watch(viewer, huge, at = 42)
+
+        assertEquals(
+            null,
+            collab
+                .view(viewer)
+                .comments
+                .single()
+                .sourceKey,
+        )
+        assertEquals(null, collab.view(viewer).me?.watching)
+    }
+
+    @Test
+    fun aGuestCanPostOnlySoManyCommentsAMinute() {
+        val viewer = joined().participantId
+
+        repeat(CollabSession.MAX_COMMENTS_PER_MINUTE + 5) {
+            collab.comments.post(viewer, "spam $it", hostTs = 90, sourceKey = null)
+        }
+        assertEquals(CollabSession.MAX_COMMENTS_PER_MINUTE, collab.view(viewer).comments.size)
+
+        wall += 60_000
+        collab.comments.post(viewer, "later", hostTs = 90, sourceKey = null)
+        assertEquals(
+            "later",
+            collab
+                .view(viewer)
+                .comments
+                .last()
+                .text,
+        )
+    }
+
+    @Test
+    fun theOwnerIsNotRateLimited() {
+        repeat(CollabSession.MAX_COMMENTS_PER_MINUTE + 5) {
+            collab.comments.post(CollabSession.OWNER_ID, "note $it", hostTs = 90, sourceKey = null)
+        }
+
+        assertEquals(CollabSession.MAX_COMMENTS_PER_MINUTE + 5, collab.view(CollabSession.OWNER_ID).comments.size)
+    }
+
+    @Test
+    fun anInviteLetsOnlySoManyPeopleIn() {
+        val invite = collab.invites.create()
+
+        val joins = (1..CollabSession.MAX_MEMBERS_PER_INVITE + 3).map { collab.invites.join(invite.token, "guest $it") }
+
+        assertEquals(CollabSession.MAX_MEMBERS_PER_INVITE, joins.count { it != null })
+    }
+
+    @Test
     fun presenceFollowsWhatTheyWatchAndWhetherAnyTabIsOpen() {
         val viewer = joined().participantId
 
