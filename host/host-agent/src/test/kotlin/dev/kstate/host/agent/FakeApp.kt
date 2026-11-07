@@ -51,9 +51,16 @@ class FakeApp(
     val applied = mutableListOf<JsonElement>()
     var releases = 0
 
-    private val screen = Screen()
+    private var screen = Screen()
     override val session = MutableStateFlow(view())
-    override val screens: StateFlow<Map<String, DeviceScreen>> = MutableStateFlow(mapOf(DEVICE to screen))
+    private val screenMap = MutableStateFlow<Map<String, DeviceScreen>>(mapOf(DEVICE to screen))
+    override val screens: StateFlow<Map<String, DeviceScreen>> = screenMap
+
+    /** The video reconnects: a new screen for the same device, the old one goes quiet for good. */
+    fun reconnectVideo() {
+        screen = Screen()
+        screenMap.value = mapOf(DEVICE to screen)
+    }
 
     /** The state channel drops while the video keeps going, as when adb loses its reverse rule. */
     fun dropStateChannel() {

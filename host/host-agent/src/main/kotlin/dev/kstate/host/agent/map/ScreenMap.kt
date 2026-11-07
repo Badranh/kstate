@@ -6,13 +6,14 @@ import dev.kstate.host.agent.settle.SettleTiming
 import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.SessionView
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.serialization.json.JsonElement
 import kotlin.time.TimeSource
 
@@ -77,14 +78,21 @@ class ScreenMap(
         }
     }
 
-    /** Watches every device with video until cancelled. */
+    /**
+     * Watches every device with video until cancelled. A device whose video reconnects gets a new
+     * screen object; its watcher follows it, since the old one never sends a picture again.
+     */
     suspend fun run(): Unit =
-        coroutineScope {
-            val watched = mutableSetOf<String>()
+        supervisorScope {
+            val watchers = mutableMapOf<String, Pair<DeviceScreen, Job>>()
             source.screens.collect { screens ->
-                screens.filterKeys { it !in watched }.forEach { (id, screen) ->
-                    watched += id
-                    launch { watch(id, screen) }
+                (watchers.keys - screens.keys).forEach { id -> watchers.remove(id)?.second?.cancel() }
+                screens.forEach { (id, screen) ->
+                    val current = watchers[id]
+                    if (current?.first !== screen) {
+                        current?.second?.cancel()
+                        watchers[id] = screen to launch { watch(id, screen) }
+                    }
                 }
             }
         }

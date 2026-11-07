@@ -18,6 +18,7 @@ import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.SourceView
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.TimeSource
 
 /** What Kstate notices on its own, before anyone looks at the pictures. */
@@ -69,7 +70,7 @@ class Explorer(
     private val timing: SettleTiming = SettleTiming(),
     private val time: TimeSource = TimeSource.Monotonic,
 ) {
-    private var runs = 0
+    private val runs = AtomicInteger(0)
 
     suspend fun explore(
         sourceKey: String,
@@ -102,7 +103,16 @@ class Explorer(
             if (!finished) withContext(NonCancellable) { source.release(sourceKey) }
         }
         val restored = stopped == null && restore(sourceKey, device.id, screen, baseline)
-        return ExploreRun("r${++runs}", sourceKey, device.id, device.route, baseline, results, restored, stopped)
+        return ExploreRun(
+            "r${runs.incrementAndGet()}",
+            sourceKey,
+            device.id,
+            device.route,
+            baseline,
+            results,
+            restored,
+            stopped,
+        )
     }
 
     private suspend fun tryVariant(

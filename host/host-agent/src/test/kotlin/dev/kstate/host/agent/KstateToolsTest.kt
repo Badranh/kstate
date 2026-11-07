@@ -5,6 +5,7 @@ import dev.kstate.host.agent.settle.SettleTiming
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ImageContent
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -285,6 +286,29 @@ class KstateToolsTest {
 
             assertTrue(result.isError())
             assertTrue("not connected" in result.texts().single(), result.texts().single())
+        }
+
+    @Test
+    fun twoExploresOfOneDeviceTakeTurnsAndGetTheirOwnIds() =
+        runTest {
+            val app = FakeApp(backgroundScope, state(0), schema, ::render)
+            val agent =
+                KstateAgent(
+                    app,
+                    reports,
+                    SettleTiming(quietMillis = 300, graceMillis = 600, timeoutMillis = 3_000),
+                    testScheduler.timeSource,
+                )
+
+            val first = async { agent.explore(FakeApp.KEY, limit = 2) }
+            val second = async { agent.explore(FakeApp.KEY, limit = 3) }
+            val runs = listOf(first.await(), second.await())
+
+            assertEquals(2, runs.map { it.id }.toSet().size)
+            val applied = app.applied.map { it.toString() }
+            val one = runs[0].results.map { it.variant.state.toString() }
+            val two = runs[1].results.map { it.variant.state.toString() }
+            assertTrue(applied == one + two || applied == two + one, "the runs were interleaved: $applied")
         }
 
     @Test

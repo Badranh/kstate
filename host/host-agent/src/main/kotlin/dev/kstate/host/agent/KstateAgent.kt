@@ -28,7 +28,10 @@ class KstateAgent(
 ) {
     val captures: CaptureStore = CaptureStore()
     val map: ScreenMap = ScreenMap(source, captures, timing, time)
-    val driver: DeviceDriver = DeviceDriver(source, captures, map, timing, time)
+
+    /** One thing at a time per device: an explore and a tap on it would read each other's screens. */
+    private val locks = DeviceLocks()
+    val driver: DeviceDriver = DeviceDriver(source, captures, map, timing, time, locks)
     private val explorer = Explorer(source, captures, timing, time)
     private val writer = ReportWriter(reports)
     private val runs = mutableListOf<ExploreRun>()
@@ -53,7 +56,9 @@ class KstateAgent(
         limit: Int,
         onVariant: suspend (done: Int, total: Int, label: String) -> Unit = { _, _, _ -> },
     ): ExploreRun =
-        map.paused { explorer.explore(sourceKey, limit, onVariant) }.also { synchronized(runs) { runs += it } }
+        locks
+            .withDevice(deviceOf(sourceKey)) { map.paused { explorer.explore(sourceKey, limit, onVariant) } }
+            .also { synchronized(runs) { runs += it } }
 
     fun report(
         title: String,

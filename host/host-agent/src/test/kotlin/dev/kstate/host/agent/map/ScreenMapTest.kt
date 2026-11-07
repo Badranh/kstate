@@ -2,6 +2,7 @@ package dev.kstate.host.agent.map
 
 import dev.kstate.host.agent.FakeApp
 import dev.kstate.host.agent.capture.CaptureStore
+import dev.kstate.host.agent.image.Fingerprints
 import dev.kstate.host.agent.image.Picture
 import dev.kstate.host.agent.settle.SettleTiming
 import kotlinx.coroutines.launch
@@ -16,6 +17,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ScreenMapTest {
     private fun state(count: Int) = JsonObject(mapOf("count" to JsonPrimitive(count)))
@@ -33,11 +35,13 @@ class ScreenMapTest {
 
     private fun TestScope.start(): Pair<FakeApp, ScreenMap> {
         val app = FakeApp(backgroundScope, state(0), schema = null, render = ::render, route = listOf("Counter"))
-        val map = ScreenMap(app, CaptureStore(), timing, testScheduler.timeSource)
+        val map = ScreenMap(app, captures, timing, testScheduler.timeSource)
         backgroundScope.launch { map.run() }
         settle()
         return app to map
     }
+
+    private val captures = CaptureStore()
 
     private fun TestScope.settle() {
         runCurrent()
@@ -94,6 +98,26 @@ class ScreenMapTest {
                     .transitions
                     .single()
                     .causes,
+            )
+        }
+
+    @Test
+    fun aDeviceWhoseVideoReconnectsIsStillMapped() =
+        runTest {
+            val (app, map) = start()
+
+            app.reconnectVideo()
+            settle()
+            app.emit(state(4), route = listOf("Counter", "Detail"))
+            settle()
+
+            val node = map.view().nodes.last()
+            assertEquals(listOf("Counter", "Detail"), node.route)
+            // The picture is the new screen's, not the old one's last frame frozen with the new state.
+            val captured = checkNotNull(captures.get(node.captureId)).fingerprint
+            assertTrue(
+                Fingerprints.sameScreen(Fingerprints.of(render(state(4))), captured),
+                "mapped the dead screen's picture",
             )
         }
 

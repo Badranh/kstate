@@ -47,6 +47,7 @@ class DeviceDriver(
     private val map: ScreenMap,
     private val timing: SettleTiming,
     private val time: TimeSource,
+    private val locks: DeviceLocks = DeviceLocks(),
 ) {
     suspend fun screenshot(deviceId: String?): Capture {
         val (id, screen) = screen(deviceId)
@@ -121,6 +122,15 @@ class DeviceDriver(
         action: suspend (DeviceScreen) -> Unit,
     ): ActionResult {
         val (id, screen) = screen(deviceId)
+        return locks.withDevice(id) { actOn(id, screen, note, action) }
+    }
+
+    private suspend fun actOn(
+        id: String,
+        screen: DeviceScreen,
+        note: String,
+        action: suspend (DeviceScreen) -> Unit,
+    ): ActionResult {
         val view = source.session.value
         val before = view.devices.firstOrNull { it.id == id }
         val mark = DeviceMark.of(view, id)
