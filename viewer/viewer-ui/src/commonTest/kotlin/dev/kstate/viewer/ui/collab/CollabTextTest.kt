@@ -1,10 +1,13 @@
 package dev.kstate.viewer.ui.collab
 
 import dev.kstate.viewer.client.CollabView
+import dev.kstate.viewer.client.Comment
 import dev.kstate.viewer.client.Participant
 import dev.kstate.viewer.client.Role
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class CollabTextTest {
     private val second = 1_000_000_000L
@@ -51,5 +54,47 @@ class CollabTextTest {
 
         assertEquals("Grace", CollabText.driver(view)?.name)
         assertEquals(null, CollabText.driver(CollabView()))
+    }
+
+    private fun comment(
+        id: String,
+        at: Long,
+        author: String = "Ada",
+    ) = Comment(
+        id,
+        authorId = author.lowercase(),
+        authorName = author,
+        text = "x",
+        hostTs = at,
+        sourceKey = null,
+        postedAt = at,
+    )
+
+    @Test
+    fun initialsComeFromTheFirstTwoWords() {
+        assertEquals("AL", CollabText.initials("Ada Lovelace"))
+        assertEquals("G", CollabText.initials("guest"))
+        assertEquals("?", CollabText.initials("  "))
+    }
+
+    @Test
+    fun everyoneKeepsTheirAvatarColour() {
+        assertEquals(CollabText.avatarIndex("Ada", 6), CollabText.avatarIndex("Ada", 6))
+        assertTrue(CollabText.avatarIndex("Grace", 6) in 0 until 6)
+        assertTrue(setOf("Ada", "Grace", "Linus", "Margaret").map { CollabText.avatarIndex(it, 6) }.toSet().size > 1)
+    }
+
+    @Test
+    fun commentsAreInSessionOrder() {
+        val later = comment("c1", at = 9_000_000_000)
+        val earlier = comment("c2", at = 2_000_000_000)
+
+        assertEquals(listOf("c2", "c1"), CollabText.inOrder(listOf(later, earlier)).map { it.id })
+    }
+
+    @Test
+    fun aCommentWithinASecondOfTheMomentShownIsNow() {
+        assertTrue(CollabText.isNow(comment("c1", at = 5_000_000_000), momentShown = 5_400_000_000))
+        assertFalse(CollabText.isNow(comment("c1", at = 5_000_000_000), momentShown = 7_000_000_000))
     }
 }
