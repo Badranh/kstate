@@ -449,3 +449,12 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   A damaged line anywhere but last is still an error; reads stay bounds-checked.
 - The first failed write stops further writing and makes `stop()` throw, instead of a "finished"
   recording that silently lacks its second half. Saving on quit is the shutdown work in Tier 3.
+
+## 2026-11-07: A blinking caret vs a changed digit
+- One comparison can't tell a blinking caret from a small piece of text that changed: both are a
+  few grid cells in one or two columns. So "small motion" (at most 6 cells within 2 adjacent
+  columns) only ever stops a screen from waiting to settle; it still counts as a change, so the
+  state behind it is still waited for.
+- "Same screen" stays strict (one stray cell) for the UNCHANGED and DUPLICATE flags: a caret may
+  hide a hint there, but a real small text change is never called "unchanged". Only the check that
+  the app came back after explore is lenient, where a caret's phase would raise a false warning.

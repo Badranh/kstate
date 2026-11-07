@@ -152,7 +152,9 @@ class Explorer(
     ): Boolean {
         source.release(sourceKey)
         val after = capture(deviceId, screen) ?: return false
-        return Fingerprints.sameScreen(after.fingerprint, baseline.fingerprint)
+        // Lenient on purpose: a caret caught in its other phase must not read as "did not come back".
+        return Fingerprints.sameScreen(after.fingerprint, baseline.fingerprint) ||
+            Fingerprints.isSmallMotion(after.fingerprint, baseline.fingerprint)
     }
 
     private suspend fun capture(

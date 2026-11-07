@@ -1,5 +1,7 @@
 package dev.kstate.host.agent.settle
 
+import dev.kstate.host.agent.image.Fingerprints
+import dev.kstate.host.agent.image.Picture
 import dev.kstate.viewer.client.SessionView
 import dev.kstate.viewer.client.VideoFrame
 import kotlinx.coroutines.flow.StateFlow
@@ -84,17 +86,27 @@ object Settle {
     ): Settled {
         val start = time.markNow()
         var current = frames.value
+        var reference = current?.let(::fingerprint)
         var changed = false
+        // Settled once no change that matters came for the quiet time; the first may take the grace.
+        var quietUntil = timing.graceMillis
         while (true) {
             val elapsed = start.elapsedNow().inWholeMilliseconds
-            val wait = if (changed) timing.quietMillis else timing.graceMillis - elapsed
-            // The timeout can cut the wait short: then the screen was still moving.
-            val window = minOf(wait, timing.timeoutMillis - elapsed)
+            val window = minOf(quietUntil, timing.timeoutMillis) - elapsed
             val previous = current
             val next = if (window > 0) withTimeoutOrNull(window) { frames.first { it !== previous } } else null
-            if (next == null) return Settled(current, changed, settled = window >= wait)
+            if (next == null) return Settled(current, changed, settled = quietUntil <= timing.timeoutMillis)
             current = next
             changed = true
+            // A small motion (a blinking caret) is a change, so the state behind it is still waited
+            // for, but it doesn't keep the screen from settling.
+            val print = fingerprint(next)
+            if (reference == null || !Fingerprints.isSmallMotion(reference, print)) {
+                reference = print
+                quietUntil = start.elapsedNow().inWholeMilliseconds + timing.quietMillis
+            }
         }
     }
 }
+
+private fun fingerprint(frame: VideoFrame) = Fingerprints.of(Picture.of(frame))

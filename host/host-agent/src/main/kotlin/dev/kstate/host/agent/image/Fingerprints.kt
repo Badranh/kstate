@@ -18,6 +18,10 @@ object Fingerprints {
 
     /** One changed cell may be a blinking caret; more is a different screen. */
     private const val STRAY_CELLS = 1
+
+    /** A caret at a real tile size covers two or three cells of one column, a spinner a few more. */
+    private const val MOTION_CELLS = 6
+    private const val MOTION_COLUMNS = 2
     private const val BLANK_SPREAD = 6.0
     private const val BLANK_SHARE = 0.985
     private const val SAMPLES = 20_000
@@ -46,6 +50,21 @@ object Fingerprints {
         a: Fingerprint,
         b: Fingerprint,
     ): Boolean = changedCells(a, b) <= STRAY_CELLS
+
+    /**
+     * The only change is a few cells in one or two adjacent columns: a blinking caret or a spinner,
+     * or a small piece of text that changed. One comparison can't tell those apart, so this never
+     * decides that a screen is unchanged: it only keeps a screen from waiting to settle.
+     */
+    fun isSmallMotion(
+        a: Fingerprint,
+        b: Fingerprint,
+    ): Boolean {
+        val changed = a.cells.indices.filter { abs(a.cells[it] - b.cells[it]) > CELL_CHANGE }
+        if (changed.size > MOTION_CELLS) return false
+        val columns = changed.map { it % GRID_WIDTH }
+        return columns.isEmpty() || columns.max() - columns.min() < MOTION_COLUMNS
+    }
 
     /** Nearly every pixel is the same shade: a white or black screen, perhaps with a thin bar. */
     fun isBlank(picture: Picture): Boolean {
