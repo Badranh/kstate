@@ -7,8 +7,10 @@ import dev.kstate.core.session.data.wire.RecordingFormatException
 import dev.kstate.core.session.domain.SessionEngine
 import dev.kstate.host.server.timeline.VideoSample
 import dev.kstate.host.server.timeline.VideoTimeline
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.attribute.PosixFilePermissions
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.exists
@@ -16,6 +18,8 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.io.path.outputStream
 import kotlin.io.path.readBytes
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -138,6 +142,36 @@ class SessionArchiveTest {
         assertFailsWith<RecordingFormatException> { archive.import(file, imports) }
 
         assertEquals(emptyList(), if (imports.exists()) imports.listDirectoryEntries().map { it.name } else emptyList())
+    }
+
+    /** An export that fails half way must not leave a truncated recording, or spoil one already there. */
+    @Test
+    fun aFailedExportLeavesTheTargetAsItWas() {
+        record()
+        val file = root.resolve("Bug.kstate").apply { writeText("an earlier export") }
+        val timeline = session.resolve(SessionFolder.TIMELINE)
+        Files.setPosixFilePermissions(timeline, emptySet())
+
+        try {
+            assertFailsWith<IOException> { archive.export(session, file) }
+        } finally {
+            Files.setPosixFilePermissions(timeline, PosixFilePermissions.fromString("rw-------"))
+        }
+
+        assertEquals("an earlier export", file.readText())
+        assertEquals(listOf("Bug.kstate"), root.listDirectoryEntries("*.kstate*").map { it.name })
+    }
+
+    /** A small archive that unpacks to a lot (a zip bomb) stops before the disk is full. */
+    @Test
+    fun anImportStopsBeforeFillingTheDisk() {
+        val tight = SessionArchive(freeSpace = { 64L * 1024 + SessionArchive.DISK_RESERVE_BYTES })
+        val big = zip(SessionFolder.TIMELINE to ByteArray(1024 * 1024))
+
+        val failure = assertFailsWith<RecordingFormatException> { tight.import(big, imports) }
+
+        assertTrue("disk" in failure.message.orEmpty(), failure.message)
+        assertEquals(emptyList(), imports.listDirectoryEntries())
     }
 
     @Test

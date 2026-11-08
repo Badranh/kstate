@@ -29,6 +29,7 @@ import kotlin.io.path.walk
 class SessionArchive(
     private val maxEntries: Int = DEFAULT_MAX_ENTRIES,
     private val maxTotalBytes: Long = DEFAULT_MAX_TOTAL_BYTES,
+    private val freeSpace: (Path) -> Long = { Files.getFileStore(it).usableSpace },
 ) {
     fun export(
         sessionDir: Path,
@@ -42,13 +43,22 @@ class SessionArchive(
                 }.map { it.relativeTo(sessionDir).joinToString("/") }
                 .sorted()
                 .toList()
-        Files.createDirectories(target.toAbsolutePath().parent)
-        ZipOutputStream(Files.newOutputStream(target)).use { zip ->
-            files.filter(SessionFolder::isRecordingFile).forEach { name ->
-                zip.putNextEntry(ZipEntry(name))
-                Files.newInputStream(sessionDir.resolve(name)).use { it.copyTo(zip) }
-                zip.closeEntry()
+        val folder = target.toAbsolutePath().parent
+        Files.createDirectories(folder)
+        // Written beside the target and moved over it whole: an export that fails half way leaves
+        // no truncated recording, and an earlier one at that name as it was.
+        val partial = Files.createTempFile(folder, ".${target.name}.", ".partial")
+        try {
+            ZipOutputStream(Files.newOutputStream(partial)).use { zip ->
+                files.filter(SessionFolder::isRecordingFile).forEach { name ->
+                    zip.putNextEntry(ZipEntry(name))
+                    Files.newInputStream(sessionDir.resolve(name)).use { it.copyTo(zip) }
+                    zip.closeEntry()
+                }
             }
+            Files.move(partial, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+        } finally {
+            Files.deleteIfExists(partial)
         }
     }
 
@@ -83,7 +93,17 @@ class SessionArchive(
             }
         zip.use {
             formatCheck(zip.size() <= maxEntries) { "recording has more than $maxEntries files" }
-            var budget = maxTotalBytes
+            // The sizes a zip claims are not trusted, so the bytes are counted as they come out,
+            // up to the limit or what leaves DISK_RESERVE_BYTES free, whichever is smaller.
+            val room = freeSpace(into) - DISK_RESERVE_BYTES
+            val tooBig =
+                if (room < maxTotalBytes) {
+                    "recording does not fit on the disk with ${DISK_RESERVE_BYTES / BYTES_PER_GIB} GiB left free"
+                } else {
+                    "recording is larger than $maxTotalBytes bytes"
+                }
+            var budget = minOf(maxTotalBytes, room)
+            formatCheck(budget > 0) { tooBig }
             zip
                 .entries()
                 .asSequence()
@@ -98,7 +118,7 @@ class SessionArchive(
                     zip.getInputStream(entry).use { input ->
                         Files.newOutputStream(target, StandardOpenOption.CREATE_NEW).use { output ->
                             budget -=
-                                copyWithin(input, output, budget)
+                                copyWithin(input, output, budget, tooBig)
                         }
                     }
                 }
@@ -110,6 +130,7 @@ class SessionArchive(
         input: InputStream,
         output: OutputStream,
         budget: Long,
+        tooBig: String,
     ): Long {
         val buffer = ByteArray(BUFFER_BYTES)
         var copied = 0L
@@ -117,7 +138,7 @@ class SessionArchive(
             val read = input.read(buffer)
             if (read < 0) return copied
             copied += read
-            formatCheck(copied <= budget) { "recording is larger than $maxTotalBytes bytes" }
+            formatCheck(copied <= budget) { tooBig }
             output.write(buffer, 0, read)
         }
     }
@@ -147,6 +168,10 @@ class SessionArchive(
         const val DEFAULT_MAX_ENTRIES: Int = 1_024
         const val DEFAULT_MAX_TOTAL_BYTES: Long = 16L * 1024 * 1024 * 1024
         private const val BUFFER_BYTES = 64 * 1024
+
+        /** Left free on the disk by an import, whatever the archive holds. */
+        const val DISK_RESERVE_BYTES: Long = 1024L * 1024 * 1024
+        private const val BYTES_PER_GIB = 1024L * 1024 * 1024
         private const val MAX_NAME_ATTEMPTS = 1_000
     }
 }
