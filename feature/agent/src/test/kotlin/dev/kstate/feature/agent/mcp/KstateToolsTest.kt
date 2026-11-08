@@ -421,18 +421,52 @@ class KstateToolsTest {
     fun typeTextCanEmptyTheFieldFirst() =
         runTest {
             val (app, server) = server()
+            showsASelectionAfterSelectAll(app)
 
             server.call("type_text", """{"text":"Ada"}""")
             server.call("type_text", """{"text":"Grace","clear":true}""")
             server.call("type_text", """{"text":"","clear":true}""")
 
-            // Typing replaces the selection, so Delete is only sent to leave the field empty: in an
-            // empty field it would delete a chip or step back to the previous PIN box.
+            // Typing replaces the selection, so Delete is only sent to leave the field empty.
+            // Either waits until the selection is on screen: the keyboard hears of it only then, and
+            // a Delete it gets first removes one character instead of the selection.
             assertEquals(
-                listOf("text Ada", "key 29 meta 4096", "text Grace", "key 29 meta 4096", "key 67 meta 0"),
+                listOf(
+                    "text Ada",
+                    "key 29 meta 4096",
+                    "selection shown",
+                    "text Grace",
+                    "key 29 meta 4096",
+                    "selection shown",
+                    "key 67 meta 0",
+                ),
                 app.typed,
             )
         }
+
+    @Test
+    fun clearingAFieldWithNothingToSelectSendsNoDelete() =
+        runTest {
+            val (app, server) = server()
+
+            server.call("type_text", """{"text":"","clear":true}""")
+
+            // In an empty field Delete would remove a chip or step back to the previous PIN box.
+            assertEquals(listOf("key 29 meta 4096"), app.typed)
+        }
+
+    /** Select all draws a highlight a little later, as a real field does. */
+    private fun TestScope.showsASelectionAfterSelectAll(app: FakeApp) {
+        app.onKey = { keycode, _ ->
+            if (keycode == 29) {
+                backgroundScope.launch {
+                    delay(100)
+                    app.typed += "selection shown"
+                    app.repaint()
+                }
+            }
+        }
+    }
 
     @Test
     fun anExploreThatCouldNotCheckTheAppCameBackSaysWhy() =

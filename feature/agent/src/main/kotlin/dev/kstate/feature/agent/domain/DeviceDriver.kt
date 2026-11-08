@@ -119,12 +119,13 @@ class DeviceDriver(
         clear: Boolean = false,
     ): ActionResult =
         act(deviceId, "type \"${text.take(NOTE_TEXT)}\"" + if (clear) " after clearing" else "") { screen ->
-            // Typing replaces the selection, so Delete is only sent to leave the field empty: in an
-            // empty field it would delete a chip or step back to the previous PIN box.
-            if (clear) screen.key(KEYCODE_A, META_CTRL_ON)
+            val selected = clear && screen.selectAll(timing, time)
+            // Typing replaces the selection, so Delete is only sent to leave the field empty, and
+            // only over a selection: in an empty field it would delete a chip or step back to the
+            // previous PIN box.
             if (text.isNotEmpty()) {
                 screen.text(text)
-            } else if (clear) {
+            } else if (selected) {
                 screen.key(KEYCODE_DEL)
             }
         }
@@ -221,11 +222,25 @@ class DeviceDriver(
         const val SWIPE_STEPS = 12
         const val NOTE_TEXT = 30
         const val MAX_CHANGES = 40
-        const val KEYCODE_A = 29
         const val KEYCODE_DEL = 67
-        const val META_CTRL_ON = 0x1000
     }
 }
+
+/**
+ * Ctrl+A, then waits for the screen to show it. The keyboard hears of the new selection only after
+ * the app has drawn it, and a Delete it gets first removes one character instead. False when
+ * nothing changed on screen: there was nothing to select.
+ */
+private suspend fun DeviceScreen.selectAll(
+    timing: SettleTiming,
+    time: TimeSource,
+): Boolean {
+    key(KEYCODE_A, META_CTRL_ON)
+    return Settle.await(frames, timing, time).changed
+}
+
+private const val KEYCODE_A = 29
+private const val META_CTRL_ON = 0x1000
 
 private fun whichDevice(devices: Set<String>): String =
     if (devices.isEmpty()) {

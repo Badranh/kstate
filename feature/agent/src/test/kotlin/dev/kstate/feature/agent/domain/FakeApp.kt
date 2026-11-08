@@ -47,6 +47,9 @@ class FakeApp(
     /** Called with each state the app accepts, before it is drawn. */
     var onShow: (JsonElement) -> Unit = {}
 
+    /** Called with each key the device receives. */
+    var onKey: (keycode: Int, metaState: Int) -> Unit = { _, _ -> }
+
     /** Called when an overlay is released, before the app's own state is drawn again. */
     var onRelease: () -> Unit = {}
 
@@ -261,6 +264,7 @@ class FakeApp(
             metaState: Int,
         ) {
             typed += "key $keycode meta $metaState"
+            onKey(keycode, metaState)
         }
 
         override fun text(text: String) {

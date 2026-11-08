@@ -538,7 +538,10 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   has no Paste key, but the SDK needs Android 8 (minSdk 26), so a Kstate app never runs there.
 - `type_text` takes `clear`: Ctrl+A, then the text, which replaces the selection; Delete only when
   there is no text, since in an empty field it deletes a chip or steps back to the previous PIN
-  box. Key presses carry a KeyEvent meta state end to end, including from the web viewer
+  box. Between Ctrl+A and what follows, Kstate waits for the screen to settle: the keyboard hears
+  of the selection only after the app draws it, and live, a Delete sent straight after removed
+  one character instead (1 run in 3). A Ctrl+A that changes nothing on screen means nothing was
+  selected, so no Delete is sent. Key presses carry a KeyEvent meta state end to end, including from the web viewer
   (`ViewerInput.Key.metaState`, left out when 0, so older viewers still parse); the host passes
   only Shift, Ctrl and Alt from viewers.
 - The scrambled text in the field report came from the sample, not Kstate: its Orbit form applied
