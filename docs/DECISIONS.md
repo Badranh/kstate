@@ -556,7 +556,12 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   oldest video kept) can lag as old video rolls off; it catches up with the next change.
 - The heartbeat dot reads its animation only while drawing: it recomposed 82 times a beat.
 - A watch (which source and moment someone looks at) goes to the host and on to everyone, so it
-  is sent once the moment holds still for 150 ms: a scrub sent one per frame.
+  is sent once the moment holds still for 150 ms: a scrub sent one per frame. One still waiting
+  when the screen goes away (opening a recording) is sent then, never twice.
+- Held-back emissions (the app's real state behind an override) used to leave the session
+  unchanged, so with the timeline rebuilt on session changes their red marks stopped appearing.
+  A source now records its newest held-back emission (`SourceView.heldBackSeq`), which changes
+  the view each time.
 
 ## 2026-11-08: A seek makes one picture
 - Showing a moment decodes its GOP from the key frame, and every frame was converted to RGBA and
@@ -569,7 +574,10 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 - A joining viewer got the whole history in one SessionState frame; the history only grows, so a
   long session became one huge string built on the host and parsed in the browser. It now comes
   in frames of at most 500 lines (SessionState with the first, then TimelineAppends), as live
-  input already did. The viewer still replays all of it: scrubbing back needs every line.
+  input already did. The viewer still replays all of it: scrubbing back needs every line. The
+  SessionState says how many lines the history has (`historyLines`, left out by older hosts), and
+  the viewer shows "Loading the session…" until all have arrived: half a history would show an
+  old "latest" as current.
 - Rebuilding the timeline reads each source's whole history, so it is quadratic over a session.
   Measured, not changed: 0.4 ms per rebuild with 36,000 states over 10 sources (an hour at 10
   states a second), about 0.4% of a core at that rate. Incremental lane lists would cost more in

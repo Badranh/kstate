@@ -133,11 +133,16 @@ class SessionEngine(
         val timed = TimedSnapshot(hostTs, snapshot)
         timeline.append(key, timed)
         // A suppressed emission is the app's real state hidden behind an override: kept, not shown.
+        // Recording it as held back still changes the session, so the timeline's mark is drawn.
         val shown =
             if (snapshot.suppressed) {
-                source
+                source.copy(heldBack = timed)
             } else {
-                source.copy(latest = timed, lastDiff = diffEngine.diff(source.latest?.snapshot?.state, snapshot.state))
+                source.copy(
+                    latest = timed,
+                    lastDiff = diffEngine.diff(source.latest?.snapshot?.state, snapshot.state),
+                    heldBack = null,
+                )
             }
         return session.copy(sources = session.sources + (key to shown))
     }

@@ -30,6 +30,8 @@ sealed interface ToViewer {
             RecordedInput,
         >,
         val collab: CollabView,
+        /** How many history lines are coming, these and the TimelineAppends after; null when all are here. */
+        val historyLines: Int? = null,
     ) : ToViewer
 
     @Serializable

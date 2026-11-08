@@ -35,6 +35,25 @@ class WatchSyncTest {
             assertEquals("emulator-5554/Counter-1" to (FRAMES - 1) * STEP, collaboration.watched.last())
         }
 
+    /** Opening a recording right after pausing replaces the screen: the moment still reaches the others. */
+    @Test
+    fun aWatchStillWaitingIsSentWhenTheScreenGoesAway() =
+        runComposeUiTest {
+            val collaboration = RecordingCollaboration()
+            var at by mutableStateOf<Long?>(null)
+            var shown by mutableStateOf(true)
+            mainClock.autoAdvance = false
+            setContent { if (shown) WatchSync(collaboration, "a", at) }
+            mainClock.advanceTimeBy(SETTLED)
+
+            at = 42L
+            mainClock.advanceTimeBy(FRAME)
+            shown = false
+            mainClock.advanceTimeBy(SETTLED)
+
+            assertEquals("a" to 42L, collaboration.watched.last())
+        }
+
     @Test
     fun choosingAnotherSourceIsSentToo() =
         runComposeUiTest {

@@ -42,6 +42,8 @@ data class SourceTrack(
     val schema: JsonElement? = null,
     /** Host time of the app's latest registration of this source; its seqs start over there. */
     val registeredAt: Long? = null,
+    /** The app's newest emission held back behind an override; null once one is shown again. */
+    val heldBack: TimedSnapshot? = null,
 )
 
 data class TimedSnapshot(

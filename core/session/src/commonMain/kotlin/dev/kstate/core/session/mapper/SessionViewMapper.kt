@@ -132,6 +132,7 @@ object SessionViewMapper {
             restorable =
                 track.live &&
                     track.latest.let { it != null && it.hostTs >= (track.registeredAt ?: Long.MIN_VALUE) },
+            heldBackSeq = track.heldBack?.snapshot?.seq,
         )
 
     private fun event(timed: TimedEvent) =

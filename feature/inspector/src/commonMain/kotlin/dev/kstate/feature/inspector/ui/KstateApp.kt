@@ -19,11 +19,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -135,8 +137,28 @@ internal fun WatchSync(
     selected: String?,
     at: Long?,
 ) {
-    LaunchedEffect(collaboration, selected, at) {
+    val sync = remember(collaboration) { Watched(collaboration) }
+    LaunchedEffect(sync, selected, at) {
         delay(WATCH_SETTLE_MILLIS)
+        sync.send(selected, at)
+    }
+    // Leaving the screen (opening a recording, say) still tells the others where it stopped.
+    val latest by rememberUpdatedState(selected to at)
+    DisposableEffect(sync) { onDispose { sync.send(latest.first, latest.second) } }
+}
+
+/** What was last told to the others, so a moment is never sent twice. */
+private class Watched(
+    private val collaboration: Collaboration,
+) {
+    private var sent: Pair<String?, Long?>? = null
+
+    fun send(
+        selected: String?,
+        at: Long?,
+    ) {
+        if (sent == (selected to at)) return
+        sent = selected to at
         collaboration.watch(selected, at)
     }
 }

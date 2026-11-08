@@ -21,6 +21,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class SessionEngineTest {
@@ -364,6 +365,27 @@ class SessionEngineTest {
                 .getValue(counter)
         assertEquals(JsonPrimitive(1), source.latest?.snapshot?.state)
         assertEquals(listOf(false, true), engine.timeline.history(counter).map { it.snapshot.suppressed })
+    }
+
+    /** What the viewer shows has to change, or nothing redraws the timeline's held-back marks. */
+    @Test
+    fun aHeldBackEmissionChangesWhatTheViewerShows() {
+        connectCounter()
+        receive(snapshot(0, 1))
+        val before = SessionViewMapper.map(engine.session.value, emptyList(), null)
+
+        receive(StateSnapshot("Counter-1", 1, JsonPrimitive(2), Encoding.SERIALIZER, suppressed = true))
+        val after = SessionViewMapper.map(engine.session.value, emptyList(), null)
+
+        assertNotEquals(before, after)
+        assertEquals(
+            1L,
+            after.devices
+                .single()
+                .sources
+                .single()
+                .heldBackSeq,
+        )
     }
 
     @Test

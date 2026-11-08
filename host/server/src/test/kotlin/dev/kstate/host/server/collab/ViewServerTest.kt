@@ -278,6 +278,7 @@ class ViewServerTest {
 
             viewSocket(cookie) {
                 val state = assertIs<ToViewer.SessionState>(next())
+                assertEquals(1_202, state.historyLines)
                 val seqs = state.lines.map { it.seq }.toMutableList()
                 val frames = mutableListOf(state.lines.size)
                 while (seqs.size < 1_202) {

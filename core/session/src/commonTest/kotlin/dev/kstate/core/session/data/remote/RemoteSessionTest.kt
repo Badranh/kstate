@@ -96,6 +96,21 @@ class RemoteSessionTest {
             )
         }
 
+    /** A long history comes in several frames; acting on half of it would show an old "latest". */
+    @Test
+    fun aJoinShowsTheSessionOnceItsWholeHistoryHasArrived() =
+        runTest {
+            val remote = remote()
+
+            remote.receive(state(joined.take(1)).copy(historyLines = joined.size))
+            assertEquals("Loading the session…", remote.session.value.problem)
+            assertEquals(emptyList(), remote.session.value.devices)
+
+            remote.receive(ToViewer.TimelineAppend(hostNow = 50, lines = joined.drop(1)))
+            assertEquals(null, remote.session.value.problem)
+            assertEquals(JsonPrimitive(1), remote.counter().state)
+        }
+
     @Test
     fun theClockFollowsTheHost() =
         runTest {

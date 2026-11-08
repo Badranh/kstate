@@ -38,6 +38,9 @@ class RemoteSession(
 ) : SessionSource {
     private var engine = newEngine()
     private var problem: String? = CONNECTING
+
+    /** History lines still to come after joining; the session is shown once they are all here. */
+    private var loading = 0
     private var hostMinusLocal = 0L
     private val commands = PendingCommands(link, REPLY_TIMEOUT_MILLIS)
     private val view = MutableStateFlow(SessionView(problem = CONNECTING))
@@ -52,11 +55,13 @@ class RemoteSession(
             is ToViewer.SessionState -> {
                 engine = newEngine()
                 problem = null
+                loading = (message.historyLines ?: message.lines.size) - message.lines.size
                 collab.value = message.collab
                 follow(message.hostNow, message.lines)
             }
 
             is ToViewer.TimelineAppend -> {
+                loading = (loading - message.lines.size).coerceAtLeast(0)
                 follow(message.hostNow, message.lines)
             }
 
@@ -119,8 +124,14 @@ class RemoteSession(
         publish()
     }
 
+    // Half a history would show an old "latest" as current, so nothing is shown until it is whole.
     private fun publish() {
-        view.value = SessionViewMapper.map(engine.session.value, emptyList(), problem)
+        view.value =
+            if (loading > 0) {
+                SessionView(problem = LOADING)
+            } else {
+                SessionViewMapper.map(engine.session.value, emptyList(), problem)
+            }
     }
 
     private inner class RemoteCollaboration : Collaboration {
@@ -156,6 +167,7 @@ class RemoteSession(
         /** The host gives the app 3 s; the extra second covers the network. */
         const val REPLY_TIMEOUT_MILLIS: Long = 4_000
         private const val CONNECTING = "Connecting to the host…"
+        private const val LOADING = "Loading the session…"
 
         private fun newEngine() =
             SessionEngine(clock = {

@@ -44,6 +44,7 @@ internal class ViewerConnection(
                     hostNow(),
                     history.firstOrNull().orEmpty(),
                     collab.view(participantId),
+                    historyLines = following.lines.size,
                 ),
             )
             history.drop(1).forEach { socket.send(ToViewer.TimelineAppend(hostNow(), it)) }

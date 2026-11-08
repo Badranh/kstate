@@ -93,6 +93,8 @@ data class SourceView(
      * A state from before the screen was reopened or the app restarted is not, as seqs start over.
      */
     val restorable: Boolean = false,
+    /** Seq of the app's newest emission held back behind an override; null while none is. */
+    val heldBackSeq: Long? = null,
 )
 
 data class EventView(
