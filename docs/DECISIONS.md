@@ -564,3 +564,13 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   cost some 550 MB of conversion and copying per seek, on every drag step. The decoder now skims
   (decodes, keeping a reference to the newest frame) and converts only that one. Live video still
   converts each frame it shows.
+
+## 2026-11-08: Joining a long session, and the timeline's cost
+- A joining viewer got the whole history in one SessionState frame; the history only grows, so a
+  long session became one huge string built on the host and parsed in the browser. It now comes
+  in frames of at most 500 lines (SessionState with the first, then TimelineAppends), as live
+  input already did. The viewer still replays all of it: scrubbing back needs every line.
+- Rebuilding the timeline reads each source's whole history, so it is quadratic over a session.
+  Measured, not changed: 0.4 ms per rebuild with 36,000 states over 10 sources (an hour at 10
+  states a second), about 0.4% of a core at that rate. Incremental lane lists would cost more in
+  code than they save. Revisit if sessions grow by orders of magnitude.

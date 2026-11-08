@@ -267,6 +267,30 @@ class ViewServerTest {
             }
         }
 
+    /** The history only grows: in one frame a long session became one huge string on both ends. */
+    @Test
+    fun aLongHistoryArrivesInBoundedFramesInOrder(): Unit =
+        runBlocking {
+            receive(Hello("app", "1", Platform.ANDROID, "16", "Pixel", "0.1.0"))
+            receive(SourceRegistered("Counter-1", "Counter", "StateFlow"))
+            repeat(1_200) { receive(StateSnapshot("Counter-1", it.toLong(), JsonPrimitive(it), Encoding.REFLECTION)) }
+            val cookie = join().sessionCookie()
+
+            viewSocket(cookie) {
+                val state = assertIs<ToViewer.SessionState>(next())
+                val seqs = state.lines.map { it.seq }.toMutableList()
+                val frames = mutableListOf(state.lines.size)
+                while (seqs.size < 1_202) {
+                    val append = next() as? ToViewer.TimelineAppend ?: continue
+                    seqs += append.lines.map { it.seq }
+                    frames += append.lines.size
+                }
+
+                assertEquals((0L until 1_202L).toList(), seqs)
+                assertTrue(frames.all { it <= ViewerConnection.MAX_BATCH }, "frames of $frames lines")
+            }
+        }
+
     @Test
     fun aViewerCantTouchTheDeviceOrChangeTheApp(): Unit =
         runBlocking {

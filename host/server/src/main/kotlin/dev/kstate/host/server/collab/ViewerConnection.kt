@@ -35,7 +35,18 @@ internal class ViewerConnection(
         collab.presence.connected(participantId)
         val following = log.follow()
         try {
-            socket.send(ToViewer.SessionState(sessionId, hostNow(), following.lines, collab.view(participantId)))
+            // The history goes in frames of at most MAX_BATCH lines, as live input does: in one
+            // frame a long session became one huge string to build here and parse in the browser.
+            val history = following.lines.chunked(MAX_BATCH)
+            socket.send(
+                ToViewer.SessionState(
+                    sessionId,
+                    hostNow(),
+                    history.firstOrNull().orEmpty(),
+                    collab.view(participantId),
+                ),
+            )
+            history.drop(1).forEach { socket.send(ToViewer.TimelineAppend(hostNow(), it)) }
             coroutineScope {
                 val outgoing =
                     listOf(
@@ -166,7 +177,8 @@ internal class ViewerConnection(
 
     private suspend fun DefaultWebSocketSession.send(message: ToViewer) = send(Frame.Text(ViewWire.encode(message)))
 
-    private companion object {
+    internal companion object {
+        /** The most lines one frame carries. */
         const val MAX_BATCH = 500
         const val SCROLL = 16f
 
