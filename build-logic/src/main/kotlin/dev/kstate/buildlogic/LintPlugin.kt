@@ -40,6 +40,10 @@ class LintPlugin : Plugin<Project> {
             config.setFrom(rootProject.files("config/detekt/detekt.yml"))
             basePath.set(rootProject.projectDir)
         }
+        // Generated code (Compose's Res accessors, say) is not ours to style, as ktlint already skips it.
+        tasks.withType<Detekt>().configureEach {
+            exclude { it.file.invariantSeparatorsPath.contains("/build/") }
+        }
     }
 
     private fun Project.configureKtlint() {

@@ -8,6 +8,11 @@ It bundles or uses the following third-party software:
 - scrcpy (https://github.com/Genymobile/scrcpy), Copyright Genymobile and Romain Vimont,
   licensed under the Apache License, Version 2.0. The scrcpy-server binary is bundled
   in host/video from milestone M2.
+- Noto Color Emoji (https://github.com/googlefonts/noto-emoji), Noto Sans CJK
+  (https://github.com/notofonts/noto-cjk) and Noto Sans Symbols 2
+  (https://github.com/notofonts/symbols), Copyright The Noto Project Authors, licensed under
+  the SIL Open Font License, Version 1.1 (see licenses/OFL-1.1-noto.txt). Bundled in app/web
+  and served to the web viewer's guests.
 - FFmpeg (https://ffmpeg.org), licensed under the GNU Lesser General Public License, version 3 or later (as built by
   bytedeco, https://github.com/bytedeco/javacpp-presets). Only LGPL builds are used, loaded as
   separate native libraries.

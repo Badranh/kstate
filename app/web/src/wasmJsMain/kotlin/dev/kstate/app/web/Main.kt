@@ -20,6 +20,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFontFamilyResolver
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeViewport
 import dev.kstate.app.web.data.HostConnection
@@ -29,6 +31,10 @@ import dev.kstate.app.web.data.video.webCodecsAvailable
 import dev.kstate.app.web.platform.forgetJoinToken
 import dev.kstate.app.web.platform.joinTokenFromHash
 import dev.kstate.app.web.platform.postJoin
+import dev.kstate.app.web.resources.Res
+import dev.kstate.app.web.resources.noto_color_emoji
+import dev.kstate.app.web.resources.noto_sans_cjk
+import dev.kstate.app.web.resources.noto_sans_symbols2
 import dev.kstate.app.web.ui.JoinScreen
 import dev.kstate.core.designsystem.theme.KstateTheme
 import dev.kstate.core.session.data.remote.RemoteSession
@@ -39,10 +45,33 @@ import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.preloadFont
 
 fun main() {
     val token = joinTokenFromHash()
-    ComposeViewport { WebViewer(token) }
+    ComposeViewport {
+        WebViewer(token)
+        FallbackFonts()
+    }
+}
+
+/**
+ * Compose's default font has no emoji, Chinese, Japanese, Korean or many symbols, which app states
+ * hold as often as Latin text. These load after the viewer is up, so joining stays quick, and are
+ * then used for whatever the default can't draw.
+ */
+@OptIn(ExperimentalResourceApi::class)
+@Composable
+private fun FallbackFonts() {
+    val resolver = LocalFontFamilyResolver.current
+    val fonts =
+        listOf(Res.font.noto_color_emoji, Res.font.noto_sans_cjk, Res.font.noto_sans_symbols2).map {
+            preloadFont(it).value
+        }
+    LaunchedEffect(fonts) {
+        fonts.filterNotNull().forEach { resolver.preload(FontFamily(it)) }
+    }
 }
 
 private sealed interface Phase {

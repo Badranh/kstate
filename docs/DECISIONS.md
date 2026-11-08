@@ -609,3 +609,13 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   and reads part of a state with `path`, a JSON pointer.
 - An explore whose app did not come back (`restored: false`) says which source and suggests a
   screenshot (`notRestored`), as one that could not check already did.
+
+## 2026-11-08: Fonts the web viewer brings along
+- Compose's web build draws with its own small default font, so an app state holding emoji,
+  Chinese, Japanese or Korean, and the hint's arrows and ⌘, showed empty boxes for guests. The
+  viewer bundles Noto Color Emoji (vector COLRv1, 4.8 MB), Noto Sans CJK SC (15.7 MB, which covers
+  Chinese, Japanese and Korean, arrows and ⌘) and Noto Sans Symbols 2 (0.6 MB), all OFL 1.1, and
+  preloads them as fallbacks once it is on screen, so joining is not held up by them.
+- Bundled rather than fetched from Google Fonts: guests' browsers contact no one but the host,
+  and it works offline or on a LAN. The cost is about 21 MB in the app and in the repository.
+  ViewerFontsTest reads the fonts from what the desktop serves and checks they draw the samples.
