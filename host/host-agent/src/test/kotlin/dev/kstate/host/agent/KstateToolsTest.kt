@@ -9,6 +9,7 @@ import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -373,6 +374,29 @@ class KstateToolsTest {
 
             assertTrue("\"explorable\":false" in text, text)
             assertTrue("only reports its state" in text, text)
+        }
+
+    @Test
+    fun aTapWaitingForItsTurnUsesTheScreenAsItIsWhenTheTurnComes() =
+        runTest {
+            val app = FakeApp(backgroundScope, state(0), schema, ::render)
+            val agent =
+                KstateAgent(
+                    app,
+                    reports,
+                    SettleTiming(quietMillis = 300, graceMillis = 600, timeoutMillis = 3_000),
+                    testScheduler.timeSource,
+                )
+            val exploring = async { agent.explore(FakeApp.KEY, limit = 2) }
+            runCurrent()
+            val tapping = async { agent.driver.tap(null, 0.5f, 0.8f) }
+            runCurrent()
+
+            app.reconnectVideo()
+            exploring.await()
+            tapping.await()
+
+            assertEquals(setOf(2), app.touchedScreens.toSet(), "the tap went to the dead screen")
         }
 
     @Test

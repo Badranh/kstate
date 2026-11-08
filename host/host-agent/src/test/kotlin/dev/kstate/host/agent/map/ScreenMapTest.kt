@@ -200,6 +200,25 @@ class ScreenMapTest {
         }
 
     @Test
+    fun aScreenThatKeepsRepaintingKeepsAPicture() =
+        runTest {
+            val small = CaptureStore(max = 2)
+            val app = FakeApp(backgroundScope, state(0), schema = null, render = ::render, route = listOf("Counter"))
+            val map = ScreenMap(app, small, timing, testScheduler.timeSource)
+            backgroundScope.launch { map.run() }
+            settle()
+
+            repeat(3) {
+                app.repaint()
+                settle()
+            }
+
+            val node = map.view().nodes.single()
+            assertTrue(small.get(node.captureId) != null, "the screen showing now lost its picture")
+            assertEquals(1, node.visits)
+        }
+
+    @Test
     fun theSameStepTwiceIsCountedOnce() =
         runTest {
             val (app, map) = start()

@@ -171,7 +171,11 @@ class ScreenMap(
                 ?: MapNode("s${nodes.size + 1}", deviceId, route, states, captureId, visits = 1)
         val previous = last[deviceId]?.let(nodes::get)
         notes.removeAll(mine)
-        if (previous?.id == node.id) return
+        if (previous?.id == node.id) {
+            // Still on the same screen: not a visit, but its picture is the newest.
+            nodes[node.id] = previous.copy(captureId = captureId)
+            return
+        }
         nodes[node.id] = node
         previous?.let { from ->
             val causes = mine.map { it.text } + events.map { "event $it" }

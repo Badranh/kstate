@@ -46,6 +46,10 @@ class FakeApp(
 
     /** Every touch phase the device received, in order. */
     val touches = mutableListOf<TouchPhase>()
+
+    /** For each touch, which screen got it: 1 at first, one more after each [reconnectVideo]. */
+    val touchedScreens = mutableListOf<Int>()
+    private var screensMade = 0
     private var appState: JsonElement = initial
     private var overlay: JsonElement? = null
     private var connected = true
@@ -63,6 +67,11 @@ class FakeApp(
     fun reconnectVideo() {
         screen = Screen()
         screenMap.value = mapOf(DEVICE to screen)
+    }
+
+    /** The same picture sent again, as a blinking caret or an animation does: no state changes. */
+    fun repaint() {
+        screen.frames.value = screen.frames.value?.let { VideoFrame(it.width, it.height, it.rgba.copyOf(), hostTs = 0) }
     }
 
     /** A picture whose pixels don't match its size, as a decoder bug could send. */
@@ -191,6 +200,7 @@ class FakeApp(
         )
 
     private inner class Screen : DeviceScreen {
+        val number = ++screensMade
         private var drawn: Picture = render(shown())
         override val frames = MutableStateFlow<VideoFrame?>(frame(drawn))
 
@@ -218,6 +228,7 @@ class FakeApp(
             y: Float,
         ) {
             touches += phase
+            touchedScreens += number
             if (phase == TouchPhase.UP) onTap(x, y)
         }
 

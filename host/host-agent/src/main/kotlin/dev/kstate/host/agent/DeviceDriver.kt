@@ -121,8 +121,9 @@ class DeviceDriver(
         note: String,
         action: suspend (DeviceScreen) -> Unit,
     ): ActionResult {
-        val (id, screen) = screen(deviceId)
-        return locks.withDevice(id) { actOn(id, screen, note, action) }
+        val id = screen(deviceId).first
+        // The screen is looked up once it is this action's turn: the video may have reconnected meanwhile.
+        return locks.withDevice(id) { actOn(id, screen(id).second, note, action) }
     }
 
     private suspend fun actOn(
