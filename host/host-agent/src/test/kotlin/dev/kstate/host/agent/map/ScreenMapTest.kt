@@ -181,6 +181,25 @@ class ScreenMapTest {
         }
 
     @Test
+    fun aScreenSeenAgainKeepsAPictureWhileOldOnesRollOff() =
+        runTest {
+            val small = CaptureStore(max = 2)
+            val app = FakeApp(backgroundScope, state(0), schema = null, render = ::render, route = listOf("Counter"))
+            val map = ScreenMap(app, small, timing, testScheduler.timeSource)
+            backgroundScope.launch { map.run() }
+            settle()
+
+            repeat(2) {
+                app.emit(state(1))
+                settle()
+                app.emit(state(0))
+                settle()
+            }
+
+            assertTrue(map.view().nodes.all { small.get(it.captureId) != null }, "a node lost its picture")
+        }
+
+    @Test
     fun theSameStepTwiceIsCountedOnce() =
         runTest {
             val (app, map) = start()

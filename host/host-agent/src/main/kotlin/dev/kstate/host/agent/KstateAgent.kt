@@ -42,7 +42,10 @@ class KstateAgent(
     fun hasVideo(deviceId: String): Boolean = deviceId in source.screens.value
 
     fun run(id: String): ExploreRun =
-        synchronized(runs) { runs.firstOrNull { it.id == id } } ?: throw AgentFailure("No explore run $id")
+        synchronized(runs) { runs.firstOrNull { it.id == id } }
+            ?: throw AgentFailure(
+                "No explore run $id. Only the last $KEPT_RUNS are kept: ${runs().joinToString { it.id }}",
+            )
 
     fun runs(): List<ExploreRun> = synchronized(runs) { runs.toList() }
 
@@ -64,7 +67,12 @@ class KstateAgent(
     ): ExploreRun =
         locks
             .withDevice(deviceOf(sourceKey)) { map.paused { explorer.explore(sourceKey, limit, onVariant) } }
-            .also { synchronized(runs) { runs += it } }
+            .also {
+                synchronized(runs) {
+                    runs += it
+                    while (runs.size > KEPT_RUNS) runs.removeFirst()
+                }
+            }
 
     fun report(
         title: String,
@@ -91,4 +99,9 @@ class KstateAgent(
         throw AgentFailure(
             "No source $sourceKey. Sources: ${session.devices.flatMap { it.sources }.joinToString { it.key }}",
         )
+
+    companion object {
+        /** Explore runs kept for report and variant; each holds its pictures. */
+        const val KEPT_RUNS: Int = 20
+    }
 }

@@ -166,7 +166,8 @@ class ScreenMap(
         val mine = notes.filter { it.seq <= causesUpTo }
         val existing = nodes.values.firstOrNull { it.deviceId == deviceId && it.route == route && it.states == states }
         val node =
-            existing?.copy(visits = existing.visits + 1)
+            // A revisit shows its newest picture: the store lets old ones roll off.
+            existing?.copy(visits = existing.visits + 1, captureId = captureId)
                 ?: MapNode("s${nodes.size + 1}", deviceId, route, states, captureId, visits = 1)
         val previous = last[deviceId]?.let(nodes::get)
         notes.removeAll(mine)

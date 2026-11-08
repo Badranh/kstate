@@ -21,6 +21,7 @@ import java.nio.file.Files
 import kotlin.io.path.exists
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /** The tools end to end: JSON-RPC in, the fake app reacting, text and pictures out. */
@@ -372,6 +373,19 @@ class KstateToolsTest {
 
             assertTrue("\"explorable\":false" in text, text)
             assertTrue("only reports its state" in text, text)
+        }
+
+    @Test
+    fun onlyTheLatestExploreRunsAreKeptAndAnOldOneIsExplained() =
+        runTest {
+            val app = FakeApp(backgroundScope, state(0), schema, ::render)
+            val agent = KstateAgent(app, reports, time = testScheduler.timeSource)
+
+            repeat(KstateAgent.KEPT_RUNS + 1) { agent.explore(FakeApp.KEY, limit = 1) }
+
+            assertEquals(KstateAgent.KEPT_RUNS, agent.runs().size)
+            val failure = assertFailsWith<AgentFailure> { agent.run("r1") }
+            assertTrue("last ${KstateAgent.KEPT_RUNS}" in failure.message.orEmpty(), failure.message)
         }
 
     @Test

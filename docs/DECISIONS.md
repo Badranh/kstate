@@ -467,3 +467,12 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 - While two copies are live at once (a navigation animation keeps the old screen), the new one
   gets the next number. Keys are stable across reopen, not across overlap; names that must never
   collide should be distinct names.
+
+## 2026-11-08: What the agent keeps
+- Captures roll off after 600; a map node now points at the newest capture of its screen, so a
+  screen still being visited keeps a picture. A screen not seen for a long time can lose its
+  picture; the map still lists it, the contact sheet just leaves it out.
+- Only the last 20 explore runs are kept, each with its pictures; asking for an older one says so
+  and names the kept ones.
+- Map nodes themselves are not capped: one per distinct route and states, small without pictures.
+  An app whose state ticks on its own grows the map; cap it if that shows up in practice.
