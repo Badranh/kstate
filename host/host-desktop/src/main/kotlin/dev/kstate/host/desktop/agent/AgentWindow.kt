@@ -24,11 +24,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberWindowState
-import dev.kstate.viewer.ui.chrome.CopyField
-import dev.kstate.viewer.ui.chrome.HeartbeatDot
-import dev.kstate.viewer.ui.chrome.SectionCard
-import dev.kstate.viewer.ui.theme.Kstate
-import dev.kstate.viewer.ui.theme.KstateTheme
+import dev.kstate.core.designsystem.component.CopyField
+import dev.kstate.core.designsystem.component.HeartbeatDot
+import dev.kstate.core.designsystem.component.SectionCard
+import dev.kstate.core.designsystem.theme.Kstate
+import dev.kstate.core.designsystem.theme.KstateTheme
 import java.awt.Desktop
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection

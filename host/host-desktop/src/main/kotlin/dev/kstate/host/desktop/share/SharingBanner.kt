@@ -8,8 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.kstate.core.designsystem.theme.KstateTheme
 import dev.kstate.host.desktop.SharingState
-import dev.kstate.viewer.ui.theme.KstateTheme
 
 /** Always visible while shared (docs/SPEC.md, Security model): people elsewhere may be watching. */
 @Composable

@@ -13,11 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.kstate.core.designsystem.component.HeartbeatDot
+import dev.kstate.core.designsystem.theme.Kstate
 import dev.kstate.core.model.Participant
 import dev.kstate.core.model.Role
 import dev.kstate.host.desktop.SharingState
-import dev.kstate.viewer.ui.chrome.HeartbeatDot
-import dev.kstate.viewer.ui.theme.Kstate
 
 // Small pieces of the Share window: the status chip and a row per guest.
 

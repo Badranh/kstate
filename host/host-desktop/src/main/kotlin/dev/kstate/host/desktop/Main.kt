@@ -14,13 +14,13 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import dev.kstate.core.session.domain.SessionEngine
+import dev.kstate.feature.inspector.ui.KstateApp
 import dev.kstate.host.agent.KstateAgent
 import dev.kstate.host.collab.CollabSession
 import dev.kstate.host.desktop.agent.AgentAccess
 import dev.kstate.host.desktop.agent.AgentWindow
 import dev.kstate.host.desktop.share.ShareWindow
 import dev.kstate.host.desktop.share.SharingBanner
-import dev.kstate.viewer.ui.KstateApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin

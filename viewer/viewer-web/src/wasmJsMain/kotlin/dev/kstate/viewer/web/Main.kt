@@ -22,11 +22,11 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeViewport
+import dev.kstate.core.designsystem.theme.KstateTheme
 import dev.kstate.core.session.data.remote.RemoteSession
 import dev.kstate.core.session.data.wire.FromViewer
 import dev.kstate.core.session.data.wire.ViewerInput
-import dev.kstate.viewer.ui.KstateApp
-import dev.kstate.viewer.ui.theme.KstateTheme
+import dev.kstate.feature.inspector.ui.KstateApp
 import dev.kstate.viewer.web.video.WebVideoScreen
 import dev.kstate.viewer.web.video.webCodecsAvailable
 import kotlinx.coroutines.await

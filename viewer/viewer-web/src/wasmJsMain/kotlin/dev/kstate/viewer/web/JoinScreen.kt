@@ -19,7 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.ui.theme.KstateTheme
+import dev.kstate.core.designsystem.theme.KstateTheme
 
 /** Asks a guest for a name before the invite is used, or says why they can't get in. */
 @Composable

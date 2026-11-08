@@ -16,7 +16,7 @@ kotlin {
     }
     sourceSets {
         wasmJsMain.dependencies {
-            implementation(projects.viewer.viewerUi)
+            implementation(projects.feature.inspector)
             implementation(projects.core.session)
             implementation(libs.compose.ui)
             implementation(libs.compose.foundation)

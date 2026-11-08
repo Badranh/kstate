@@ -9,7 +9,7 @@ dependencies {
     implementation(projects.host.hostVideo)
     implementation(projects.host.hostTunnel)
     implementation(projects.host.hostAgent)
-    implementation(projects.viewer.viewerUi)
+    implementation(projects.feature.inspector)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)
     implementation(libs.kotlinx.coroutines.swing)

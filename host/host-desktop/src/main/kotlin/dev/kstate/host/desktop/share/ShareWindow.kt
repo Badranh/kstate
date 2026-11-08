@@ -36,6 +36,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberWindowState
+import dev.kstate.core.designsystem.component.CopyField
+import dev.kstate.core.designsystem.component.HeartbeatDot
+import dev.kstate.core.designsystem.component.SectionCard
+import dev.kstate.core.designsystem.theme.Kstate
+import dev.kstate.core.designsystem.theme.KstateTheme
 import dev.kstate.core.model.Participant
 import dev.kstate.core.model.Role
 import dev.kstate.host.collab.CollabSession
@@ -43,11 +48,6 @@ import dev.kstate.host.desktop.Sharing
 import dev.kstate.host.desktop.SharingState
 import dev.kstate.host.tunnel.Availability
 import dev.kstate.host.tunnel.TunnelProvider
-import dev.kstate.viewer.ui.chrome.CopyField
-import dev.kstate.viewer.ui.chrome.HeartbeatDot
-import dev.kstate.viewer.ui.chrome.SectionCard
-import dev.kstate.viewer.ui.theme.Kstate
-import dev.kstate.viewer.ui.theme.KstateTheme
 import kotlinx.coroutines.launch
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection

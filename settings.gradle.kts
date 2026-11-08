@@ -50,7 +50,9 @@ include(":host:host-tunnel")
 include(":host:host-agent")
 include(":host:host-desktop")
 
-include(":viewer:viewer-ui")
+include(":core:designsystem")
+include(":core:ui")
+include(":feature:inspector")
 include(":viewer:viewer-web")
 
 include(":sample:shared")

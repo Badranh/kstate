@@ -15,9 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
+import dev.kstate.core.designsystem.component.HeartbeatDot
+import dev.kstate.core.designsystem.theme.Kstate
 import dev.kstate.host.desktop.agent.AgentState
-import dev.kstate.viewer.ui.chrome.HeartbeatDot
-import dev.kstate.viewer.ui.theme.Kstate
 
 /** Record, Agent and Share in the top bar, so none is only in the File menu. */
 @Composable
