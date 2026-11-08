@@ -14,6 +14,7 @@ object ControlMessageWriter {
                 is ControlMessage.InjectText -> out.text(message)
                 is ControlMessage.InjectTouch -> out.touch(message)
                 is ControlMessage.InjectScroll -> out.scroll(message)
+                is ControlMessage.SetClipboard -> out.clipboard(message)
             }
         }
         return bytes.toByteArray()
@@ -35,6 +36,19 @@ object ControlMessageWriter {
         writeByte(TYPE_TEXT)
         writeInt(utf8.size)
         write(utf8)
+    }
+
+    private fun DataOutputStream.clipboard(message: ControlMessage.SetClipboard) {
+        val utf8 = message.text.toByteArray(Charsets.UTF_8)
+        require(utf8.size <= ControlMessage.MAX_CLIPBOARD_BYTES) {
+            "Clipboard text is ${utf8.size} bytes; the server accepts ${ControlMessage.MAX_CLIPBOARD_BYTES}"
+        }
+        writeByte(TYPE_SET_CLIPBOARD)
+        // Sequence 0: no acknowledgement is asked for, so nothing comes back on the socket.
+        writeLong(0)
+        writeInt(utf8.size)
+        write(utf8)
+        writeByte(if (message.paste) 1 else 0)
     }
 
     private fun DataOutputStream.touch(message: ControlMessage.InjectTouch) {
@@ -78,6 +92,7 @@ object ControlMessageWriter {
     private const val TYPE_TEXT = 1
     private const val TYPE_TOUCH = 2
     private const val TYPE_SCROLL = 3
+    private const val TYPE_SET_CLIPBOARD = 9
     private const val SCROLL_RANGE = 16f
     private const val U16_MAX = 0xffff
     private const val U16_SCALE = 65_536f

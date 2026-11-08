@@ -27,7 +27,7 @@ class VideoDeviceInputs(
         when (input) {
             is ViewerInput.Touch -> translator.touch(HostTouchPhase.valueOf(input.phase.name), input.x, input.y)
             is ViewerInput.Scroll -> translator.scroll(input.x, input.y, input.horizontal, input.vertical)
-            is ViewerInput.Key -> translator.key(input.keycode)
+            is ViewerInput.Key -> translator.key(input.keycode, input.metaState)
             is ViewerInput.Text -> translator.text(input.text)
         }
     }

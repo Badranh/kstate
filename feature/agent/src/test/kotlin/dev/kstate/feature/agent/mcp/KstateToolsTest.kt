@@ -407,6 +407,34 @@ class KstateToolsTest {
         }
 
     @Test
+    fun textTooLongToTypeInOneGoIsRefusedBeforeAnythingIsSent() =
+        runTest {
+            val (app, server) = server()
+
+            val reply = server.call("type_text", """{"text":"${"x".repeat(70_000)}"}""").texts().single()
+
+            assertTrue("at most" in reply, reply)
+            assertEquals(emptyList(), app.typed)
+        }
+
+    @Test
+    fun typeTextCanEmptyTheFieldFirst() =
+        runTest {
+            val (app, server) = server()
+
+            server.call("type_text", """{"text":"Ada"}""")
+            server.call("type_text", """{"text":"Grace","clear":true}""")
+            server.call("type_text", """{"text":"","clear":true}""")
+
+            // Typing replaces the selection, so Delete is only sent to leave the field empty: in an
+            // empty field it would delete a chip or step back to the previous PIN box.
+            assertEquals(
+                listOf("text Ada", "key 29 meta 4096", "text Grace", "key 29 meta 4096", "key 67 meta 0"),
+                app.typed,
+            )
+        }
+
+    @Test
     fun anExploreThatCouldNotCheckTheAppCameBackSaysWhy() =
         runTest {
             val (app, server) = server()

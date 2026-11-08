@@ -7,6 +7,7 @@ import dev.kstate.host.video.control.ControlMessage.Companion.POINTER_ID_GENERIC
 import dev.kstate.host.video.device.VideoSize
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class InputTranslatorTest {
     private val sent = mutableListOf<ControlMessage>()
@@ -91,12 +92,56 @@ class InputTranslatorTest {
     }
 
     @Test
+    fun aKeyCanBePressedWithModifiers() {
+        input.key(keycode = 29, metaState = META_CTRL)
+
+        assertEquals(
+            listOf<ControlMessage>(
+                ControlMessage.InjectKeycode(ACTION_DOWN, 29, 0, META_CTRL),
+                ControlMessage.InjectKeycode(ACTION_UP, 29, 0, META_CTRL),
+            ),
+            sent,
+        )
+    }
+
+    @Test
     fun longTextIsSplitIntoChunksTheServerAccepts() {
-        input.text("é".repeat(200))
+        input.text("x".repeat(700))
 
         val chunks = sent.map { (it as ControlMessage.InjectText).text }
-        assertEquals("é".repeat(200), chunks.joinToString(""))
+        assertEquals("x".repeat(700), chunks.joinToString(""))
         assertEquals(true, chunks.all { it.toByteArray().size <= ControlMessage.MAX_TEXT_BYTES })
-        assertEquals(2, chunks.size)
+        assertEquals(3, chunks.size)
+    }
+
+    /**
+     * The server presses Paste without waiting for the app to read the clipboard, so a second paste
+     * could replace the first one's text before it lands: text with anything a key can't type goes
+     * in as one paste, never as several.
+     */
+    @Test
+    fun textNoKeyCanTypeIsPastedWholeInOnePaste() {
+        input.text("ab😀 日本c")
+
+        assertEquals(listOf<ControlMessage>(ControlMessage.SetClipboard("ab😀 日本c")), sent)
+    }
+
+    @Test
+    fun accentedLettersArePastedRatherThanLeftToTheKeyboardMap() {
+        input.text("Zoë")
+
+        assertEquals(listOf<ControlMessage>(ControlMessage.SetClipboard("Zoë")), sent)
+    }
+
+    @Test
+    fun pastedTextTheServerCantTakeInOnePasteIsRefused() {
+        val tooLong = "é".repeat(ControlMessage.MAX_CLIPBOARD_BYTES / 2 + 1)
+
+        assertFailsWith<IllegalArgumentException> { input.text(tooLong) }
+        assertEquals(emptyList(), sent)
+    }
+
+    private companion object {
+        const val META_CTRL = 0x1000
     }
 }

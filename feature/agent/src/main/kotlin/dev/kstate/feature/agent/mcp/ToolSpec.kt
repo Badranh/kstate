@@ -13,6 +13,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
 import java.io.IOException
@@ -116,6 +117,12 @@ class ToolArguments(
     fun optionalFloat(name: String): Float? = (json[name] as? JsonPrimitive)?.doubleOrNull?.toFloat()
 
     fun optionalInt(name: String): Int? = (json[name] as? JsonPrimitive)?.intOrNull
+
+    fun optionalBoolean(name: String): Boolean? =
+        json[name]?.let {
+            (it as? JsonPrimitive)?.booleanOrNull
+                ?: throw ToolInputException("\"$name\" must be true or false")
+        }
 
     fun element(name: String): JsonElement = json[name] ?: throw ToolInputException("\"$name\" is required")
 }

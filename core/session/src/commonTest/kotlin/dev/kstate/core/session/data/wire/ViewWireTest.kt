@@ -15,6 +15,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 
 class ViewWireTest {
     private val me = Participant("p1", "Ada", Role.VIEWER, online = true)
@@ -75,6 +76,7 @@ class ViewWireTest {
             FromViewer.Input("emulator-5554", ViewerInput.Touch(TouchPhase.DOWN, 0.5f, 0.25f)),
             FromViewer.Input("emulator-5554", ViewerInput.Scroll(0.5f, 0.5f, 0f, -1f)),
             FromViewer.Input("emulator-5554", ViewerInput.Key(4)),
+            FromViewer.Input("emulator-5554", ViewerInput.Key(29, metaState = 0x1000)),
             FromViewer.Input("emulator-5554", ViewerInput.Text("hi")),
             FromViewer.Command("r1", "emulator-5554/Counter-1", ViewerCommand.Restore(3, ApplyMode.OVERLAY)),
             FromViewer.Command(
@@ -89,6 +91,13 @@ class ViewWireTest {
             FromViewer.RequestDrive,
             FromViewer.ReleaseDrive,
         ).forEach { assertEquals(it, ViewWire.decodeFromViewer(ViewWire.encode(it))) }
+    }
+
+    @Test
+    fun aKeyWithoutModifiersIsSentAsBefore() {
+        val plain = ViewWire.encode(FromViewer.Input("emulator-5554", ViewerInput.Key(4)))
+
+        assertFalse("metaState" in plain, plain)
     }
 
     @Test

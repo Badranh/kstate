@@ -112,10 +112,22 @@ class DeviceDriver(
         keycode: Int,
     ): ActionResult = act(deviceId, "key $name") { it.key(keycode) }
 
+    /** Types [text]; with [clear], empties the focused field first (select all, then delete). */
     suspend fun type(
         deviceId: String?,
         text: String,
-    ): ActionResult = act(deviceId, "type \"${text.take(NOTE_TEXT)}\"") { it.text(text) }
+        clear: Boolean = false,
+    ): ActionResult =
+        act(deviceId, "type \"${text.take(NOTE_TEXT)}\"" + if (clear) " after clearing" else "") { screen ->
+            // Typing replaces the selection, so Delete is only sent to leave the field empty: in an
+            // empty field it would delete a chip or step back to the previous PIN box.
+            if (clear) screen.key(KEYCODE_A, META_CTRL_ON)
+            if (text.isNotEmpty()) {
+                screen.text(text)
+            } else if (clear) {
+                screen.key(KEYCODE_DEL)
+            }
+        }
 
     /** Does [action] on the device's screen, then reports the settled screen and the sources that changed. */
     suspend fun act(
@@ -209,6 +221,9 @@ class DeviceDriver(
         const val SWIPE_STEPS = 12
         const val NOTE_TEXT = 30
         const val MAX_CHANGES = 40
+        const val KEYCODE_A = 29
+        const val KEYCODE_DEL = 67
+        const val META_CTRL_ON = 0x1000
     }
 }
 

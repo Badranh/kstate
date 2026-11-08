@@ -141,7 +141,8 @@ class ScrcpyLauncherTest {
                     "emulator-5554",
                     "shell",
                     "CLASSPATH=/data/local/tmp/kstate-scrcpy.jar app_process / com.genymobile.scrcpy.Server 5.0.1 " +
-                        "scid=0000abcd tunnel_forward=true audio=false control=true cleanup=true " +
+                        "scid=0000abcd tunnel_forward=true audio=false control=true clipboard_autosync=false " +
+                        "cleanup=true " +
                         "video_codec=h264 max_size=1280 video_bit_rate=4000000 max_fps=60",
                 ),
                 spawned.single(),

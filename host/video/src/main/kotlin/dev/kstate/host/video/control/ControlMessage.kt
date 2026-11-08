@@ -21,6 +21,12 @@ sealed interface ControlMessage {
         val text: String,
     ) : ControlMessage
 
+    /** Puts [text] on the device's clipboard and, with [paste], presses Paste in the focused field. */
+    data class SetClipboard(
+        val text: String,
+        val paste: Boolean = true,
+    ) : ControlMessage
+
     data class InjectTouch(
         val action: Int,
         val pointerId: Long,
@@ -49,5 +55,8 @@ sealed interface ControlMessage {
 
         /** The server's INJECT_TEXT_MAX_LENGTH, in UTF-8 bytes. */
         const val MAX_TEXT_BYTES: Int = 300
+
+        /** The server's CLIPBOARD_TEXT_MAX_LENGTH, in UTF-8 bytes. */
+        const val MAX_CLIPBOARD_BYTES: Int = 262_130
     }
 }

@@ -521,3 +521,23 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   format is unchanged: every message type has an explicit `@SerialName`.
 - Short module names are safe in the packaged app: Compose adds a content hash to every jar.
   The macOS bundle id stays `dev.kstate.host` so the system still sees the same app.
+
+## 2026-11-08: Typing text that arrives whole
+- Measured on the emulator: scrcpy types text as key presses through the device's key map and
+  drops, with only a log line, every character it has no key for (emoji, CJK). Kstate now types
+  text that is all printable ASCII, newline and tab as keys, and pastes any other text whole
+  (scrcpy's SET_CLIPBOARD with paste, byte layout read from the bundled v5.0.1 server: type,
+  sequence 0 so no ack comes back, text, paste flag). Whole, because the server presses Paste
+  asynchronously: a second paste could replace the clipboard before the app read the first, so
+  mixed text is never split into several pastes. Accented letters are pasted too rather than left
+  to the key map's dead keys. A paste replaces the device's clipboard (the tool says so), and
+  Kstate turns off scrcpy's clipboard echo since it never reads device messages. Android below 7
+  has no Paste key, but the SDK needs Android 8 (minSdk 26), so a Kstate app never runs there.
+- `type_text` takes `clear`: Ctrl+A, then the text, which replaces the selection; Delete only when
+  there is no text, since in an empty field it deletes a chip or steps back to the previous PIN
+  box. Key presses carry a KeyEvent meta state end to end, including from the web viewer
+  (`ViewerInput.Key.metaState`, left out when 0, so older viewers still parse); the host passes
+  only Shift, Ctrl and Alt from viewers.
+- The scrambled text in the field report came from the sample, not Kstate: its Orbit form applied
+  each keystroke in an async `intent`, so fast typing (adb's `input text` too) lost characters and
+  moved the cursor. Its text handlers use `blockingIntent`, which Orbit reserves for text input.

@@ -155,7 +155,8 @@ internal class ViewerConnection(
             }
 
             is ViewerInput.Key -> {
-                keycode in 0..MAX_KEYCODE
+                // Shift, Ctrl and Alt only: Meta, Sym and Function open system shortcuts.
+                keycode in 0..MAX_KEYCODE && metaState and ALLOWED_META.inv() == 0
             }
 
             is ViewerInput.Text -> {
@@ -168,6 +169,9 @@ internal class ViewerConnection(
     private companion object {
         const val MAX_BATCH = 500
         const val SCROLL = 16f
+
+        /** KeyEvent's Shift (0x1, 0x40, 0x80), Alt (0x2, 0x10, 0x20) and Ctrl (0x1000, 0x2000, 0x4000) bits. */
+        const val ALLOWED_META = 0x70F3
         const val MAX_KEYCODE = 400
         const val MAX_TEXT = 1_000
     }

@@ -148,7 +148,7 @@ private fun WebVideoScreen.InputEvent.toWire(): ViewerInput =
     when (this) {
         is WebVideoScreen.InputEvent.Touch -> ViewerInput.Touch(phase, x, y)
         is WebVideoScreen.InputEvent.Scroll -> ViewerInput.Scroll(x, y, horizontal, vertical)
-        is WebVideoScreen.InputEvent.Key -> ViewerInput.Key(keycode)
+        is WebVideoScreen.InputEvent.Key -> ViewerInput.Key(keycode, metaState)
         is WebVideoScreen.InputEvent.Text -> ViewerInput.Text(text)
     }
 

@@ -31,8 +31,11 @@ interface DeviceScreen {
         vertical: Float,
     )
 
-    /** An Android KeyEvent code, pressed and released. */
-    fun key(keycode: Int)
+    /** An Android KeyEvent code, pressed and released, with KeyEvent [metaState] (Ctrl, Shift) held. */
+    fun key(
+        keycode: Int,
+        metaState: Int = 0,
+    )
 
     fun text(text: String)
 }

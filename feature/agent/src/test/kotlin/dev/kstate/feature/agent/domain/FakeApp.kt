@@ -50,6 +50,9 @@ class FakeApp(
     /** Called when an overlay is released, before the app's own state is drawn again. */
     var onRelease: () -> Unit = {}
 
+    /** Every key and text the device received, in order, as "key 66 meta 0" or "text hi". */
+    val typed = mutableListOf<String>()
+
     /** Every touch phase the device received, in order. */
     val touches = mutableListOf<TouchPhase>()
 
@@ -253,9 +256,16 @@ class FakeApp(
             vertical: Float,
         ) = Unit
 
-        override fun key(keycode: Int) = Unit
+        override fun key(
+            keycode: Int,
+            metaState: Int,
+        ) {
+            typed += "key $keycode meta $metaState"
+        }
 
-        override fun text(text: String) = Unit
+        override fun text(text: String) {
+            typed += "text $text"
+        }
     }
 
     private fun frame(picture: Picture) = VideoFrame(picture.width, picture.height, picture.rgba, hostTs = 0)

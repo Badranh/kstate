@@ -122,7 +122,8 @@ class ScrcpyLauncher(
         profile: VideoProfile,
     ): String =
         "CLASSPATH=$REMOTE_PATH app_process / com.genymobile.scrcpy.Server ${server.version} " +
-            "scid=$sessionId tunnel_forward=true audio=false control=true cleanup=true " +
+            // Kstate never reads device messages, so the device's clipboard is not echoed back.
+            "scid=$sessionId tunnel_forward=true audio=false control=true clipboard_autosync=false cleanup=true " +
             "video_codec=h264 max_size=${profile.maxSize} video_bit_rate=${profile.bitRate} max_fps=${profile.maxFps}"
 
     /** With a forward tunnel the connect succeeds before the server listens; the dummy byte proves it does. */

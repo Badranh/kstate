@@ -46,6 +46,34 @@ class ControlMessageWriterTest {
     }
 
     @Test
+    fun aPasteSetsTheClipboardWithoutAskingForAnAck() {
+        val utf8 = "日本😀".toByteArray()
+
+        assertContentEquals(
+            expected {
+                writeByte(9)
+                writeLong(0)
+                writeInt(utf8.size)
+                write(utf8)
+                writeByte(1)
+            },
+            ControlMessageWriter.encode(ControlMessage.SetClipboard("日本😀")),
+        )
+    }
+
+    @Test
+    fun aPasteOverTheServerLimitIsRejected() {
+        assertFailsWith<IllegalArgumentException> {
+            // Fewer characters than the limit, more bytes: the limit is in UTF-8 bytes.
+            ControlMessageWriter.encode(
+                ControlMessage.SetClipboard(
+                    "é".repeat(ControlMessage.MAX_CLIPBOARD_BYTES / 2 + 1),
+                ),
+            )
+        }
+    }
+
+    @Test
     fun textOverTheServerLimitIsRejected() {
         assertFailsWith<IllegalArgumentException> {
             ControlMessageWriter.encode(

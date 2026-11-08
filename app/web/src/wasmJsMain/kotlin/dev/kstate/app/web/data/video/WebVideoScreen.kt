@@ -35,6 +35,7 @@ class WebVideoScreen(
 
         data class Key(
             val keycode: Int,
+            val metaState: Int,
         ) : InputEvent
 
         data class Text(
@@ -104,7 +105,10 @@ class WebVideoScreen(
         vertical: Float,
     ) = input(InputEvent.Scroll(x, y, horizontal, vertical))
 
-    override fun key(keycode: Int) = input(InputEvent.Key(keycode))
+    override fun key(
+        keycode: Int,
+        metaState: Int,
+    ) = input(InputEvent.Key(keycode, metaState))
 
     override fun text(text: String) = input(InputEvent.Text(text))
 }

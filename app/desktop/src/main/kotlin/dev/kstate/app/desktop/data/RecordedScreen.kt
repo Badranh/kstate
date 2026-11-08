@@ -42,7 +42,10 @@ class RecordedScreen(
         vertical: Float,
     ) = Unit
 
-    override fun key(keycode: Int) = Unit
+    override fun key(
+        keycode: Int,
+        metaState: Int,
+    ) = Unit
 
     override fun text(text: String) = Unit
 }

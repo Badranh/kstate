@@ -328,6 +328,8 @@ class ViewServerTest {
                 next()
                 send(FromViewer.Input("emulator-5554", ViewerInput.Touch(TouchPhase.DOWN, 4f, -1f)))
                 send(FromViewer.Input("emulator-5554", ViewerInput.Text("x".repeat(10_000))))
+                // The Meta (Windows/Command) key opens system shortcuts; only Shift, Ctrl and Alt are passed.
+                send(FromViewer.Input("emulator-5554", ViewerInput.Key(29, metaState = 0x10000)))
                 send(FromViewer.Command("r1", "emulator-5554/Counter-1", ViewerCommand.Release))
                 reply("r1")
             }

@@ -20,6 +20,21 @@ class SignupFormModelTest {
             }
         }
 
+    /**
+     * A text field shows the state, so a keystroke must be in it by the time onValueChange returns:
+     * one applied later lets the next keystroke start from the old text and lose characters.
+     */
+    @Test
+    fun aKeystrokeIsInTheStateBeforeTheNextOne() =
+        runTest {
+            val model = SignupFormModel(backgroundScope)
+
+            model.onNameChanged("A")
+            assertEquals("A", model.container.stateFlow.value.name)
+            model.onEmailChanged("a@")
+            assertEquals("a@", model.container.stateFlow.value.email)
+        }
+
     @Test
     fun submittingInvalidInputShowsErrorsAndSendsNothing() =
         runTest {

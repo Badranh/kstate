@@ -123,6 +123,8 @@ sealed interface ViewerInput {
     @SerialName("key")
     data class Key(
         val keycode: Int,
+        /** KeyEvent meta state; left out when 0, as older viewers send it. */
+        val metaState: Int = 0,
     ) : ViewerInput
 
     @Serializable

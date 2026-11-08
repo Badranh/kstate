@@ -48,7 +48,10 @@ class DeviceVideoScreen(
         vertical: Float,
     ) = input.scroll(x, y, horizontal, vertical)
 
-    override fun key(keycode: Int) = input.key(keycode)
+    override fun key(
+        keycode: Int,
+        metaState: Int,
+    ) = input.key(keycode, metaState)
 
     override fun text(text: String) = input.text(text)
 }

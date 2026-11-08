@@ -114,14 +114,24 @@ internal class ActTools(
             "type_text",
             "Type text",
             Effect.DRIVES,
-            "Type text into the focused field.",
+            "Type text into the focused field. ASCII goes in as key presses; anything else (accents, " +
+                "emoji, other scripts) is pasted, which replaces the device's clipboard. clear: true empties " +
+                "the field first (select all, then delete), so the field ends up holding exactly the text.",
             input(
                 "text" to typed("string"),
+                "clear" to typed("boolean"),
                 "device" to Params.DEVICE,
                 "width" to Params.WIDTH,
                 required = listOf("text"),
             ),
-        ) { action(agent.driver.type(it.optionalString("device"), it.string("text")), it) }
+        ) {
+            val clear = it.optionalBoolean("clear") ?: false
+            val text = it.string("text")
+            if (text.length > MAX_TYPED_CHARS) {
+                throw ToolInputException("type_text takes at most $MAX_TYPED_CHARS characters at a time")
+            }
+            action(agent.driver.type(it.optionalString("device"), text, clear), it)
+        }
 
     private fun action(
         result: ActionResult,
@@ -158,6 +168,9 @@ internal class ActTools(
 
     private companion object {
         const val DEFAULT_SWIPE_MILLIS = 300
+
+        /** Within one paste on the device: a UTF-16 char is at most 3 UTF-8 bytes, under 262,130 bytes. */
+        const val MAX_TYPED_CHARS = 60_000
         const val NOT_CONNECTED =
             "The app is not connected to Kstate: its state is not being received, so `changed` and `route` " +
                 "below are stale, not proof that nothing changed. The screen is live. Kstate restores the " +
