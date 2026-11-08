@@ -12,7 +12,7 @@ import dev.kstate.core.session.domain.HostClock
 import dev.kstate.core.session.domain.SessionEngine
 import dev.kstate.core.session.mapper.DeviceInfo
 import dev.kstate.core.session.mapper.SessionViewMapper
-import dev.kstate.host.device.AttachedDevice
+import dev.kstate.host.server.device.AttachedDevice
 import dev.kstate.host.video.device.DeviceVideo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

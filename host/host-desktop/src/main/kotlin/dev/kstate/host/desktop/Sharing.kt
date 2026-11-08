@@ -1,8 +1,8 @@
 package dev.kstate.host.desktop
 
-import dev.kstate.host.collab.CollabSession
-import dev.kstate.host.collab.ViewServer
-import dev.kstate.host.collab.ViewerServer
+import dev.kstate.host.server.collab.CollabSession
+import dev.kstate.host.server.collab.ViewServer
+import dev.kstate.host.server.collab.ViewerServer
 import dev.kstate.host.tunnel.Availability
 import dev.kstate.host.tunnel.TunnelException
 import dev.kstate.host.tunnel.TunnelHandle

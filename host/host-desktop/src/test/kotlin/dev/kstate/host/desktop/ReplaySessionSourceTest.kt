@@ -18,10 +18,10 @@ import dev.kstate.core.protocol.Platform
 import dev.kstate.core.protocol.SourceRegistered
 import dev.kstate.core.protocol.StateSnapshot
 import dev.kstate.core.session.domain.SessionEngine
-import dev.kstate.host.record.RecordedSession
-import dev.kstate.host.record.SessionRecorder
-import dev.kstate.host.timeline.VideoSample
-import dev.kstate.host.timeline.VideoTimeline
+import dev.kstate.host.server.record.RecordedSession
+import dev.kstate.host.server.record.SessionRecorder
+import dev.kstate.host.server.timeline.VideoSample
+import dev.kstate.host.server.timeline.VideoTimeline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

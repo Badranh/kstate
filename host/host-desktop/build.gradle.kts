@@ -5,10 +5,10 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.host.hostCore)
-    implementation(projects.host.hostVideo)
-    implementation(projects.host.hostTunnel)
-    implementation(projects.host.hostAgent)
+    implementation(projects.host.server)
+    implementation(projects.host.video)
+    implementation(projects.host.tunnel)
+    implementation(projects.feature.agent)
     implementation(projects.feature.inspector)
     implementation(compose.desktop.currentOs)
     implementation(libs.compose.material3)

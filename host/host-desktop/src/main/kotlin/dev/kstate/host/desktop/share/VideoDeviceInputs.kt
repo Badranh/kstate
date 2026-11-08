@@ -1,7 +1,7 @@
 package dev.kstate.host.desktop.share
 
 import dev.kstate.core.session.data.wire.ViewerInput
-import dev.kstate.host.collab.DeviceInputs
+import dev.kstate.host.server.collab.DeviceInputs
 import dev.kstate.host.video.control.InputTranslator
 import dev.kstate.host.video.device.DeviceVideo
 import kotlinx.coroutines.flow.StateFlow

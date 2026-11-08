@@ -10,7 +10,7 @@ import dev.kstate.core.model.SourceCapabilities
 import dev.kstate.core.model.SourceView
 import dev.kstate.core.model.TimelineView
 import dev.kstate.core.session.mapper.SessionViewMapper
-import dev.kstate.host.record.RecordedSession
+import dev.kstate.host.server.record.RecordedSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

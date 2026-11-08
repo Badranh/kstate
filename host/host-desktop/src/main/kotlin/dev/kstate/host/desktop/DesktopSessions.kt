@@ -3,10 +3,10 @@ package dev.kstate.host.desktop
 import dev.kstate.core.data.SessionSource
 import dev.kstate.core.session.domain.HostClock
 import dev.kstate.core.session.domain.SessionEngine
-import dev.kstate.host.record.RecordedSession
-import dev.kstate.host.record.SessionArchive
-import dev.kstate.host.record.SessionRecorder
-import dev.kstate.host.timeline.VideoTimeline
+import dev.kstate.host.server.record.RecordedSession
+import dev.kstate.host.server.record.SessionArchive
+import dev.kstate.host.server.record.SessionRecorder
+import dev.kstate.host.server.timeline.VideoTimeline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

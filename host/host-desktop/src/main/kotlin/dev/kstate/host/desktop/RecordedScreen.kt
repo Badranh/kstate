@@ -3,7 +3,7 @@ package dev.kstate.host.desktop
 import dev.kstate.core.data.DeviceScreen
 import dev.kstate.core.model.TouchPhase
 import dev.kstate.core.model.VideoFrame
-import dev.kstate.host.timeline.GopSource
+import dev.kstate.host.server.timeline.GopSource
 import dev.kstate.host.video.decode.OutputSize
 import dev.kstate.host.video.device.GopFrames
 import dev.kstate.host.video.device.LiveFrame

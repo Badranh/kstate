@@ -7,8 +7,8 @@ import dev.kstate.core.protocol.Hello
 import dev.kstate.core.protocol.Platform
 import dev.kstate.core.session.data.wire.RecordingFormatException
 import dev.kstate.core.session.domain.SessionEngine
-import dev.kstate.host.timeline.VideoSample
-import dev.kstate.host.timeline.VideoTimeline
+import dev.kstate.host.server.timeline.VideoSample
+import dev.kstate.host.server.timeline.VideoTimeline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

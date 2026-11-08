@@ -5,11 +5,11 @@ import dev.kstate.core.session.domain.SessionEngine
 import dev.kstate.host.adb.Adb
 import dev.kstate.host.adb.AdbDevice
 import dev.kstate.host.adb.AdbException
-import dev.kstate.host.device.PortAllocator
-import dev.kstate.host.gateway.CommandBus
-import dev.kstate.host.gateway.Gateway
-import dev.kstate.host.gateway.GatewayFactory
-import dev.kstate.host.gateway.HostCommands
+import dev.kstate.host.server.device.PortAllocator
+import dev.kstate.host.server.gateway.CommandBus
+import dev.kstate.host.server.gateway.Gateway
+import dev.kstate.host.server.gateway.GatewayFactory
+import dev.kstate.host.server.gateway.HostCommands
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

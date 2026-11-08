@@ -6,9 +6,9 @@ import dev.kstate.core.protocol.OverrideMode
 import dev.kstate.core.session.data.wire.ViewerCommand
 import dev.kstate.core.session.domain.SessionEngine
 import dev.kstate.core.session.model.SourceKey
-import dev.kstate.host.collab.ViewerCommands
-import dev.kstate.host.gateway.HostCommands
-import dev.kstate.host.gateway.CommandOutcome as HostOutcome
+import dev.kstate.host.server.collab.ViewerCommands
+import dev.kstate.host.server.gateway.HostCommands
+import dev.kstate.host.server.gateway.CommandOutcome as HostOutcome
 
 /** Runs a command on a source by its viewer key, for the desktop UI and (role-checked) remote Drivers alike. */
 class HostCommandRunner(

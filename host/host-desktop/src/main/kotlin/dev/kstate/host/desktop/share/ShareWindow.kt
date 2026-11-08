@@ -43,9 +43,9 @@ import dev.kstate.core.designsystem.theme.Kstate
 import dev.kstate.core.designsystem.theme.KstateTheme
 import dev.kstate.core.model.Participant
 import dev.kstate.core.model.Role
-import dev.kstate.host.collab.CollabSession
 import dev.kstate.host.desktop.Sharing
 import dev.kstate.host.desktop.SharingState
+import dev.kstate.host.server.collab.CollabSession
 import dev.kstate.host.tunnel.Availability
 import dev.kstate.host.tunnel.TunnelProvider
 import kotlinx.coroutines.launch
