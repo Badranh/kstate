@@ -15,9 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
-import dev.kstate.app.desktop.domain.ActiveRecording
+import dev.kstate.app.desktop.data.ActiveRecording
+import dev.kstate.app.desktop.data.DesktopSessions
 import dev.kstate.app.desktop.domain.AgentState
-import dev.kstate.app.desktop.domain.DesktopSessions
 import dev.kstate.app.desktop.domain.Sharing
 import dev.kstate.app.desktop.domain.SharingState
 import dev.kstate.core.designsystem.component.HeartbeatDot

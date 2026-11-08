@@ -1,5 +1,6 @@
-package dev.kstate.feature.agent.domain.image
+package dev.kstate.feature.agent.data.image
 
+import dev.kstate.feature.agent.domain.image.Picture
 import java.awt.Color
 import java.awt.Font
 import java.awt.RenderingHints

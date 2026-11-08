@@ -79,12 +79,12 @@ class ConfirmingCommandsTest {
             runCurrent()
 
             assertEquals(emptyList(), source.sent)
-            assertEquals("Write Counter's state from “Bug 42” into the live app?", gate.pending?.question)
+            assertEquals("Write Counter's state from “Bug 42” into the live app?", gate.pending.value?.question)
 
             gate.answer(confirmed = true)
             assertEquals(CommandOutcome.Ok, outcome.await())
             assertEquals(listOf("restore d/Counter-1 3 WRITE_THROUGH"), source.sent)
-            assertNull(gate.pending)
+            assertNull(gate.pending.value)
         }
 
     @Test
@@ -93,7 +93,7 @@ class ConfirmingCommandsTest {
             val outcome = async { commands.setState("d/Counter-1", JsonPrimitive(1), ApplyMode.OVERLAY) }
             runCurrent()
 
-            assertEquals("Show Counter's state from “Bug 42” in the live app?", gate.pending?.question)
+            assertEquals("Show Counter's state from “Bug 42” in the live app?", gate.pending.value?.question)
             gate.answer(confirmed = false)
 
             assertEquals(CommandOutcome.Cancelled, outcome.await())

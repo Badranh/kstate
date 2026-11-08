@@ -1,5 +1,6 @@
 package dev.kstate.feature.agent.domain.image
 
+import dev.kstate.feature.agent.data.image.Pngs
 import java.io.ByteArrayInputStream
 import javax.imageio.ImageIO
 import kotlin.test.Test

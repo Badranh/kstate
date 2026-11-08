@@ -116,7 +116,8 @@ fun KstateApp(
                     }
                 }
             }
-            gate.pending?.let { InjectionDialog(it.question, onAnswer = gate::answer) }
+            val question by gate.pending.collectAsState()
+            question?.let { InjectionDialog(it.question, onAnswer = gate::answer) }
         }
     }
 }

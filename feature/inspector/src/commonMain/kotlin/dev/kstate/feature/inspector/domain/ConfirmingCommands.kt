@@ -1,13 +1,13 @@
 package dev.kstate.feature.inspector.domain
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import dev.kstate.core.data.SessionSource
 import dev.kstate.core.model.ApplyMode
 import dev.kstate.core.model.CommandOutcome
 import dev.kstate.core.model.SessionKind
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.JsonElement
 
 /** A question waiting for the person's yes or no. */
@@ -16,24 +16,24 @@ class PendingInjection internal constructor(
     internal val answer: CompletableDeferred<Boolean>,
 )
 
-/** Holds at most one question at a time, as Compose state, for the dialog that asks it. */
+/** Holds at most one question at a time, for the dialog that asks it. */
 class InjectionGate {
-    var pending: PendingInjection? by mutableStateOf(null)
-        private set
+    private val current = MutableStateFlow<PendingInjection?>(null)
+    val pending: StateFlow<PendingInjection?> = current.asStateFlow()
 
     internal suspend fun ask(question: String): Boolean {
         val asked = PendingInjection(question, CompletableDeferred())
-        pending?.answer?.complete(false)
-        pending = asked
+        current.value?.answer?.complete(false)
+        current.value = asked
         return try {
             asked.answer.await()
         } finally {
-            if (pending === asked) pending = null
+            current.compareAndSet(asked, null)
         }
     }
 
     fun answer(confirmed: Boolean) {
-        pending?.answer?.complete(confirmed)
+        current.value?.answer?.complete(confirmed)
     }
 }
 

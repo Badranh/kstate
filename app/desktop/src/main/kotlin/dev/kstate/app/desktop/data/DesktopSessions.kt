@@ -1,4 +1,4 @@
-package dev.kstate.app.desktop.domain
+package dev.kstate.app.desktop.data
 
 import dev.kstate.app.desktop.data.PreferencesSaveFolders
 import dev.kstate.app.desktop.data.RecordingLibrary

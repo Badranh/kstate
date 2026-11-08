@@ -1,4 +1,4 @@
-package dev.kstate.feature.inspector.ui.component
+package dev.kstate.feature.inspector.domain
 
 import dev.kstate.core.model.CollabView
 import dev.kstate.core.model.Comment

@@ -1,10 +1,10 @@
 package dev.kstate.feature.agent.data.capture
 
 import dev.kstate.core.model.SessionView
+import dev.kstate.feature.agent.data.image.Pngs
 import dev.kstate.feature.agent.domain.image.Fingerprint
 import dev.kstate.feature.agent.domain.image.Fingerprints
 import dev.kstate.feature.agent.domain.image.Picture
-import dev.kstate.feature.agent.domain.image.Pngs
 import dev.kstate.feature.agent.domain.settle.Settled
 import kotlinx.serialization.json.JsonElement
 

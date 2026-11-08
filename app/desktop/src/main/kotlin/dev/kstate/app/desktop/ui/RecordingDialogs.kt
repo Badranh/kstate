@@ -1,7 +1,7 @@
 package dev.kstate.app.desktop.ui
 
 import androidx.compose.ui.window.FrameWindowScope
-import dev.kstate.app.desktop.domain.DesktopSessions
+import dev.kstate.app.desktop.data.DesktopSessions
 import dev.kstate.core.session.data.wire.RecordingFormatException
 import java.awt.Desktop
 import java.awt.FileDialog

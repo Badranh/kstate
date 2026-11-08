@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.kstate.core.data.Collaboration
 import dev.kstate.core.model.Role
+import dev.kstate.feature.inspector.domain.CollabText
 
 /**
  * Who is here, and the drive controls that fit this person's role: guests ask to drive or stop

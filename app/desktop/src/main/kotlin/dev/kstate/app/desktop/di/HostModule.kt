@@ -1,11 +1,11 @@
 package dev.kstate.app.desktop.di
 
+import dev.kstate.app.desktop.data.AgentTokens
+import dev.kstate.app.desktop.data.DesktopSessions
 import dev.kstate.app.desktop.data.OwnerCollaboration
 import dev.kstate.app.desktop.data.RecordingLibrary
 import dev.kstate.app.desktop.domain.AdbAvailability
 import dev.kstate.app.desktop.domain.AgentAccess
-import dev.kstate.app.desktop.domain.AgentTokens
-import dev.kstate.app.desktop.domain.DesktopSessions
 import dev.kstate.app.desktop.domain.HostCommandRunner
 import dev.kstate.app.desktop.domain.HostRuntime
 import dev.kstate.app.desktop.domain.Sharing

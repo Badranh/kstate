@@ -7,8 +7,8 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
-import dev.kstate.app.desktop.domain.ActiveRecording
-import dev.kstate.app.desktop.domain.DesktopSessions
+import dev.kstate.app.desktop.data.ActiveRecording
+import dev.kstate.app.desktop.data.DesktopSessions
 import java.nio.file.Path
 
 /** File menu: record the live session, open and export recordings, go back to live, agent testing, share. */

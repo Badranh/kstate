@@ -8,10 +8,10 @@ import dev.kstate.core.model.DeviceView
 import dev.kstate.core.model.SourceView
 import dev.kstate.feature.agent.data.capture.Capture
 import dev.kstate.feature.agent.data.capture.CaptureStore
+import dev.kstate.feature.agent.data.image.Pngs
 import dev.kstate.feature.agent.domain.AgentFailure
 import dev.kstate.feature.agent.domain.SourceLimits
 import dev.kstate.feature.agent.domain.image.Fingerprints
-import dev.kstate.feature.agent.domain.image.Pngs
 import dev.kstate.feature.agent.domain.settle.DeviceMark
 import dev.kstate.feature.agent.domain.settle.Settle
 import dev.kstate.feature.agent.domain.settle.SettleTiming

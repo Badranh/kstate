@@ -3,7 +3,7 @@ package dev.kstate.feature.agent.mcp.tools
 import dev.kstate.core.model.CommandOutcome
 import dev.kstate.feature.agent.data.capture.Capture
 import dev.kstate.feature.agent.data.capture.CaptureStore
-import dev.kstate.feature.agent.domain.image.Pngs
+import dev.kstate.feature.agent.data.image.Pngs
 import dev.kstate.feature.agent.mcp.ToolArguments
 import dev.kstate.feature.agent.mcp.ToolResults
 import dev.kstate.feature.agent.mcp.ToolSpec

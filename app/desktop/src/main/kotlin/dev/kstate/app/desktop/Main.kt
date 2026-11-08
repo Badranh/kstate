@@ -13,10 +13,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import dev.kstate.app.desktop.data.DesktopSessions
 import dev.kstate.app.desktop.data.traceSnapshots
 import dev.kstate.app.desktop.di.hostModule
 import dev.kstate.app.desktop.domain.AgentAccess
-import dev.kstate.app.desktop.domain.DesktopSessions
 import dev.kstate.app.desktop.domain.HostRuntime
 import dev.kstate.app.desktop.domain.QuitSequence
 import dev.kstate.app.desktop.domain.Sharing

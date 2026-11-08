@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import dev.kstate.core.data.Collaboration
 import dev.kstate.core.designsystem.theme.Kstate
 import dev.kstate.core.model.Comment
+import dev.kstate.feature.inspector.domain.CollabText
 
 /**
  * Comments on moments of the session, as a thread in session order. A new one is pinned to the

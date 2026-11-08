@@ -102,13 +102,14 @@ kstate/
 
 Dependency rule, top to bottom: `app` -> `feature` -> `core`, and `host` sits beside `feature` as
 the desktop's data sources. `core:designsystem` depends on nothing of Kstate's; `core:ui` on
-`designsystem` and `data`; features never on `host`. The inspector talks to a `SessionSource`
-(`core:data`) that the desktop implements in-process and the web over `/ws/view`. `sdk-*` depend
-only on `core:protocol`.
+`designsystem`, `data` and `protocol`; features never on `host`. The inspector talks to a `SessionSource`
+(`core:data`) that the desktop implements in-process and the web over `/ws/view`. The SDK modules depend on
+nothing of Kstate's but `core:protocol` and each other.
 
 Inside a module, packages follow its layers: `model` (plain data), `data` (IO, sources, storage),
 `domain` (logic with no IO or UI), `ui` with `ui.component` (composables), `di` (Koin), and
-`mapper`, `mcp` or `platform` where a module has one. Host modules, which have no UI, are
+`mapper`, `mcp` or `platform` where a module has one; a self-contained algorithm gets its own
+package (`core.session.diff`). Host modules, which have no UI, are
 packaged by subsystem.
 
 ## Tech stack and dependencies
@@ -487,7 +488,7 @@ Build in this order; each milestone ends with a working demo on the sample app a
 **M6: Collaboration**
 
 - [x] Spike: video inside the Compose Wasm viewer; choose the main approach or the fallback. (Main approach; see DECISIONS.)
-- [x] `viewer-web`, `/ws/view`, invites, roles, driver handoff, presence, comments.
+- [x] `app:web` (was `viewer-web`), `/ws/view`, invites, roles, driver handoff, presence, comments.
 - [x] Tunnel providers: LAN, Tailscale, ngrok, Cloudflare. Second scrcpy instance for the remote profile.
 - [ ] Accepted when a viewer on another network joins through ngrok, sees video and state, and can drive only after approval.
 

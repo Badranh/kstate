@@ -9,9 +9,9 @@ for size in 16 32 128 256 512; do
   rsvg-convert -w $size -h $size branding/logo.svg -o "$set/icon_${size}x${size}.png"
   rsvg-convert -w $((size * 2)) -h $((size * 2)) branding/logo.svg -o "$set/icon_${size}x${size}@2x.png"
 done
-mkdir -p host/host-desktop/icons
-iconutil -c icns "$set" -o host/host-desktop/icons/kstate.icns
-rsvg-convert -w 512 -h 512 branding/logo.svg -o host/host-desktop/src/main/resources/kstate-icon.png
-cp branding/logo.svg viewer/viewer-web/src/wasmJsMain/resources/favicon.svg
+mkdir -p app/desktop/icons
+iconutil -c icns "$set" -o app/desktop/icons/kstate.icns
+rsvg-convert -w 512 -h 512 branding/logo.svg -o app/desktop/src/main/resources/kstate-icon.png
+cp branding/logo.svg app/web/src/wasmJsMain/resources/favicon.svg
 rm -r "$work"
 echo "icons written"
