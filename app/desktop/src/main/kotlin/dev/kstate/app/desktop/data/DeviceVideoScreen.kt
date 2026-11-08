@@ -68,7 +68,10 @@ internal fun decodeSize(
     device: VideoSize?,
 ): OutputSize {
     val width = maxOf(tileWidth, MIN_DECODE_WIDTH)
-    val (shapeWidth, shapeHeight) = device?.let { it.width to it.height } ?: (tileWidth to tileHeight)
+    // The device's shape when it has a real one, else the tile's, else square.
+    val (shapeWidth, shapeHeight) =
+        listOfNotNull(device?.let { it.width to it.height }, tileWidth to tileHeight)
+            .firstOrNull { (w, h) -> w > 0 && h > 0 } ?: (1 to 1)
     return OutputSize(width, (width.toLong() * shapeHeight / shapeWidth).toInt())
 }
 

@@ -20,6 +20,13 @@ class DecodeSizeTest {
         assertEquals(OutputSize(600, 1333), decodeSize(600, 1334, pixel))
     }
 
+    /** The size comes off the video stream unchecked: a zero there must not end the screen. */
+    @Test
+    fun aZeroSizeFallsBackInsteadOfDividingByIt() {
+        assertEquals(OutputSize(480, 1066), decodeSize(240, 533, VideoSize(0, 0)))
+        assertEquals(OutputSize(480, 480), decodeSize(0, 0, device = null))
+    }
+
     @Test
     fun beforeTheDeviceSizeIsKnownTheTilesShapeIsKept() {
         assertEquals(OutputSize(480, 1066), decodeSize(240, 533, device = null))
