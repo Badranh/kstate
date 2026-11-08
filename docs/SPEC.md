@@ -44,11 +44,11 @@ The Mac host is the hub. Apps connect to it as WebSocket clients, emulators feed
 |                                                            |- /video/{device}   |
 |                                                            +- /  (web viewer)   |
 |  SessionEngine: timeline (host clock), diff engine, ring index, recorder        |
-|  UI: CMP Desktop (shared viewer-ui) | Decoder: FFmpeg (JavaCV) -> Skia bitmap   |
+|  UI: CMP Desktop (shared inspector) | Decoder: FFmpeg (JavaCV) -> Skia bitmap   |
 +----------------------------------------+----------------------------------------+
                                          | TunnelProvider: LAN | Tailscale | ngrok | Cloudflare
                                          v
-                       Remote viewers: browser, Compose Wasm viewer-web
+                       Remote viewers: browser, Compose Wasm app:web
                        (video decoded with WebCodecs)
 ```
 
@@ -67,7 +67,16 @@ One Gradle monorepo with convention plugins in `build-logic`. The SDK artifacts 
 kstate/
 +- build-logic/                     # convention plugins: kmp-library, jvm-app, publishing, detekt
 +- gradle/libs.versions.toml
-+- protocol/                        # KMP common: messages, envelope, codecs, version
++- core/
+|  +- protocol/                     # KMP common: messages, envelope, codecs, version
+|  +- model/                        # what the viewer shows: plain data, no behaviour
+|  +- data/                         # SessionSource, DeviceScreen, Collaboration: the contracts
+|  +- session/                      # the engine, diffs, timeline and wire codecs (jvm + wasmJs)
+|  +- designsystem/                 # theme, colour tokens, generic components
+|  +- ui/                           # Kstate's shared widgets: state tree, device tile, timeline
++- feature/
+|  +- inspector/                    # the viewer screen: sources, states, editor, comments
+|  +- agent/                        # the MCP agent: explore, screen map, reports
 +- sdk/
 |  +- sdk-core/                     # KMP android+ios(+jvm for tests): Kstate, track(), inspectable(), encoders, transport
 |  +- sdk-noop/                     # same public API, empty bodies (release builds)
@@ -79,20 +88,28 @@ kstate/
 |     +- adapter-livedata/          # androidMain only
 |     +- adapter-rx/                # androidMain only
 +- host/
-|  +- host-core/                    # JVM: Ktor server, SessionEngine, DiffEngine, Recorder, DeviceManager
-|  +- host-video/                   # JVM: scrcpy client, H.264 parser, FFmpeg decoder
-|  +- host-tunnel/                  # JVM: TunnelProvider + LAN/Tailscale/ngrok/Cloudflare
-|  +- host-desktop/                 # CMP Desktop app shell, packaging, Koin wiring
-+- viewer/
-|  +- viewer-ui/                    # CMP shared UI: jvm + wasmJs
-|  +- viewer-client/                # KMP: Ktor WS client to /ws/view, video sink interface
-|  +- viewer-web/                   # wasmJs entry, WebCodecs interop, served by host
+|  +- adb/                          # JVM: finding and driving adb
+|  +- server/                       # JVM: app gateway, collaboration server, recording, devices
+|  +- video/                        # JVM: scrcpy client, H.264 parser, FFmpeg decoder
+|  +- tunnel/                       # JVM: TunnelProvider + LAN/Tailscale/ngrok/Cloudflare
++- app/
+|  +- desktop/                      # CMP Desktop app shell, packaging, Koin wiring
+|  +- web/                          # wasmJs entry, WebCodecs interop, served by host
 +- ios-capture/                     # Swift package: ScreenCaptureKit sidecar [M6]
 +- sample/                          # KMP + CMP sample app: MVVM, Orbit and Decompose screens
 +- docs/
 ```
 
-Dependency rule: `protocol` <- `sdk-*`, `host-*`, `viewer-*`. `viewer-ui` never depends on `host-*`. It talks to a `SessionSource` interface that the desktop implements in-process and the web implements over `/ws/view`.
+Dependency rule, top to bottom: `app` -> `feature` -> `core`, and `host` sits beside `feature` as
+the desktop's data sources. `core:designsystem` depends on nothing of Kstate's; `core:ui` on
+`designsystem` and `data`; features never on `host`. The inspector talks to a `SessionSource`
+(`core:data`) that the desktop implements in-process and the web over `/ws/view`. `sdk-*` depend
+only on `core:protocol`.
+
+Inside a module, packages follow its layers: `model` (plain data), `data` (IO, sources, storage),
+`domain` (logic with no IO or UI), `ui` with `ui.component` (composables), `di` (Koin), and
+`mapper`, `mcp` or `platform` where a module has one. Host modules, which have no UI, are
+packaged by subsystem.
 
 ## Tech stack and dependencies
 
@@ -101,20 +118,20 @@ Resolve the latest stable version of every dependency at scaffold time and pin i
 | Area | Choice | Used in | Notes |
 | --- | --- | --- | --- |
 | Language | Kotlin (K2), latest stable | all | Explicit API mode on for `sdk-*`, `protocol` |
-| UI | Compose Multiplatform | host-desktop, viewer-ui, viewer-web, sample | wasmJs target for viewer-web |
-| Networking | Ktor 3.x: server CIO + WebSockets; client CIO (Android/JVM), Darwin (iOS), Js (wasm) | host-core, sdk-core, viewer-client | One WS per app connection |
+| UI | Compose Multiplatform | app:desktop, core:designsystem, core:ui, feature:inspector, app:web, sample | wasmJs target for app:web |
+| Networking | Ktor 3.x: server CIO + WebSockets; client CIO (Android/JVM), Darwin (iOS), Js (wasm) | host:server, sdk-core, app:web | One WS per app connection |
 | Serialization | kotlinx.serialization JSON | all | `classDiscriminator = "t"` |
 | Coroutines | kotlinx.coroutines | all | Turbine + coroutines-test for tests |
-| DI (host only) | Koin | host-desktop, optional sdk-koin | The SDK core must not depend on Koin |
-| adb | Shell out to the `adb` binary, through one `AdbClient` interface | host-core | Use the user's SDK adb; resolve from `ANDROID_HOME`; adam library allowed later |
-| Screen stream | scrcpy-server, pinned version, jar bundled in resources | host-video | Server version must match the protocol the client speaks |
-| Video decode (host) | FFmpeg via bytedeco JavaCV, LGPL build, `h264_videotoolbox` hwaccel when available | host-video | Decode to RGBA, upload into a reused Skia `Bitmap` |
-| Video decode (web) | WebCodecs `VideoDecoder` via wasmJs external interop | viewer-web | Highest-risk piece; spike first in M5 |
+| DI (host only) | Koin | app:desktop, optional sdk-koin | The SDK core must not depend on Koin |
+| adb | Shell out to the `adb` binary, through one `AdbClient` interface | host:adb | Use the user's SDK adb; resolve from `ANDROID_HOME`; adam library allowed later |
+| Screen stream | scrcpy-server, pinned version, jar bundled in resources | host:video | Server version must match the protocol the client speaks |
+| Video decode (host) | FFmpeg via bytedeco JavaCV, LGPL build, `h264_videotoolbox` hwaccel when available | host:video | Decode to RGBA, upload into a reused Skia `Bitmap` |
+| Video decode (web) | WebCodecs `VideoDecoder` via wasmJs external interop | app:web | Highest-risk piece; spike first in M5 |
 | Reflection (Android encoder) | kotlin-reflect | sdk-core androidMain | Debug builds only; acceptable size cost |
 | Logging | Kermit | sdk-core, host | SDK logs off by default |
-| Storage | Session = directory, exported as zip (`.kstate`): JSONL + raw H.264 + index | host-core | No database in v1 |
-| Tunnels | Shell out to `tailscale`, `ngrok`, `cloudflared` CLIs | host-tunnel | Detect on PATH; no vendor SDKs |
-| Packaging | Compose Gradle plugin `nativeDistributions` (DMG), signing + notarization | host-desktop | arm64 first, x64 second |
+| Storage | Session = directory, exported as zip (`.kstate`): JSONL + raw H.264 + index | host:server | No database in v1 |
+| Tunnels | Shell out to `tailscale`, `ngrok`, `cloudflared` CLIs | host:tunnel | Detect on PATH; no vendor SDKs |
+| Packaging | Compose Gradle plugin `nativeDistributions` (DMG), signing + notarization | app:desktop | arm64 first, x64 second |
 | Quality | detekt + ktlint, binary-compatibility-validator for `sdk-*` and `protocol` | all | Public API changes must be deliberate |
 
 ## Wire protocol
@@ -285,7 +302,7 @@ The host discovers devices, runs one video pipeline and one app gateway per devi
 - Start one `AppGateway` (a small Ktor CIO server on `127.0.0.1:<hostPort>`, route `/ws/app`) per device. Remove the reverse rule and stop the gateway when the device disappears.
 - Resolve `adb` from `ANDROID_HOME`/`ANDROID_SDK_ROOT`, then PATH. Show a clear setup error if it's missing.
 
-**scrcpy pipeline** (host-video). Verify every byte layout below against `doc/develop.md` and the server sources of the pinned scrcpy version, and lock it with fixture tests.
+**scrcpy pipeline** (host:video). Verify every byte layout below against `doc/develop.md` and the server sources of the pinned scrcpy version, and lock it with fixture tests.
 
 1. Push the bundled `scrcpy-server` jar to `/data/local/tmp/kstate-scrcpy.jar` when the hash differs.
 2. Pick a random 31-bit `scid`. Run `adb forward tcp:<p> localabstract:scrcpy_<scid as 8 hex>`.
@@ -340,9 +357,9 @@ Export = zip with a `.kstate` extension. Replay uses a `SessionSource` implement
 
 Remote people open a link in a browser and get the same UI as the desktop, served by the host. The tunnel is a swappable provider; state sync is cheap, video is what costs bandwidth.
 
-**Web viewer (viewer-web)**
+**Web viewer (app:web)**
 
-- Compose Multiplatform wasmJs app, served by the host at `/`, using the shared `viewer-ui` and a `SessionSource` implemented over `/ws/view`.
+- Compose Multiplatform wasmJs app, served by the host at `/`, using the shared `feature:inspector` and a `SessionSource` implemented over `/ws/view`.
 - Video: `/video/{deviceId}` into a WebCodecs `VideoDecoder` (codec string built from the SPS profile/level, e.g. `avc1.42E01F`), drawn to a canvas.
 - Risk: embedding a live canvas inside a Compose Wasm layout. Spike this first in M5. Fallback: a plain HTML `<canvas>` absolutely positioned under a transparent Compose region, kept in sync with the tile's bounds through a small JS bridge.
 
@@ -485,7 +502,7 @@ Test screens by setting state, not by scanning the UI. Kstate already has every 
 schema, can set any state as an overlay, and has the live video, so an agent needs no view tree or
 label detection. Kstate serves MCP on `127.0.0.1` (bearer token, Origin checked, off until the
 Owner turns it on); the connected agent (e.g. Claude Code) judges the pictures, Kstate holds no
-API key. Logic lives in `host/host-agent` behind ports; host-desktop wires it.
+API key. Logic lives in `feature/agent` behind ports; app:desktop wires it.
 
 1. **Map:** while anyone uses the app, each settled screen (no new video frame for 300 ms) is paired
    with the route (`Nav` stack) and the source states that produced it; each change is a
@@ -520,12 +537,12 @@ The protocol and SDK carry the most tests because other people's apps depend on 
 | protocol | Round-trip every message; unknown-type tolerance; golden JSON files per version | kotlin-test |
 | sdk-core | Throttle/conflate timing, ring-buffer eviction, overlay/freeze/release, write-through, encoder chain per type shape, redaction, buffer drop rules, reconnect resend | coroutines-test, Turbine, fake transport |
 | Encoders | toString parser corpus (nested, lists, maps, strings with commas and parentheses), reflection on sealed/cyclic graphs | kotlin-test (common + android unit) |
-| host-core | DiffEngine (keyed arrays, cap), SessionEngine ordering and scrubbing, command timeouts, recorder/replay round-trip | JUnit5, Ktor testApplication |
-| host-video | scrcpy stream parser against a recorded binary fixture; decoder smoke test on a short H.264 clip | JUnit5 |
+| core:session, host:server | DiffEngine (keyed arrays, cap), SessionEngine ordering and scrubbing, command timeouts, recorder/replay round-trip | JUnit5, Ktor testApplication |
+| host:video | scrcpy stream parser against a recorded binary fixture; decoder smoke test on a short H.264 clip | JUnit5 |
 | Integration | Fake SDK client (JVM) against a real host: register, stream, restore, edit | Ktor client in tests |
 | End-to-end (manual, per milestone) | Sample app on an emulator, checklist from the milestone's acceptance criteria | - |
 
-**CI** (GitHub Actions, `macos-14`): build all targets, unit tests, detekt, ktlint, `apiCheck`, guard-plugin test (a release sample build must fail with `sdk-core`), and a wasm build of `viewer-web`. Nightly: package the DMG unsigned.
+**CI** (GitHub Actions, `macos-14`): build all targets, unit tests, detekt, ktlint, `apiCheck`, guard-plugin test (a release sample build must fail with `sdk-core`), and a wasm build of `app:web`. Nightly: package the DMG unsigned.
 
 **Publishing:** Maven Central via the vanniktech maven-publish plugin, with GPG signing from CI secrets. SemVer; the SDK and protocol major versions move together. DMG built with Compose `nativeDistributions`, signed with a Developer ID and notarized in a release workflow.
 
@@ -552,9 +569,9 @@ or add an entry to docs/DECISIONS.md, don't silently deviate.
 
 ## Commands
 - Build + all checks:      ./gradlew check
-- Desktop host:            ./gradlew :host:host-desktop:run
+- Desktop host:            ./gradlew :app:desktop:run
 - Sample app (Android):    ./gradlew :sample:androidApp:installDebug
-- Web viewer (dev):        ./gradlew :viewer:viewer-web:wasmJsBrowserDevelopmentRun
+- Web viewer (dev):        ./gradlew :app:web:wasmJsBrowserDevelopmentRun
 - Public API dump/check:   ./gradlew apiDump / ./gradlew apiCheck
 
 ## Hard rules

@@ -501,3 +501,23 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   recorded was real when it was shown.
 - Limit: the check is only as fresh as the device's video list, which drops a stream when its
   reader sees it end. A stream that stalls without ending still looks settled.
+
+## 2026-11-08: Modules and packages by layer
+- Modules follow Now in Android's shape: `core` (protocol, model, data, session, designsystem,
+  ui), `feature` (inspector, agent), `host` (adb, server, video, tunnel: the desktop's data
+  sources), `app` (desktop, web). Old to new: `:protocol` -> `:core:protocol`,
+  `:viewer:viewer-client` -> `:core:model` + `:core:data`, `:session` -> `:core:session`,
+  `:viewer:viewer-ui` -> `:core:designsystem` + `:core:ui` + `:feature:inspector`,
+  `:host:host-core` -> `:host:adb` + `:host:server`, `:host:host-video` -> `:host:video`,
+  `:host:host-tunnel` -> `:host:tunnel`, `:host:host-agent` -> `:feature:agent`,
+  `:host:host-desktop` -> `:app:desktop`, `:viewer:viewer-web` -> `:app:web`. Entries above
+  this one use the old names.
+- Packages match the module path (`dev.kstate.core.session`, `dev.kstate.feature.agent`), then
+  the layer: `model`, `data`, `domain`, `ui` / `ui.component`, `di`. Host modules have no UI and
+  are packaged by subsystem.
+- The SDK's own packages (`dev.kstate.sdk.*`, `dev.kstate.adapter.*`) are unchanged: apps use
+  them. Its public API changed only where it exposes protocol types, now in
+  `dev.kstate.core.protocol`; nothing is published yet, so no migration is needed. The wire
+  format is unchanged: every message type has an explicit `@SerialName`.
+- Short module names are safe in the packaged app: Compose adds a content hash to every jar.
+  The macOS bundle id stays `dev.kstate.host` so the system still sees the same app.

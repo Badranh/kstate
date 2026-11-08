@@ -18,10 +18,10 @@ You need macOS, JDK 17 or newer, the Android SDK and Xcode.
 
 | What | Command |
 | --- | --- |
-| Desktop host | `./gradlew :host:host-desktop:run` |
+| Desktop host | `./gradlew :app:desktop:run` |
 | Android sample | `./gradlew :sample:androidApp:installDebug` |
 | iOS sample | open `sample/iosApp/iosApp.xcodeproj` in Xcode and run |
-| Web viewer | `./gradlew :viewer:viewer-web:wasmJsBrowserDevelopmentRun` |
+| Web viewer | `./gradlew :app:web:wasmJsBrowserDevelopmentRun` |
 
 ## License
 

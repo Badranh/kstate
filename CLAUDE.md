@@ -14,9 +14,9 @@ or add an entry to docs/DECISIONS.md, don't silently deviate.
 
 ## Commands
 - Build + all checks:      ./gradlew check
-- Desktop host:            ./gradlew :host:host-desktop:run
+- Desktop host:            ./gradlew :app:desktop:run
 - Sample app (Android):    ./gradlew :sample:androidApp:installDebug
-- Web viewer (dev):        ./gradlew :viewer:viewer-web:wasmJsBrowserDevelopmentRun
+- Web viewer (dev):        ./gradlew :app:web:wasmJsBrowserDevelopmentRun
 - Public API dump/check:   ./gradlew apiDump / ./gradlew apiCheck
 
 ## Hard rules
