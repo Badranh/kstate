@@ -18,6 +18,7 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import org.junit.jupiter.api.Assumptions
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.NetworkInterface
@@ -106,7 +107,12 @@ class KtorGatewayFactoryTest {
                 .toList()
                 .flatMap { it.inetAddresses().toList() }
                 .firstOrNull { !it.isLoopbackAddress && it is java.net.Inet4Address }
-                ?: return
+        Assumptions.assumeTrue(lanAddress != null, "this machine has no LAN address to try")
+        // Control: something listening on every interface is reachable there, so a refusal below
+        // comes from where the gateway listens, not from the network.
+        ServerSocket(0, 1, InetAddress.getByName("0.0.0.0")).use { open ->
+            Socket().use { it.connect(InetSocketAddress(lanAddress, open.localPort), CONNECT_TIMEOUT_MILLIS) }
+        }
         val gateway = factory.start("emulator-5554", port)
         try {
             assertFailsWith<java.io.IOException> {

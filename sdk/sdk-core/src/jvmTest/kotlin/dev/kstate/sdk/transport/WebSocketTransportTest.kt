@@ -255,12 +255,16 @@ class WebSocketTransportTest {
         runBlocking {
             val host = host()
             val transport = transport(host.url)
-            host.next()
+            assertEquals(0 to hello, host.next())
+            // Control: on an open transport a send arrives, so silence after close means something.
+            transport.send(envelope(Event(name = "before close")))
+            assertEquals(0 to Event(name = "before close"), host.next())
 
             transport.close()
             transport.send(envelope(Event(name = "after close")))
 
-            assertNull(withTimeoutOrNull(300.milliseconds) { host.received.receive() })
+            // Several reconnect backoffs (50-100 ms): a transport that came back would replay its hello.
+            assertNull(withTimeoutOrNull(500.milliseconds) { host.received.receive() })
         }
 
     /**
