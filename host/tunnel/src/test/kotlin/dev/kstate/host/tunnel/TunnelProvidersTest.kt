@@ -119,6 +119,21 @@ class TunnelProvidersTest {
             assertTrue("http://127.0.0.1:47800" in processes.spawned.single())
         }
 
+    /** A quick-tunnel-looking name that goes on (another domain, a path) is not the tunnel's link. */
+    @Test
+    fun aNameThatGoesOnIsNotTheTunnel() =
+        runTest {
+            val processes =
+                FakeProcesses(output = {
+                    flowOf(
+                        "2026-11-06T10:00:00Z INF see https://quiet-lake-1234.trycloudflare.com.example.org",
+                        "2026-11-06T10:00:00Z ERR Post https://quiet-lake-1234.trycloudflare.com/tunnel failed",
+                    )
+                })
+
+            assertFailsWith<TunnelException> { CloudflareTunnel(processes, startTimeoutMillis = 50).start(47800) }
+        }
+
     /** cloudflared names its own API when a request fails; that is not a link anyone can open. */
     @Test
     fun cloudflaredsApiAddressIsNeverTakenForTheTunnel() =

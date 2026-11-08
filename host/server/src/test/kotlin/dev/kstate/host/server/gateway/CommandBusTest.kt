@@ -8,15 +8,18 @@ import dev.kstate.core.protocol.Restore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
@@ -71,16 +74,28 @@ class CommandBusTest {
             assertTrue(currentCoroutineContext().isActive)
         }
 
+    /**
+     * An async that is cancelled ends cancelled whatever its body returns, so this looks at the
+     * body: had send swallowed the cancellation, the line after it would still run.
+     */
     @Test
     fun aCallerCancelledWhileWaitingIsStillCancelled() =
         runTest {
-            bus.attach("emulator-5554", connectionId = 1) { sent += it }
-            val waiting = async { bus.send("emulator-5554") { id -> Release(id, "Counter-1") } }
-            runCurrent()
+            bus.attach("emulator-5554", connectionId = 1) {
+                // The socket dies as the caller is cancelled: only the caller's cancellation may win.
+                currentCoroutineContext().cancel()
+                throw CancellationException("session cancelled")
+            }
+            var carriedOn = false
+            val caller =
+                launch {
+                    bus.send("emulator-5554") { id -> Release(id, "Counter-1") }
+                    carriedOn = true
+                }
 
-            waiting.cancel()
+            caller.join()
 
-            assertFailsWith<CancellationException> { waiting.await() }
+            assertFalse(carriedOn, "send swallowed the caller's own cancellation")
         }
 
     @Test
