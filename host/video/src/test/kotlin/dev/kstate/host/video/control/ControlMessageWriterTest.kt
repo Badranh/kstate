@@ -45,6 +45,12 @@ class ControlMessageWriterTest {
         )
     }
 
+    /**
+     * The server reads the paste flag before the text (its bytecode does; jadx's default decompile
+     * inlines the reads into one call and shows them the other way round). Sent the wrong way, the
+     * flag eats a length byte and the server waits forever for a huge string, swallowing every
+     * later message.
+     */
     @Test
     fun aPasteSetsTheClipboardWithoutAskingForAnAck() {
         val utf8 = "日本😀".toByteArray()
@@ -53,9 +59,9 @@ class ControlMessageWriterTest {
             expected {
                 writeByte(9)
                 writeLong(0)
+                writeByte(1)
                 writeInt(utf8.size)
                 write(utf8)
-                writeByte(1)
             },
             ControlMessageWriter.encode(ControlMessage.SetClipboard("日本😀")),
         )

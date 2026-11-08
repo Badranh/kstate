@@ -46,9 +46,10 @@ object ControlMessageWriter {
         writeByte(TYPE_SET_CLIPBOARD)
         // Sequence 0: no acknowledgement is asked for, so nothing comes back on the socket.
         writeLong(0)
+        // The flag comes before the text, as the server's bytecode reads it.
+        writeByte(if (message.paste) 1 else 0)
         writeInt(utf8.size)
         write(utf8)
-        writeByte(if (message.paste) 1 else 0)
     }
 
     private fun DataOutputStream.touch(message: ControlMessage.InjectTouch) {

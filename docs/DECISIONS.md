@@ -526,8 +526,11 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 - Measured on the emulator: scrcpy types text as key presses through the device's key map and
   drops, with only a log line, every character it has no key for (emoji, CJK). Kstate now types
   text that is all printable ASCII, newline and tab as keys, and pastes any other text whole
-  (scrcpy's SET_CLIPBOARD with paste, byte layout read from the bundled v5.0.1 server: type,
-  sequence 0 so no ack comes back, text, paste flag). Whole, because the server presses Paste
+  (scrcpy's SET_CLIPBOARD with paste, byte layout read from the bundled v5.0.1 server's
+  bytecode: type, sequence 0 so no ack comes back, paste flag, text). jadx's default decompile
+  inlines those reads into one call and shows the text before the flag; sent that way the flag
+  eats a length byte and the server waits forever, swallowing all later input. Read side-effect
+  order from `--decompilation-mode fallback`, not the default output. Whole, because the server presses Paste
   asynchronously: a second paste could replace the clipboard before the app read the first, so
   mixed text is never split into several pastes. Accented letters are pasted too rather than left
   to the key map's dead keys. A paste replaces the device's clipboard (the tool says so), and
