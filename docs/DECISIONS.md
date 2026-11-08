@@ -619,3 +619,9 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 - Bundled rather than fetched from Google Fonts: guests' browsers contact no one but the host,
   and it works offline or on a LAN. The cost is about 21 MB in the app and in the repository.
   ViewerFontsTest reads the fonts from what the desktop serves and checks they draw the samples.
+
+## 2026-11-08: A short, narrow window
+- Stacked (narrow) panes shared the height out evenly, so a short window left the phone a sliver
+  and its text one word per line. When the stack can't give the device pane 280 dp and the
+  details 320 dp, it keeps those heights and scrolls instead. Checked by measuring the real
+  layout at 700x450 and by rendering it offscreen.

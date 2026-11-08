@@ -1,13 +1,23 @@
 package dev.kstate.feature.inspector.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.height
 import dev.kstate.core.data.DeviceScreen
 import dev.kstate.core.data.SessionSource
 import dev.kstate.core.model.ApplyMode
 import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.model.DeviceView
 import dev.kstate.core.model.SessionView
 import dev.kstate.core.model.TimelineView
+import dev.kstate.core.model.TouchPhase
+import dev.kstate.core.model.VideoFrame
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.json.JsonElement
 import kotlin.test.Test
@@ -47,6 +57,57 @@ class KstateAppTest {
 
             assertTrue(source.timelines > before, "the timeline was not rebuilt for a new session")
         }
+
+    /** In a short, narrow window the tile shrank to a sliver: the phone and its text became unreadable. */
+    @Test
+    fun aShortNarrowWindowKeepsTheDeviceTileUsable() =
+        runComposeUiTest {
+            val source = CountingSource()
+            source.session.value =
+                SessionView(
+                    devices = listOf(DeviceView("emulator-5554", "Pixel", connected = true, sources = emptyList())),
+                )
+            source.screens.value = mapOf("emulator-5554" to StillScreen())
+            // The tile's waiting shimmer never stops, so the clock is driven by hand.
+            mainClock.autoAdvance = false
+            setContent { Box(Modifier.size(700.dp, 450.dp)) { KstateApp(source) } }
+            mainClock.advanceTimeBy(FRAME)
+
+            val tile = onNodeWithTag(DEVICE_PANE_TAG).getBoundsInRoot()
+
+            assertTrue(tile.height >= MIN_DEVICE_PANE_HEIGHT, "the device pane got ${tile.height}")
+        }
+
+    private class StillScreen : DeviceScreen {
+        override val frames = MutableStateFlow<VideoFrame?>(null)
+
+        override fun frameAt(hostTs: Long): VideoFrame? = null
+
+        override fun setOutputSize(
+            width: Int,
+            height: Int,
+        ) = Unit
+
+        override fun touch(
+            phase: TouchPhase,
+            x: Float,
+            y: Float,
+        ) = Unit
+
+        override fun scroll(
+            x: Float,
+            y: Float,
+            horizontal: Float,
+            vertical: Float,
+        ) = Unit
+
+        override fun key(
+            keycode: Int,
+            metaState: Int,
+        ) = Unit
+
+        override fun text(text: String) = Unit
+    }
 
     private class CountingSource : SessionSource {
         var clock = 0L

@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.kstate.core.data.Collaboration
 import dev.kstate.core.data.DeviceScreen
@@ -231,14 +236,21 @@ private fun WidePanes(panes: Panes) {
 /** A phone: the device on top, the sources as chips, the details below. */
 @Composable
 private fun NarrowPanes(panes: Panes) {
-    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(NARROW_GAP)) {
-        panes.screen?.let {
-            PanelCard(
-                Modifier.fillMaxWidth().weight(1f),
-            ) { DeviceTile(it, panes.pausedAt, Modifier.fillMaxSize(), panes.canDrive) }
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        // Shared out, a short window left the phone a sliver; then the panes keep a usable height
+        // and the stack scrolls instead.
+        val roomy = maxHeight >= MIN_DEVICE_PANE_HEIGHT + MIN_DETAILS_HEIGHT + CHIPS_HEIGHT
+        val stack = if (roomy) Modifier.fillMaxSize() else Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+        Column(stack, verticalArrangement = Arrangement.spacedBy(NARROW_GAP)) {
+            fun Modifier.share(least: Dp) = if (roomy) fillMaxWidth().weight(1f) else fillMaxWidth().height(least)
+            panes.screen?.let {
+                PanelCard(
+                    Modifier.share(MIN_DEVICE_PANE_HEIGHT).testTag(DEVICE_PANE_TAG),
+                ) { DeviceTile(it, panes.pausedAt, Modifier.fillMaxSize(), panes.canDrive) }
+            }
+            SourceChips(panes.session.devices, panes.selected, panes.onSelect)
+            PanelCard(Modifier.share(MIN_DETAILS_HEIGHT)) { Details(panes, Modifier.fillMaxSize()) }
         }
-        SourceChips(panes.session.devices, panes.selected, panes.onSelect)
-        PanelCard(Modifier.fillMaxWidth().weight(1f)) { Details(panes, Modifier.fillMaxSize()) }
     }
 }
 
@@ -262,6 +274,13 @@ private fun screenFor(
     session: SessionView,
     screens: Map<String, DeviceScreen>,
 ): DeviceScreen? = session.devices.firstNotNullOfOrNull { screens[it.id] } ?: screens.values.firstOrNull()
+
+internal const val DEVICE_PANE_TAG = "device-pane"
+
+/** Below this a phone and its text can't be read; the stack scrolls instead of going shorter. */
+internal val MIN_DEVICE_PANE_HEIGHT = 280.dp
+private val MIN_DETAILS_HEIGHT = 320.dp
+private val CHIPS_HEIGHT = 48.dp
 
 private val SIDEBAR_WIDTH = 260.dp
 private val GAP = 12.dp
