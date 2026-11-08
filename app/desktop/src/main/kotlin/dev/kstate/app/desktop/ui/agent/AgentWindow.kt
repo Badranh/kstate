@@ -80,7 +80,7 @@ private fun Header(state: AgentState) {
         }
         val (label, color) =
             when (state) {
-                AgentState.Off -> "Off" to MaterialTheme.colorScheme.outline
+                AgentState.Off -> "Off" to MaterialTheme.colorScheme.onSurfaceVariant
                 is AgentState.On -> "Listening" to Kstate.colors.live
                 is AgentState.Failed -> "Failed" to MaterialTheme.colorScheme.error
             }

@@ -95,9 +95,11 @@ private fun SourceRow(
             style = MaterialTheme.typography.bodyMedium,
             color = if (selected) colors.onPrimaryContainer else colors.onSurface,
         )
-        if (!source.live) Badge("ended", colors.onSurfaceVariant)
+        // On a selected row's tinted background the quiet badges take its own text colour.
+        val quiet = if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant
+        if (!source.live) Badge("ended", quiet)
         if (source.overridden) Badge("override", Kstate.colors.paused)
-        source.seq?.let { Badge("#$it", colors.onSurfaceVariant) }
+        source.seq?.let { Badge("#$it", quiet) }
     }
 }
 

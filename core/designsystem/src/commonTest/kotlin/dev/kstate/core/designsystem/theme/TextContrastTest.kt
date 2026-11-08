@@ -38,6 +38,16 @@ class TextContrastTest {
         assertTrue(failing.isEmpty(), "below $MIN_CONTRAST:1 on some surface: $failing")
     }
 
+    /** A selected row sits on primaryContainer; its text and badges use these. */
+    @Test
+    fun textOnASelectedRowIsReadable() {
+        val failing =
+            mapOf("onPrimaryContainer" to Palette.onPrimaryContainer, "paused" to Extras.paused)
+                .filterValues { contrast(it, Palette.primaryContainer) < MIN_CONTRAST }
+                .keys
+        assertTrue(failing.isEmpty(), "below $MIN_CONTRAST:1 on a selected row: $failing")
+    }
+
     private fun contrast(
         a: Color,
         b: Color,

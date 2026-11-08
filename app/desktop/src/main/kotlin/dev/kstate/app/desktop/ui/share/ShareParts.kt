@@ -25,7 +25,7 @@ import dev.kstate.core.model.Role
 internal fun StatusChip(state: SharingState) {
     val (label, color) =
         when (state) {
-            SharingState.Off -> "Not shared" to MaterialTheme.colorScheme.outline
+            SharingState.Off -> "Not shared" to MaterialTheme.colorScheme.onSurfaceVariant
             is SharingState.Starting -> "Starting" to Kstate.colors.paused
             is SharingState.On -> "Live" to Kstate.colors.live
             is SharingState.Failed -> "Failed" to MaterialTheme.colorScheme.error
