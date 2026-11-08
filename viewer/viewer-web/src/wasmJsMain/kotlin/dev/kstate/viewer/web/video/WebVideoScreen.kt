@@ -71,7 +71,7 @@ class WebVideoScreen(
                     live.value = VideoFrame(width, height, rgba.toByteArray(), timestamp.toLong())
                 },
                 onError = onError,
-            ).also { configureDecoder(it, AvcCodec.fromConfig(config)) }
+            ).also { configureDecoder(it, AvcCodec.fromConfig(config))?.let(onError) }
 
         override fun decode(
             data: ByteArray,

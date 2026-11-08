@@ -88,6 +88,28 @@ class DecoderFeedTest {
     }
 
     @Test
+    fun aDecoderThatFailsWhileBeingMadeIsNeverUsed() {
+        var failNext = true
+        val made = mutableListOf<Fake>()
+        val feed =
+            DecoderFeed { config, onError ->
+                Fake(config, onError).also {
+                    made += it
+                    if (failNext) onError("NotSupportedError")
+                }
+            }
+        feed.configure(config)
+
+        feed.packet(1, keyFrame = true, byteArrayOf(1))
+        failNext = false
+        feed.packet(2, keyFrame = true, byteArrayOf(2))
+
+        assertTrue(made[0].closed)
+        assertEquals(emptyList(), made[0].decoded)
+        assertEquals(listOf(2L to true), made[1].decoded)
+    }
+
+    @Test
     fun nothingIsDecodedBeforeAConfigOrAfterClosing() {
         feed.packet(1, keyFrame = true, byteArrayOf(1))
         feed.configure(config)

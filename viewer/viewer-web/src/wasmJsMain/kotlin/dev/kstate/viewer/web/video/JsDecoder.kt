@@ -34,12 +34,22 @@ internal fun createDecoder(
     }""",
     )
 
-/** Annex-B H.264 (no `description`), tuned for latency over smoothness. */
+/** Annex-B H.264 (no `description`), tuned for latency over smoothness. Null when it took, else why not. */
 @Suppress("UNUSED_PARAMETER")
 internal fun configureDecoder(
     decoder: JsDecoder,
     codec: String,
-): Unit = js("decoder.configure({ codec: codec, optimizeForLatency: true })")
+): String? =
+    js(
+        """{
+        try {
+            decoder.configure({ codec: codec, optimizeForLatency: true });
+            return null;
+        } catch (e) {
+            return String(e);
+        }
+    }""",
+    )
 
 /** Null when the chunk was queued; otherwise why not (a closed decoder throws here). */
 @Suppress("UNUSED_PARAMETER")

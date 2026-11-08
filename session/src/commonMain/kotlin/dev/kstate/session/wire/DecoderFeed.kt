@@ -23,6 +23,9 @@ class DecoderFeed(
     private var config: ByteArray? = null
     private var decoder: PacketDecoder? = null
 
+    /** The decoder being made or in use; an error from any other is about one already dropped. */
+    private var attempt: Any? = null
+
     /** The last decoder error, if any, until a new config comes. */
     var lastError: String? = null
         private set
@@ -39,27 +42,36 @@ class DecoderFeed(
         data: ByteArray,
     ) {
         val config = config ?: return
-        val current = decoder ?: (if (keyFrame) open(config) else return)
+        val current = decoder ?: (if (keyFrame) open(config) else null) ?: return
         current.decode(if (keyFrame) config + data else data, hostTs, keyFrame)
     }
 
     fun close() {
-        decoder?.close()
-        decoder = null
+        drop()
         config = null
     }
 
-    private fun open(config: ByteArray): PacketDecoder {
-        var made: PacketDecoder? = null
-        // An error is about the decoder that raised it; one already replaced is ignored.
-        made = create(config) { message -> if (made != null && decoder === made) fail(message) }
+    /** Null when the new decoder failed while being made, as configuring an unsupported codec does. */
+    private fun open(config: ByteArray): PacketDecoder? {
+        val mine = Any()
+        attempt = mine
+        val made = create(config) { message -> if (attempt === mine) fail(message) }
+        if (attempt !== mine) {
+            made.close()
+            return null
+        }
         decoder = made
         return made
     }
 
     private fun fail(message: String) {
         lastError = message
+        drop()
+    }
+
+    private fun drop() {
         decoder?.close()
         decoder = null
+        attempt = null
     }
 }
