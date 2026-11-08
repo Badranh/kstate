@@ -5,7 +5,9 @@ import dev.kstate.host.video.stream.StreamEvent
 import dev.kstate.host.video.stream.VideoStreamReader
 import kotlin.test.AfterTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class FfmpegDecoderTest {
@@ -30,6 +32,27 @@ class FfmpegDecoderTest {
 
     private fun decodeAll(): List<DecodedFrame> =
         recordedPackets().flatMap { decoder.decode(it.data, it.ptsMicros) } + decoder.flush()
+
+    @Test
+    fun skimmingEndsOnTheSamePictureAsDecodingEveryFrame() {
+        val decodedLast = decodeAll().last()
+        val skimmer = FfmpegDecoder()
+
+        val shown =
+            skimmer.use {
+                recordedPackets().forEach { packet -> it.skim(packet.data, packet.ptsMicros) }
+                it.skimFlush()
+                it.latest()
+            }
+
+        assertEquals(decodedLast.ptsMicros, shown?.ptsMicros)
+        assertContentEquals(decodedLast.rgba, shown?.rgba)
+    }
+
+    @Test
+    fun nothingSkimmedHasNoPicture() {
+        assertNull(decoder.latest())
+    }
 
     @Test
     fun theFfmpegBuildIsLgpl() {

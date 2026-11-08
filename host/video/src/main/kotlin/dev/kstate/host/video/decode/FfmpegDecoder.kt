@@ -18,6 +18,10 @@ class FfmpegDecoder : VideoDecoder {
     private val context: AVCodecContext = openContext()
     private val packet: AVPacket = avcodec.av_packet_alloc()
     private val frame: AVFrame = avutil.av_frame_alloc()
+
+    /** The newest frame [skim] completed, held by reference until [latest] makes a picture of it. */
+    private val newest: AVFrame = avutil.av_frame_alloc()
+    private var hasNewest = false
     private var scaler: SwsContext? = null
     private var output: RgbaBuffer? = null
 
@@ -26,34 +30,64 @@ class FfmpegDecoder : VideoDecoder {
     override fun decode(
         data: ByteArray,
         ptsMicros: Long,
-    ): List<DecodedFrame> {
-        if (avcodec.av_new_packet(packet, data.size) < 0) return emptyList()
-        packet.data().put(data, 0, data.size)
-        packet.pts(ptsMicros)
-        val sent = avcodec.avcodec_send_packet(context, packet)
-        avcodec.av_packet_unref(packet)
-        return if (sent < 0) emptyList() else receiveAll()
-    }
+    ): List<DecodedFrame> = if (send(data, ptsMicros)) receiveAll() else emptyList()
 
     override fun flush(): List<DecodedFrame> {
         avcodec.avcodec_send_packet(context, null as AVPacket?)
         return receiveAll()
     }
 
+    override fun skim(
+        data: ByteArray,
+        ptsMicros: Long,
+    ): Boolean = send(data, ptsMicros) && keepNewest()
+
+    override fun skimFlush(): Boolean {
+        avcodec.avcodec_send_packet(context, null as AVPacket?)
+        return keepNewest()
+    }
+
+    override fun latest(): DecodedFrame? = if (hasNewest) toRgba(newest) else null
+
     override fun close() {
         scaler?.let { swscale.sws_freeContext(it) }
         output?.close()
         avutil.av_frame_free(frame)
+        avutil.av_frame_free(newest)
         avcodec.av_packet_free(packet)
         avcodec.avcodec_free_context(context)
     }
 
+    private fun send(
+        data: ByteArray,
+        ptsMicros: Long,
+    ): Boolean {
+        if (avcodec.av_new_packet(packet, data.size) < 0) return false
+        packet.data().put(data, 0, data.size)
+        packet.pts(ptsMicros)
+        val sent = avcodec.avcodec_send_packet(context, packet)
+        avcodec.av_packet_unref(packet)
+        return sent >= 0
+    }
+
     private fun receiveAll(): List<DecodedFrame> =
         buildList {
-            while (avcodec.avcodec_receive_frame(context, frame) == 0) add(toRgba())
+            while (avcodec.avcodec_receive_frame(context, frame) == 0) add(toRgba(frame))
         }
 
-    private fun toRgba(): DecodedFrame {
+    /** Takes every frame the decoder has ready, keeping a reference to the newest only. */
+    private fun keepNewest(): Boolean {
+        var got = false
+        while (avcodec.avcodec_receive_frame(context, frame) == 0) {
+            avutil.av_frame_unref(newest)
+            avutil.av_frame_move_ref(newest, frame)
+            got = true
+        }
+        hasNewest = hasNewest || got
+        return got
+    }
+
+    private fun toRgba(frame: AVFrame): DecodedFrame {
         val target = outputSize ?: OutputSize(frame.width(), frame.height())
         scaler =
             swscale.sws_getCachedContext(

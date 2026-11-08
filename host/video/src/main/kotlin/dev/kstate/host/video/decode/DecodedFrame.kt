@@ -26,4 +26,19 @@ interface VideoDecoder : AutoCloseable {
 
     /** Pictures still held inside the decoder. */
     fun flush(): List<DecodedFrame>
+
+    /**
+     * Decodes like [decode] without making pictures, keeping only the newest frame for [latest]:
+     * for seeking, where only the last frame is shown. True when this packet completed a frame.
+     */
+    fun skim(
+        data: ByteArray,
+        ptsMicros: Long,
+    ): Boolean
+
+    /** Like [flush] for [skim]: true when a frame still held inside the decoder came out. */
+    fun skimFlush(): Boolean
+
+    /** The newest frame [skim] or [skimFlush] completed, as a picture; null when none did. */
+    fun latest(): DecodedFrame?
 }

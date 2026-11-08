@@ -557,3 +557,10 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 - The heartbeat dot reads its animation only while drawing: it recomposed 82 times a beat.
 - A watch (which source and moment someone looks at) goes to the host and on to everyone, so it
   is sent once the moment holds still for 150 ms: a scrub sent one per frame.
+
+## 2026-11-08: A seek makes one picture
+- Showing a moment decodes its GOP from the key frame, and every frame was converted to RGBA and
+  copied, though only the last is shown: at 720x1600 about 4.6 MB a frame, so a 2 s GOP at 60 fps
+  cost some 550 MB of conversion and copying per seek, on every drag step. The decoder now skims
+  (decodes, keeping a reference to the newest frame) and converts only that one. Live video still
+  converts each frame it shows.

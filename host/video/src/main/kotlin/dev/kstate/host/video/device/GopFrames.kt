@@ -19,13 +19,14 @@ class GopFrames(
         return decoders().use { decoder ->
             decoder.outputSize = outputSize
             val config = gop.config ?: ByteArray(0)
-            var shown: LiveFrame? = null
+            // Only the last frame is shown, so the others are decoded without making pictures of them.
+            var shownAt: Long? = null
             gop.samples.forEachIndexed { index, sample ->
                 val data = if (index == 0) config + sample.data else sample.data
-                decoder.decode(data, sample.hostTs).lastOrNull()?.let { shown = LiveFrame(sample.hostTs, it) }
+                if (decoder.skim(data, sample.hostTs)) shownAt = sample.hostTs
             }
-            decoder.flush().lastOrNull()?.let { shown = LiveFrame(gop.samples.last().hostTs, it) }
-            shown
+            if (decoder.skimFlush()) shownAt = gop.samples.last().hostTs
+            shownAt?.let { at -> decoder.latest()?.let { LiveFrame(at, it) } }
         }
     }
 }
