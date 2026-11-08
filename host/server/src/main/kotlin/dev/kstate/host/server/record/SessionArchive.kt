@@ -5,12 +5,14 @@ import dev.kstate.core.session.data.wire.formatCheck
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
+import java.nio.file.attribute.PosixFilePermissions
 import java.util.zip.ZipEntry
 import java.util.zip.ZipException
 import java.util.zip.ZipFile
@@ -47,8 +49,10 @@ class SessionArchive(
         Files.createDirectories(folder)
         // Written beside the target and moved over it whole: an export that fails half way leaves
         // no truncated recording, and an earlier one at that name as it was.
-        val partial = Files.createTempFile(folder, ".${target.name}.", ".partial")
+        val partial = Files.createTempFile(folder, ".kstate-export-", ".partial")
         try {
+            // A temp file is owner-only; an export is shared, as readable as any saved file.
+            runCatching { Files.setPosixFilePermissions(partial, PosixFilePermissions.fromString(EXPORT_PERMISSIONS)) }
             ZipOutputStream(Files.newOutputStream(partial)).use { zip ->
                 files.filter(SessionFolder::isRecordingFile).forEach { name ->
                     zip.putNextEntry(ZipEntry(name))
@@ -56,7 +60,12 @@ class SessionArchive(
                     zip.closeEntry()
                 }
             }
-            Files.move(partial, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+            try {
+                Files.move(partial, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+            } catch (_: AtomicMoveNotSupportedException) {
+                // A file system without atomic rename still gets the whole file, just not in one step.
+                Files.move(partial, target, StandardCopyOption.REPLACE_EXISTING)
+            }
         } finally {
             Files.deleteIfExists(partial)
         }
@@ -168,6 +177,7 @@ class SessionArchive(
         const val DEFAULT_MAX_ENTRIES: Int = 1_024
         const val DEFAULT_MAX_TOTAL_BYTES: Long = 16L * 1024 * 1024 * 1024
         private const val BUFFER_BYTES = 64 * 1024
+        private const val EXPORT_PERMISSIONS = "rw-r--r--"
 
         /** Left free on the disk by an import, whatever the archive holds. */
         const val DISK_RESERVE_BYTES: Long = 1024L * 1024 * 1024

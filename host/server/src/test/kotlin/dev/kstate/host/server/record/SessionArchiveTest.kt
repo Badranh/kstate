@@ -7,6 +7,7 @@ import dev.kstate.core.session.data.wire.RecordingFormatException
 import dev.kstate.core.session.domain.SessionEngine
 import dev.kstate.host.server.timeline.VideoSample
 import dev.kstate.host.server.timeline.VideoTimeline
+import org.junit.jupiter.api.Assumptions
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -150,6 +151,8 @@ class SessionArchiveTest {
         record()
         val file = root.resolve("Bug.kstate").apply { writeText("an earlier export") }
         val timeline = session.resolve(SessionFolder.TIMELINE)
+        // A file nobody may read fails the export only where permissions hold: not for root.
+        Assumptions.assumeTrue(System.getProperty("user.name") != "root", "root reads any file")
         Files.setPosixFilePermissions(timeline, emptySet())
 
         try {
@@ -160,6 +163,27 @@ class SessionArchiveTest {
 
         assertEquals("an earlier export", file.readText())
         assertEquals(listOf("Bug.kstate"), root.listDirectoryEntries("*.kstate*").map { it.name })
+    }
+
+    /** An export goes to other people: it is as readable as any file the user saves, not owner-only. */
+    @Test
+    fun anExportIsReadableLikeAnyOtherFile() {
+        record()
+        val file = root.resolve("Bug.kstate")
+
+        archive.export(session, file)
+
+        assertEquals(PosixFilePermissions.fromString("rw-r--r--"), Files.getPosixFilePermissions(file))
+    }
+
+    @Test
+    fun aLongNameExportsAsWellAsAShortOne() {
+        record()
+        val file = root.resolve("b".repeat(240) + ".kstate")
+
+        archive.export(session, file)
+
+        assertTrue(Files.size(file) > 0)
     }
 
     /** A small archive that unpacks to a lot (a zip bomb) stops before the disk is full. */
