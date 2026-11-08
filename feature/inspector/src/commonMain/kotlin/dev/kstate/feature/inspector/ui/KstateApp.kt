@@ -36,6 +36,7 @@ import dev.kstate.core.data.SessionSource
 import dev.kstate.core.designsystem.component.PanelCard
 import dev.kstate.core.designsystem.theme.KstateTheme
 import dev.kstate.core.model.SessionView
+import dev.kstate.core.model.TimelineView
 import dev.kstate.core.model.canDrive
 import dev.kstate.core.ui.device.DeviceTile
 import dev.kstate.core.ui.timeline.Playback
@@ -56,6 +57,7 @@ import dev.kstate.feature.inspector.ui.component.ProblemBanner
 import dev.kstate.feature.inspector.ui.component.SourceChips
 import dev.kstate.feature.inspector.ui.component.SourceList
 import dev.kstate.feature.inspector.ui.component.TopBar
+import kotlinx.coroutines.delay
 
 /** Root of the shared viewer UI, used by the desktop host and the web viewer. [actions] go in the top bar. */
 @Composable
@@ -72,14 +74,16 @@ fun KstateApp(
 
     val paused = playback.playhead.shownAt
     val session = remember(live, paused) { paused?.let(source::sessionAt) ?: live }
-    val timeline = remember(live, playback.now) { source.timeline() }
+    // Built when the session or the devices' video change: it reads every source's whole history.
+    // The live end follows the clock in LiveTimelineBar, so a tick recomposes only that.
+    val timeline = remember(live, screens) { source.timeline() }
     val gate = remember(source) { InjectionGate() }
     val commands = remember(source, gate) { ConfirmingCommands(source, gate) }
 
     val collaboration = source.collaboration
     var chosen by remember(source) { mutableStateOf<String?>(null) }
     val selected = selectSource(session.devices.flatMap { it.sources }, chosen)
-    LaunchedEffect(collaboration, selected, paused) { collaboration?.watch(selected, paused) }
+    collaboration?.let { WatchSync(it, selected, paused) }
     val canDrive =
         collaboration
             ?.state
@@ -111,15 +115,42 @@ fun KstateApp(
                     Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = gap)) {
                         if (narrow) NarrowPanes(panes) else WidePanes(panes)
                     }
-                    PanelCard(Modifier.fillMaxWidth().padding(gap)) {
-                        TimelineBar(timeline, playback.playhead, playback.now, onSeek = playback::seek)
-                    }
+                    PanelCard(Modifier.fillMaxWidth().padding(gap)) { LiveTimelineBar(timeline, playback) }
                 }
             }
             val question by gate.pending.collectAsState()
             question?.let { InjectionDialog(it.question, onAnswer = gate::answer) }
         }
     }
+}
+
+/**
+ * Tells the others which source and moment this person looks at, once it holds still: each watch
+ * goes to the host and on to everyone else, and a scrub moves the moment every frame. A newer
+ * value restarts the effect, which cancels the one still waiting.
+ */
+@Composable
+internal fun WatchSync(
+    collaboration: Collaboration,
+    selected: String?,
+    at: Long?,
+) {
+    LaunchedEffect(collaboration, selected, at) {
+        delay(WATCH_SETTLE_MILLIS)
+        collaboration.watch(selected, at)
+    }
+}
+
+private const val WATCH_SETTLE_MILLIS = 150L
+
+/** The timeline, its end kept at the clock: the only part of the screen that changes with each tick. */
+@Composable
+private fun LiveTimelineBar(
+    timeline: TimelineView,
+    playback: Playback,
+) {
+    val now = playback.now
+    TimelineBar(timeline.copy(end = maxOf(timeline.end, now)), playback.playhead, now, onSeek = playback::seek)
 }
 
 /** The Comments tab: new comments are pinned to the moment shown and the selected source. */

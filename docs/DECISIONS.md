@@ -547,3 +547,13 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 - The scrambled text in the field report came from the sample, not Kstate: its Orbit form applied
   each keystroke in an async `intent`, so fast typing (adb's `input text` too) lost characters and
   moved the cursor. Its text handlers use `blockingIntent`, which Orbit reserves for text input.
+
+## 2026-11-08: What changes with each tick
+- The inspector's root no longer reads the clock. The timeline (which reads every source's whole
+  history) is rebuilt when the session or the devices' video change; a small `LiveTimelineBar`
+  reads the clock and stretches the end to now, so a tick recomposes only the bar. Measured: 20
+  rebuilds in 5 s of an idle session before, 0 after. Between state changes the start (the
+  oldest video kept) can lag as old video rolls off; it catches up with the next change.
+- The heartbeat dot reads its animation only while drawing: it recomposed 82 times a beat.
+- A watch (which source and moment someone looks at) goes to the host and on to everyone, so it
+  is sent once the moment holds still for 150 ms: a scrub sent one per frame.

@@ -9,7 +9,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -51,10 +50,11 @@ fun HeartbeatDot(
     modifier: Modifier = Modifier,
     size: Dp = 8.dp,
 ) {
-    val phase =
+    // The animated phase is read only while drawing, so the dot redraws each frame without
+    // recomposing; it is in the top bar of every window.
+    val beat =
         if (beating) {
-            val transition = rememberInfiniteTransition()
-            val value by transition.animateFloat(
+            rememberInfiniteTransition().animateFloat(
                 initialValue = 0f,
                 targetValue = 1f,
                 animationSpec =
@@ -63,11 +63,11 @@ fun HeartbeatDot(
                         RepeatMode.Restart,
                     ),
             )
-            value
         } else {
             null
         }
     Canvas(modifier.size(size * HALO)) {
+        val phase = beat?.value
         val core = size.toPx() / 2
         val center = Offset(this.size.width / 2, this.size.height / 2)
         if (phase != null) {

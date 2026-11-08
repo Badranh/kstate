@@ -12,6 +12,11 @@ kotlin {
             implementation(libs.compose.foundation)
             api(libs.compose.material3)
         }
+        // Real Compose UI tests on the JVM, with Skia for this machine.
+        jvmTest.dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation(compose.desktop.uiTestJUnit4)
+        }
     }
 }
 
