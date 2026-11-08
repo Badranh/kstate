@@ -1,5 +1,6 @@
 package dev.kstate.feature.agent.mcp.tools
 
+import dev.kstate.core.protocol.JsonPointer
 import dev.kstate.feature.agent.domain.KstateAgent
 import dev.kstate.feature.agent.domain.SourceLimits
 import dev.kstate.feature.agent.mcp.ToolInputException
@@ -77,20 +78,35 @@ internal class LookTools(
             "get_state",
             "Read a state",
             Effect.LOOKS,
-            "One source's current state, its schema, which paths are redacted, and what it allows.",
-            input("source" to Params.SOURCE, required = listOf("source")),
+            "One source's current state, which paths are redacted, and what it allows. path: a JSON " +
+                "pointer (/items/0/title) to read only that part. schema: true adds the state's shape, " +
+                "which set_state's edits must follow; hasSchema says whether there is one.",
+            input(
+                "source" to Params.SOURCE,
+                "path" to typed("string"),
+                "schema" to typed("boolean"),
+                required = listOf("source"),
+            ),
         ) {
             val key = it.string("source")
             val device =
                 agent.session.devices.firstOrNull { d -> d.sources.any { s -> s.key == key } }
                     ?: throw ToolInputException("No source $key")
             val view = device.sources.first { s -> s.key == key }
+            val path = it.optionalString("path")
+            val state =
+                view.state?.let { whole ->
+                    path?.let { p -> JsonPointer.get(whole, p) ?: throw ToolInputException("No value at $p in $key") }
+                        ?: whole
+                }
             reply(
                 buildJsonObject {
                     put("source", key)
                     put("connected", device.connected && view.live)
-                    put("state", view.state ?: JsonPrimitive("no state yet"))
-                    put("schema", view.schema ?: JsonPrimitive("none"))
+                    path?.let { p -> put("path", p) }
+                    put("state", state ?: JsonPrimitive("no state yet"))
+                    put("hasSchema", view.schema != null)
+                    if (it.optionalBoolean("schema") == true) put("schema", view.schema ?: JsonPrimitive("none"))
                     putJsonArray("redactedPaths") { view.redactedPaths.forEach { p -> add(p) } }
                     put("overlay", view.capabilities.overlay)
                     put("writeThrough", view.capabilities.writeThrough)

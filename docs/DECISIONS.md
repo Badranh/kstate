@@ -592,3 +592,13 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   on the phone), Ctrl+letter goes to the device as that key with Ctrl held (select all, copy,
   paste), and a control character is never typed: since text a key can't type is now pasted,
   Ctrl+A's U+0001 would otherwise land in the field.
+
+## 2026-11-08: The agent's field-report odds and ends
+- Frames were decoded at the desktop tile's size, so the agent's screenshots changed with the
+  window, a pixel at a time with the tile's layout. They are decoded at the tile's width but never
+  under the agent's default 480, with the device's own shape: at the default width a screenshot is
+  always the same size.
+- get_state leaves the schema out unless asked (`schema: true`; `hasSchema` says there is one),
+  and reads part of a state with `path`, a JSON pointer.
+- An explore whose app did not come back (`restored: false`) says which source and suggests a
+  screenshot (`notRestored`), as one that could not check already did.

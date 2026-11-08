@@ -6,6 +6,7 @@ import dev.kstate.core.model.VideoFrame
 import dev.kstate.host.video.control.InputTranslator
 import dev.kstate.host.video.decode.OutputSize
 import dev.kstate.host.video.device.DeviceVideo
+import dev.kstate.host.video.device.VideoSize
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +33,7 @@ class DeviceVideoScreen(
         width: Int,
         height: Int,
     ) {
-        video.outputSize = OutputSize(width, height)
+        video.outputSize = decodeSize(width, height, video.size.value)
     }
 
     override fun touch(
@@ -55,3 +56,21 @@ class DeviceVideoScreen(
 
     override fun text(text: String) = input.text(text)
 }
+
+/**
+ * The size frames are decoded at: the tile's width, but never narrower than the agent's default
+ * picture, and the device's own shape. The agent's screenshots come from these frames, so their
+ * size must not change with the window or a rounding pixel in the tile's layout.
+ */
+internal fun decodeSize(
+    tileWidth: Int,
+    tileHeight: Int,
+    device: VideoSize?,
+): OutputSize {
+    val width = maxOf(tileWidth, MIN_DECODE_WIDTH)
+    val (shapeWidth, shapeHeight) = device?.let { it.width to it.height } ?: (tileWidth to tileHeight)
+    return OutputSize(width, (width.toLong() * shapeHeight / shapeWidth).toInt())
+}
+
+/** The agent's default screenshot width. */
+private const val MIN_DECODE_WIDTH = 480

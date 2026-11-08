@@ -29,6 +29,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /** The tools end to end: JSON-RPC in, the fake app reacting, text and pictures out. */
@@ -417,6 +418,47 @@ class KstateToolsTest {
             assertEquals(emptyList(), app.typed)
         }
 
+    /** The schema is only needed to build a state, and is often the biggest part: it is asked for. */
+    @Test
+    fun getStateLeavesTheSchemaOutUnlessAsked() =
+        runTest {
+            val (_, server) = server()
+
+            val plain =
+                Json
+                    .parseToJsonElement(
+                        server.call("get_state", """{"source":"${FakeApp.KEY}"}""").texts().single(),
+                    ).jsonObject
+            val withSchema =
+                Json
+                    .parseToJsonElement(
+                        server.call("get_state", """{"source":"${FakeApp.KEY}","schema":true}""").texts().single(),
+                    ).jsonObject
+
+            assertNull(plain["schema"])
+            assertEquals(JsonPrimitive(true), plain["hasSchema"])
+            assertEquals(schema, withSchema["schema"])
+        }
+
+    @Test
+    fun getStateCanReadOnePartOfTheState() =
+        runTest {
+            val (_, server) = server()
+
+            val reply =
+                Json
+                    .parseToJsonElement(
+                        server.call("get_state", """{"source":"${FakeApp.KEY}","path":"/count"}""").texts().single(),
+                    ).jsonObject
+
+            assertEquals(JsonPrimitive(0), reply["state"])
+            assertEquals(JsonPrimitive("/count"), reply["path"])
+            assertTrue(
+                "No value" in
+                    server.call("get_state", """{"source":"${FakeApp.KEY}","path":"/nope"}""").texts().single(),
+            )
+        }
+
     @Test
     fun typeTextCanEmptyTheFieldFirst() =
         runTest {
@@ -467,6 +509,19 @@ class KstateToolsTest {
             }
         }
     }
+
+    @Test
+    fun anExploreWhoseAppDidNotComeBackNamesTheSourceAndWhatToDo() =
+        runTest {
+            val (app, server) = server()
+            // The app moves on while the overlay is up: released, it shows something else.
+            app.onRelease = { app.emit(state(5)) }
+
+            val text = server.call("explore", """{"source":"${FakeApp.KEY}"}""").texts().single()
+
+            assertTrue("\"restored\":false" in text, text)
+            assertTrue("notRestored" in text && FakeApp.KEY in text.substringAfter("notRestored"), text)
+        }
 
     @Test
     fun anExploreThatCouldNotCheckTheAppCameBackSaysWhy() =

@@ -136,6 +136,14 @@ internal class TestTools(
             put("route", run.route.route())
             put("baseline", run.baseline.id)
             put("restored", run.restored)
+            if (run.restored == false && run.stoppedEarly == null) {
+                put(
+                    "notRestored",
+                    "${run.sourceKey}'s screen did not come back to its baseline once the overlay was released: " +
+                        "the app may have moved on meanwhile, or the state is not all the screen shows. Take a " +
+                        "screenshot to see what it shows now.",
+                )
+            }
             if (run.restored == null && run.stoppedEarly == null) {
                 put(
                     "restoredUnknown",

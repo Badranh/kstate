@@ -29,7 +29,7 @@ internal class ActTools(
                 "\"write_through\" makes it the app's real state. Leave redacted values as they are.",
             input(
                 "source" to Params.SOURCE,
-                "state" to typed("object", "The whole state, as get_state returns it"),
+                "state" to typed("object", "The whole state, as get_state returns it without a path"),
                 "mode" to oneOf("overlay", "write_through"),
                 "width" to Params.WIDTH,
                 required = listOf("source", "state"),
