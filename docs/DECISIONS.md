@@ -476,3 +476,12 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   and names the kept ones.
 - Map nodes themselves are not capped: one per distinct route and states, small without pictures.
   An app whose state ticks on its own grows the map; cap it if that shows up in practice.
+
+## 2026-11-08: Putting back a past state across a reopen or restart
+- An app numbers a source's states from 0 each time it registers the source: when the screen is
+  reopened (keys are now reused, see above) and when the app restarts (always was so). A past
+  `seq` can then name a different state of the new instance, so restoring by seq is only offered
+  for a state from the current registration (`SourceView.restorable`).
+- Any other past state is sent as it is, with `setState`, which needs a decoder and no hidden
+  values; otherwise the UI says why it can't be put back. Recordings use the same path, which also
+  removes their own seq ambiguity.

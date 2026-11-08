@@ -11,6 +11,7 @@ import dev.kstate.protocol.SourceCleared
 import dev.kstate.protocol.SourceRegistered
 import dev.kstate.protocol.StateSnapshot
 import dev.kstate.session.diff.DiffOp
+import dev.kstate.session.view.SessionViewMapper
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -120,6 +121,55 @@ class SessionEngineTest {
                 .single()
                 .old,
         )
+    }
+
+    private fun counterAt(hostTs: Long) =
+        SessionViewMapper
+            .mapAt(engine.session.value, emptyList(), problem = null, hostTs, engine.timeline::stateAt)
+            .devices
+            .single()
+            .sources
+            .single()
+
+    @Test
+    fun aStateFromBeforeTheSourceWasRegisteredAgainCantBeAskedForAgain() {
+        now = 100
+        connectCounter()
+        receive(snapshot(5, 5))
+        now = 200
+        receive(SourceCleared("Counter-1"))
+        now = 300
+        receive(SourceRegistered("Counter-1", "Counter", "StateFlow"))
+        receive(snapshot(0, 0))
+
+        // The reopened screen numbers its states from 0 again: seq 5 would name one of the new states.
+        assertFalse(counterAt(150).restorable)
+        assertTrue(counterAt(350).restorable)
+    }
+
+    @Test
+    fun aStateFromBeforeAnAppRestartCantBeAskedForAgain() {
+        now = 100
+        connectCounter()
+        receive(snapshot(5, 5))
+        engine.onDisconnected("emulator-5554", connectionId = 1)
+        now = 300
+        connectCounter(connection = 2)
+        receive(snapshot(0, 0), connection = 2)
+
+        assertFalse(counterAt(150).restorable)
+        assertTrue(counterAt(350).restorable)
+    }
+
+    @Test
+    fun aClearedSourcesStatesCantBeAskedFor() {
+        now = 100
+        connectCounter()
+        receive(snapshot(1, 1))
+        now = 200
+        receive(SourceCleared("Counter-1"))
+
+        assertFalse(counterAt(150).restorable)
     }
 
     @Test

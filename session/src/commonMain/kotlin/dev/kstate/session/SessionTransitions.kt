@@ -19,6 +19,7 @@ internal fun Session.withAppUpdate(
 internal fun Session.withRegistration(
     deviceId: String,
     registration: SourceRegistered,
+    hostTs: Long,
 ): Session {
     val key = SourceKey(deviceId, registration.sourceId)
     val source =
@@ -29,6 +30,7 @@ internal fun Session.withRegistration(
             overridden = false,
             capabilities = registration.capabilities,
             schema = registration.schema,
+            registeredAt = hostTs,
         )
     return copy(sources = sources + (key to source))
 }

@@ -21,6 +21,7 @@ import dev.kstate.viewer.client.CommandOutcome
 import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.SourceView
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonElement
 
 fun outcomeText(outcome: CommandOutcome): String =
     when (outcome) {
@@ -85,6 +86,39 @@ fun SourceActions(
 
 private typealias Run = (suspend () -> CommandOutcome) -> Unit
 
+/** How a past state can be put back into the app. */
+sealed interface PutBack {
+    /** The app still has it under [seq], with its hidden values. */
+    data class BySeq(
+        val seq: Long,
+    ) : PutBack
+
+    /** From an earlier registration or a recording: the state as shown is sent. */
+    data class ByState(
+        val state: JsonElement,
+    ) : PutBack
+
+    data class Not(
+        val why: String,
+    ) : PutBack
+}
+
+/**
+ * Seqs start over when a screen is reopened or the app restarts, so only a [SourceView.restorable]
+ * state is asked for by seq; any other is sent as it is, which the app can only take whole.
+ */
+fun putBack(source: SourceView): PutBack {
+    val seq = source.seq
+    val state = source.state
+    return when {
+        source.restorable && seq != null -> PutBack.BySeq(seq)
+        state == null -> PutBack.Not("No state here.")
+        source.redactedPaths.isNotEmpty() -> PutBack.Not("This state is from an earlier run and has hidden values.")
+        !source.capabilities.decode -> PutBack.Not("This state is from an earlier run and the app can't read one.")
+        else -> PutBack.ByState(state)
+    }
+}
+
 /** Paused on a past state: put it back, shown only or written into the app. */
 @Composable
 private fun PastStateActions(
@@ -92,17 +126,20 @@ private fun PastStateActions(
     commands: SessionSource,
     run: Run,
 ) {
-    val seq = source.seq ?: return
-    if (source.capabilities.overlay) {
-        Action("Show this state") {
-            run { commands.restore(source.key, seq, ApplyMode.OVERLAY) }
+    val how = putBack(source)
+    if (how is PutBack.Not) {
+        Text(how.why, style = MaterialTheme.typography.labelMedium)
+        return
+    }
+    val send: suspend (ApplyMode) -> CommandOutcome = { mode ->
+        when (how) {
+            is PutBack.BySeq -> commands.restore(source.key, how.seq, mode)
+            is PutBack.ByState -> commands.setState(source.key, how.state, mode)
+            is PutBack.Not -> CommandOutcome.Cancelled
         }
     }
-    if (source.capabilities.writeThrough) {
-        Action("Write this state") {
-            run { commands.restore(source.key, seq, ApplyMode.WRITE_THROUGH) }
-        }
-    }
+    if (source.capabilities.overlay) Action("Show this state") { run { send(ApplyMode.OVERLAY) } }
+    if (source.capabilities.writeThrough) Action("Write this state") { run { send(ApplyMode.WRITE_THROUGH) } }
 }
 
 /** Live: hold the UI where it is, or let the app's real state show again. */

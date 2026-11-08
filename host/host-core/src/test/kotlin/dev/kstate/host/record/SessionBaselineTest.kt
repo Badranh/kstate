@@ -45,14 +45,16 @@ class SessionBaselineTest {
         val expected = live.session.value
         val actual = replay.session.value
         assertEquals(expected.apps, actual.apps)
+        // A recording's sources are registered when it starts: nothing from before is in it.
         assertEquals(
             expected.sources.mapValues {
                 it.value.copy(
                     latest = null,
                     lastDiff = actual.sources.getValue(it.key).lastDiff,
+                    registeredAt = null,
                 )
             },
-            actual.sources.mapValues { it.value.copy(latest = null) },
+            actual.sources.mapValues { it.value.copy(latest = null, registeredAt = null) },
         )
         assertEquals(
             expected.sources.mapValues { it.value.latest?.snapshot },

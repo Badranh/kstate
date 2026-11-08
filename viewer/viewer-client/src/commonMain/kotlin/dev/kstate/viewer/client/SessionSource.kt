@@ -138,6 +138,11 @@ data class SourceView(
     val redactedPaths: List<String> = emptyList(),
     /** The host's override is what the app shows right now. */
     val overridden: Boolean = false,
+    /**
+     * The app still has this state under [seq]: it came from the source as it is registered now.
+     * A state from before the screen was reopened or the app restarted is not, as seqs start over.
+     */
+    val restorable: Boolean = false,
 )
 
 data class EventView(

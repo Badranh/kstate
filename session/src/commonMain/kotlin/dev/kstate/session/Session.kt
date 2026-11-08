@@ -40,6 +40,8 @@ data class SourceTrack(
     val capabilities: Capabilities = Capabilities(),
     /** The state's shape, from the app's registration, for the form editor. */
     val schema: JsonElement? = null,
+    /** Host time of the app's latest registration of this source; its seqs start over there. */
+    val registeredAt: Long? = null,
 )
 
 data class TimedSnapshot(

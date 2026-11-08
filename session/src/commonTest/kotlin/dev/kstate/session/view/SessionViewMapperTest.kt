@@ -82,6 +82,7 @@ class SessionViewMapperTest {
                                 JsonPrimitive(2),
                                 setOf("/count"),
                                 4,
+                                restorable = true,
                             ),
                         ),
                 ),

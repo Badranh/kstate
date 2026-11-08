@@ -105,7 +105,7 @@ class SessionEngine(
         val deviceId = input.deviceId
         return when (val msg = input.envelope.msg) {
             is Hello -> session.withApp(AppConnection(deviceId, input.connectionId, msg, connected = true))
-            is SourceRegistered -> session.withRegistration(deviceId, msg)
+            is SourceRegistered -> session.withRegistration(deviceId, msg, hostTs)
             is StateSnapshot -> withSnapshot(session, deviceId, msg, hostTs)
             is SourceCleared -> session.withSource(SourceKey(deviceId, msg.sourceId)) { it.copy(live = false) }
             is Event -> session.withEvent(TimedEvent(hostTs, deviceId, msg), keep = recentEventLimit)

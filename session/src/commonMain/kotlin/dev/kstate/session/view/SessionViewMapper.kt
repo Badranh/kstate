@@ -129,6 +129,9 @@ object SessionViewMapper {
                     ?.redacted
                     .orEmpty(),
             overridden = track.overridden,
+            restorable =
+                track.live &&
+                    track.latest.let { it != null && it.hostTs >= (track.registeredAt ?: Long.MIN_VALUE) },
         )
 
     private fun event(timed: TimedEvent) =
