@@ -85,37 +85,49 @@ class AgentAccess(
     }
 }
 
-/** The agent token, kept in a file only this user can read so a connected agent survives a restart. */
+/**
+ * The agent token, kept in a file only this user can read, in a folder only they can open, so a
+ * connected agent survives a restart. A token whose file others could read is replaced: it may
+ * already be known to them.
+ */
 class AgentTokens(
     private val file: Path,
 ) {
     fun current(): String =
         file
-            .takeIf { it.exists() }
+            .takeIf { it.exists() && Files.getPosixFilePermissions(it) == OWNER_ONLY_FILE }
             ?.readText()
             ?.trim()
-            ?.takeIf { it.length >= MIN_LENGTH } ?: renew()
+            ?.takeIf { it.length >= MIN_LENGTH }
+            ?.also { lockFolder() } ?: renew()
 
     fun renew(): String {
         val token =
             Base64.getUrlEncoder().withoutPadding().encodeToString(
                 ByteArray(BYTES).also(SecureRandom()::nextBytes),
             )
-        Files.createDirectories(file.parent)
+        lockFolder()
         if (!file.exists()) {
             Files.createFile(
                 file,
-                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString(OWNER_ONLY)),
+                PosixFilePermissions.asFileAttribute(OWNER_ONLY_FILE),
             )
         }
-        Files.setPosixFilePermissions(file, PosixFilePermissions.fromString(OWNER_ONLY))
+        Files.setPosixFilePermissions(file, OWNER_ONLY_FILE)
         file.writeText(token)
         return token
+    }
+
+    private fun lockFolder() {
+        val folder = file.parent
+        if (!folder.exists()) Files.createDirectories(folder, PosixFilePermissions.asFileAttribute(OWNER_ONLY_FOLDER))
+        Files.setPosixFilePermissions(folder, OWNER_ONLY_FOLDER)
     }
 
     private companion object {
         const val BYTES = 32
         const val MIN_LENGTH = 40
-        const val OWNER_ONLY = "rw-------"
+        val OWNER_ONLY_FILE = PosixFilePermissions.fromString("rw-------")
+        val OWNER_ONLY_FOLDER = PosixFilePermissions.fromString("rwx------")
     }
 }
