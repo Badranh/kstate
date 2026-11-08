@@ -39,7 +39,10 @@ class DeviceKeyTest {
         char: Char? = null,
         command: Boolean = false,
         control: Boolean = false,
-    ) = deviceKey(key, codePoint = char?.code ?: 0, command = command, control = control)
+        shift: Boolean = false,
+        alt: Boolean = false,
+        codePoint: Int = char?.code ?: 0,
+    ) = deviceKey(key, codePoint, command = command, control = control, shift = shift, alt = alt)
 
     @Test
     fun aLetterIsTypedAsText() {
@@ -71,7 +74,48 @@ class DeviceKeyTest {
         assertNull(press(Key.Unknown, '\u0001'))
     }
 
+    /** A key with no character reports 0xFFFF on the desktop; pasted, it lands in the field and the clipboard. */
+    @Test
+    fun aKeyWithoutACharacterTypesNothing() {
+        assertNull(press(Key.ShiftLeft, codePoint = 0xFFFF, shift = true))
+        assertNull(press(Key.CapsLock, codePoint = 0xFFFF))
+        assertNull(press(Key.F1, codePoint = 0xFFFF))
+    }
+
+    /** The web viewer reports a named key's key code as its character: F5 would type "t". */
+    @Test
+    fun aNamedKeyIsNeverTypedAsItsKeyCode() {
+        assertNull(press(Key.F5, codePoint = 116))
+        assertNull(press(Key.PageUp, codePoint = 33))
+        assertNull(press(Key.Insert, codePoint = 45))
+        assertNull(press(Key.ScrollLock, codePoint = 0x91))
+    }
+
+    @Test
+    fun aCapitalLetterIsTypedWithoutTheShiftKeyOfItsOwn() {
+        assertEquals(DeviceKey.Text("A"), press(Key.A, 'A', shift = true))
+    }
+
+    @Test
+    fun shiftStaysHeldInAControlChord() {
+        assertEquals(DeviceKey.Press(54, META_CTRL_ON or META_SHIFT_ON), press(Key.Z, control = true, shift = true))
+    }
+
+    /** Ctrl with an editing key (delete a word, jump a word) reaches the device too. */
+    @Test
+    fun aControlChordWithAnEditingKeyGoesToTheDevice() {
+        assertEquals(DeviceKey.Press(67, META_CTRL_ON), press(Key.Backspace, control = true))
+        assertEquals(DeviceKey.Press(21, META_CTRL_ON), press(Key.DirectionLeft, control = true))
+    }
+
+    /** Windows browsers report AltGr as Ctrl+Alt: the character it makes is what was typed. */
+    @Test
+    fun altGrIsTypingNotAControlChord() {
+        assertEquals(DeviceKey.Text("@"), press(Key.Q, '@', control = true, alt = true))
+    }
+
     private companion object {
         const val META_CTRL_ON = 0x1000
+        const val META_SHIFT_ON = 0x1
     }
 }

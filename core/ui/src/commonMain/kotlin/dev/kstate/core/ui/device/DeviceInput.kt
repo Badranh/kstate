@@ -3,8 +3,10 @@ package dev.kstate.core.ui.device
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
@@ -22,7 +24,17 @@ internal fun Modifier.deviceKeys(
 ): Modifier =
     onKeyEvent { event ->
         if (!enabled || event.type != KeyEventType.KeyDown) return@onKeyEvent false
-        when (val action = deviceKey(event.key, event.utf16CodePoint, event.isMetaPressed, event.isCtrlPressed)) {
+        when (
+            val action =
+                deviceKey(
+                    event.key,
+                    event.utf16CodePoint,
+                    command = event.isMetaPressed,
+                    control = event.isCtrlPressed,
+                    shift = event.isShiftPressed,
+                    alt = event.isAltPressed,
+                )
+        ) {
             is DeviceKey.Press -> screen.key(action.keycode, action.metaState)
             is DeviceKey.Text -> screen.text(action.text)
             null -> return@onKeyEvent false

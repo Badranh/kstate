@@ -589,9 +589,16 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   the smaller of its limit and what leaves 1 GiB free on the disk, so a small archive that
   unpacks to a lot stops before the disk is full.
 - On a focused device tile, Command chords stay with Kstate (its shortcuts; Command+R typed an "r"
-  on the phone), Ctrl+letter goes to the device as that key with Ctrl held (select all, copy,
-  paste), and a control character is never typed: since text a key can't type is now pasted,
-  Ctrl+A's U+0001 would otherwise land in the field.
+  on the phone). Ctrl with a letter or an editing key goes to the device with Ctrl, and Shift,
+  held: select all, copy, paste, undo, redo (Ctrl+Shift+Z), delete a word. Ctrl+Alt types what it
+  makes, since Windows browsers report AltGr that way. Only a real character is ever typed: a key
+  without one reports U+FFFF on the desktop and its key code in the browser (F5 as "t"), and since
+  text a key can't type is pasted, Shift alone used to paste U+FFFF over the phone's clipboard.
+  Known limit: in the browser, Ctrl chords follow the physical key (AZERTY Ctrl+A arrives as
+  Ctrl+Q), because Compose web maps keys by position.
+- Exports keep ordinary permissions (rw-r--r--) although written through an owner-only temp file,
+  whose name no longer grows with the target's, and fall back to a plain move where the file
+  system has no atomic rename.
 
 ## 2026-11-08: The agent's field-report odds and ends
 - Frames were decoded at the desktop tile's size, so the agent's screenshots changed with the

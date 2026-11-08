@@ -33,24 +33,78 @@ sealed interface DeviceKey {
 }
 
 /**
- * Command chords are left to Kstate, its own shortcuts. Ctrl with a letter goes to the device as
- * that key with Ctrl held (select all, copy, paste in its fields). Other keys are keycodes or
- * text; a control character is never typed, since text a key can't type would be pasted.
+ * Command chords are left to Kstate, its own shortcuts. Ctrl with a letter or an editing key goes
+ * to the device as that key with Ctrl (and Shift) held: select all, copy, paste, undo, redo, delete
+ * a word. Ctrl+Alt is AltGr on Windows browsers, so it types what it makes. Other keys are keycodes
+ * or text, and only a real character is text: a key without one (Shift, F5, PageUp) types nothing,
+ * since text a key can't type would be pasted.
  */
 fun deviceKey(
     key: Key,
     codePoint: Int,
     command: Boolean,
     control: Boolean,
-): DeviceKey? =
-    when {
+    shift: Boolean = false,
+    alt: Boolean = false,
+): DeviceKey? {
+    val shiftMeta = if (shift) META_SHIFT_ON else 0
+    return when {
         command -> null
-        control -> LETTERS[key]?.let { DeviceKey.Press(it, META_CTRL_ON) }
-        else -> androidKeycode(key)?.let { DeviceKey.Press(it) } ?: printable(codePoint)
+        control && alt -> text(key, codePoint)
+        control -> (LETTERS[key] ?: androidKeycode(key))?.let { DeviceKey.Press(it, META_CTRL_ON or shiftMeta) }
+        else -> androidKeycode(key)?.let { DeviceKey.Press(it, shiftMeta) } ?: text(key, codePoint)
     }
+}
 
-private fun printable(codePoint: Int): DeviceKey? =
-    codePoint.takeIf { it >= FIRST_PRINTABLE && it != DEL }?.let { DeviceKey.Text(it.toChar().toString()) }
+/** The character a key typed, or null when it typed none. */
+private fun text(
+    key: Key,
+    codePoint: Int,
+): DeviceKey? =
+    codePoint
+        .takeIf { key !in NO_CHARACTER && isCharacter(it) }
+        ?.let { DeviceKey.Text(it.toChar().toString()) }
+
+private fun isCharacter(codePoint: Int): Boolean =
+    codePoint >= FIRST_PRINTABLE &&
+        codePoint != DEL &&
+        codePoint !in C1_CONTROLS &&
+        codePoint !in SURROGATES &&
+        codePoint < NONCHARACTERS
+
+/** Keys that make no character, whatever code they report (the web viewer reports their key code). */
+private val NO_CHARACTER: Set<Key> =
+    setOf(
+        Key.ShiftLeft,
+        Key.ShiftRight,
+        Key.CtrlLeft,
+        Key.CtrlRight,
+        Key.AltLeft,
+        Key.AltRight,
+        Key.MetaLeft,
+        Key.MetaRight,
+        Key.CapsLock,
+        Key.NumLock,
+        Key.ScrollLock,
+        Key.Function,
+        Key.F1,
+        Key.F2,
+        Key.F3,
+        Key.F4,
+        Key.F5,
+        Key.F6,
+        Key.F7,
+        Key.F8,
+        Key.F9,
+        Key.F10,
+        Key.F11,
+        Key.F12,
+        Key.PageUp,
+        Key.PageDown,
+        Key.Insert,
+        Key.PrintScreen,
+        Key.Break,
+    )
 
 /** Android's KEYCODE_A (29) to KEYCODE_Z (54). */
 private val LETTERS: Map<Key, Int> =
@@ -85,5 +139,11 @@ private val LETTERS: Map<Key, Int> =
 
 private const val KEYCODE_A = 29
 private const val META_CTRL_ON = 0x1000
+private const val META_SHIFT_ON = 0x1
 private const val FIRST_PRINTABLE = 0x20
 private const val DEL = 0x7F
+private val C1_CONTROLS = 0x80..0x9F
+private val SURROGATES = 0xD800..0xDFFF
+
+/** U+FFFE and U+FFFF, which AWT reports for a key press without a character. */
+private const val NONCHARACTERS = 0xFFFE
