@@ -35,6 +35,11 @@ class CloudflareTunnel(
     private companion object {
         const val BINARY = "cloudflared"
         const val START_TIMEOUT_MILLIS = 30_000L
-        val QUICK_TUNNEL = Regex("https://[a-z0-9-]+\\.trycloudflare\\.com")
+
+        /**
+         * A quick tunnel's name is hyphenated words (quiet-lake-1234), never followed by a path:
+         * cloudflared also prints its own API, https://api.trycloudflare.com/tunnel, when a request fails.
+         */
+        val QUICK_TUNNEL = Regex("https://[a-z0-9]+(?:-[a-z0-9]+)+\\.trycloudflare\\.com(?![/\\w.-])")
     }
 }

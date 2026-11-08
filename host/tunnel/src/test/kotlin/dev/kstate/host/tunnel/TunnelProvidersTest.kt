@@ -119,6 +119,21 @@ class TunnelProvidersTest {
             assertTrue("http://127.0.0.1:47800" in processes.spawned.single())
         }
 
+    /** cloudflared names its own API when a request fails; that is not a link anyone can open. */
+    @Test
+    fun cloudflaredsApiAddressIsNeverTakenForTheTunnel() =
+        runTest {
+            val processes =
+                FakeProcesses(output = {
+                    flowOf(
+                        "2026-11-06T10:00:00Z ERR Error unmarshaling QuickTunnel response: " +
+                            "Post \"https://api.trycloudflare.com/tunnel\": 429 Too Many Requests",
+                    )
+                })
+
+            assertFailsWith<TunnelException> { CloudflareTunnel(processes, startTimeoutMillis = 50).start(47800) }
+        }
+
     @Test
     fun aTunnelThatPrintsNoUrlFails() =
         runTest {
