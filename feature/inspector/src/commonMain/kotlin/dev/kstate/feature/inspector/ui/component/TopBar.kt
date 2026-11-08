@@ -54,7 +54,7 @@ fun TopBar(
             Text(
                 "Space $space · ←/→ changes · ⌘E edit",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         actions()

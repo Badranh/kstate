@@ -42,7 +42,7 @@ data class KstateColors(
 }
 
 /** Kstate is dark only: it sits next to emulators and IDEs, mostly in dark rooms. */
-private val Palette =
+internal val Palette =
     darkColorScheme(
         primary = Color(0xFF8AA4FF),
         onPrimary = Color(0xFF0B1026),
@@ -71,6 +71,7 @@ private val Palette =
         surfaceContainer = Color(0xFF151922),
         surfaceContainerHigh = Color(0xFF1A1F29),
         surfaceContainerHighest = Color(0xFF202632),
+        // Lines only: too faint for text, which uses onSurfaceVariant (see TextContrastTest).
         outline = Color(0xFF2E3544),
         outlineVariant = Color(0xFF232935),
         inverseSurface = Color(0xFFE5E8EF),
@@ -78,15 +79,15 @@ private val Palette =
         scrim = Color(0xCC000000),
     )
 
-private val Extras =
+internal val Extras =
     KstateColors(
         key = Color(0xFF8AA4FF),
         string = Color(0xFF9CE38A),
         number = Color(0xFFFFA866),
         boolean = Color(0xFFC79BFF),
-        nullValue = Color(0xFF7D8699),
+        nullValue = Color(0xFF8891A4),
         redacted = Color(0xFFFF7A85),
-        container = Color(0xFF7D8699),
+        container = Color(0xFF8891A4),
         changed = Color(0xFF3DDC97),
         live = Color(0xFF3DDC97),
         paused = Color(0xFFF5C26B),
