@@ -27,7 +27,7 @@ jobs:
       - name: Android sample
         run: ./gradlew :sample:androidApp:assembleDebug
       - name: Web viewer (wasm)
-        run: ./gradlew :viewer:viewer-web:wasmJsBrowserDistribution
+        run: ./gradlew :app:web:wasmJsBrowserDistribution
       - name: Upload reports on failure
         if: failure()
         uses: actions/upload-artifact@v7
@@ -47,8 +47,8 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v6
       - name: Package unsigned DMG
-        run: ./gradlew :host:host-desktop:packageDmg
+        run: ./gradlew :app:desktop:packageDmg
       - uses: actions/upload-artifact@v7
         with:
           name: kstate-dmg
-          path: host/host-desktop/build/compose/binaries/main/dmg/*.dmg
+          path: app/desktop/build/compose/binaries/main/dmg/*.dmg
