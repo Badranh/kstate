@@ -5,13 +5,19 @@ import dev.kstate.core.protocol.Msg
 import dev.kstate.core.protocol.OverrideMode
 import dev.kstate.core.protocol.Release
 import dev.kstate.core.protocol.Restore
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -43,6 +49,38 @@ class CommandBusTest {
             advanceTimeBy(3.1.seconds)
 
             assertEquals(CommandOutcome.TimedOut, outcome.await())
+        }
+
+    @Test
+    fun aConnectionThatClosedUnderASendIsNotConnected() =
+        runTest {
+            bus.attach("emulator-5554", connectionId = 1) { throw ClosedSendChannelException("socket closed") }
+
+            assertEquals(CommandOutcome.NotConnected, bus.send("emulator-5554") { id -> Release(id, "Counter-1") })
+        }
+
+    /** A WebSocket cancelled under a send throws cancellation; that is the app gone, not the caller cancelled. */
+    @Test
+    fun aSocketCancelledUnderASendIsNotConnectedAndTheCallerGoesOn() =
+        runTest {
+            bus.attach("emulator-5554", connectionId = 1) { throw CancellationException("session cancelled") }
+
+            val outcome = bus.send("emulator-5554") { id -> Release(id, "Counter-1") }
+
+            assertEquals(CommandOutcome.NotConnected, outcome)
+            assertTrue(currentCoroutineContext().isActive)
+        }
+
+    @Test
+    fun aCallerCancelledWhileWaitingIsStillCancelled() =
+        runTest {
+            bus.attach("emulator-5554", connectionId = 1) { sent += it }
+            val waiting = async { bus.send("emulator-5554") { id -> Release(id, "Counter-1") } }
+            runCurrent()
+
+            waiting.cancel()
+
+            assertFailsWith<CancellationException> { waiting.await() }
         }
 
     @Test

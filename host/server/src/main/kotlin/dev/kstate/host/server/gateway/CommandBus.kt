@@ -3,7 +3,11 @@ package dev.kstate.host.server.gateway
 import dev.kstate.core.protocol.Command
 import dev.kstate.core.protocol.CommandResult
 import dev.kstate.core.protocol.Msg
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
 import java.util.UUID
@@ -75,6 +79,13 @@ class CommandBus(
             link.send(build(cmdId))
             withTimeoutOrNull(timeout) { answer.await() } ?: CommandOutcome.TimedOut
         } catch (_: IOException) {
+            CommandOutcome.NotConnected
+        } catch (_: ClosedSendChannelException) {
+            CommandOutcome.NotConnected
+        } catch (_: CancellationException) {
+            // A WebSocket cancelled under the send throws this too: that is the app gone. Only a
+            // cancelled caller is a real cancellation, and ensureActive rethrows it.
+            currentCoroutineContext().ensureActive()
             CommandOutcome.NotConnected
         } finally {
             pending.remove(cmdId)
