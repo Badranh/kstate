@@ -1,0 +1,710 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <kstate.core:protocol>
+final enum class dev.kstate.core.protocol/Encoding : kotlin/Enum<dev.kstate.core.protocol/Encoding> { // dev.kstate.core.protocol/Encoding|null[0]
+    enum entry RAW // dev.kstate.core.protocol/Encoding.RAW|null[0]
+    enum entry REFLECTION // dev.kstate.core.protocol/Encoding.REFLECTION|null[0]
+    enum entry SERIALIZER // dev.kstate.core.protocol/Encoding.SERIALIZER|null[0]
+    enum entry TO_STRING // dev.kstate.core.protocol/Encoding.TO_STRING|null[0]
+
+    final val entries // dev.kstate.core.protocol/Encoding.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<dev.kstate.core.protocol/Encoding> // dev.kstate.core.protocol/Encoding.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): dev.kstate.core.protocol/Encoding // dev.kstate.core.protocol/Encoding.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<dev.kstate.core.protocol/Encoding> // dev.kstate.core.protocol/Encoding.values|values#static(){}[0]
+
+    final object Companion : kotlinx.serialization.internal/SerializerFactory { // dev.kstate.core.protocol/Encoding.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Encoding> // dev.kstate.core.protocol/Encoding.Companion.serializer|serializer(){}[0]
+        final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // dev.kstate.core.protocol/Encoding.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
+    }
+}
+
+final enum class dev.kstate.core.protocol/OverrideMode : kotlin/Enum<dev.kstate.core.protocol/OverrideMode> { // dev.kstate.core.protocol/OverrideMode|null[0]
+    enum entry OVERLAY // dev.kstate.core.protocol/OverrideMode.OVERLAY|null[0]
+    enum entry WRITE_THROUGH // dev.kstate.core.protocol/OverrideMode.WRITE_THROUGH|null[0]
+
+    final val entries // dev.kstate.core.protocol/OverrideMode.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<dev.kstate.core.protocol/OverrideMode> // dev.kstate.core.protocol/OverrideMode.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): dev.kstate.core.protocol/OverrideMode // dev.kstate.core.protocol/OverrideMode.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<dev.kstate.core.protocol/OverrideMode> // dev.kstate.core.protocol/OverrideMode.values|values#static(){}[0]
+
+    final object Companion : kotlinx.serialization.internal/SerializerFactory { // dev.kstate.core.protocol/OverrideMode.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/OverrideMode> // dev.kstate.core.protocol/OverrideMode.Companion.serializer|serializer(){}[0]
+        final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // dev.kstate.core.protocol/OverrideMode.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
+    }
+}
+
+final enum class dev.kstate.core.protocol/Platform : kotlin/Enum<dev.kstate.core.protocol/Platform> { // dev.kstate.core.protocol/Platform|null[0]
+    enum entry ANDROID // dev.kstate.core.protocol/Platform.ANDROID|null[0]
+    enum entry IOS // dev.kstate.core.protocol/Platform.IOS|null[0]
+    enum entry JVM // dev.kstate.core.protocol/Platform.JVM|null[0]
+
+    final val entries // dev.kstate.core.protocol/Platform.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<dev.kstate.core.protocol/Platform> // dev.kstate.core.protocol/Platform.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): dev.kstate.core.protocol/Platform // dev.kstate.core.protocol/Platform.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<dev.kstate.core.protocol/Platform> // dev.kstate.core.protocol/Platform.values|values#static(){}[0]
+
+    final object Companion : kotlinx.serialization.internal/SerializerFactory { // dev.kstate.core.protocol/Platform.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Platform> // dev.kstate.core.protocol/Platform.Companion.serializer|serializer(){}[0]
+        final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // dev.kstate.core.protocol/Platform.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
+    }
+}
+
+sealed interface dev.kstate.core.protocol/AppToHost : dev.kstate.core.protocol/Msg { // dev.kstate.core.protocol/AppToHost|null[0]
+    final object Companion : kotlinx.serialization.internal/SerializerFactory { // dev.kstate.core.protocol/AppToHost.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/AppToHost> // dev.kstate.core.protocol/AppToHost.Companion.serializer|serializer(){}[0]
+        final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // dev.kstate.core.protocol/AppToHost.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
+    }
+}
+
+sealed interface dev.kstate.core.protocol/Command : dev.kstate.core.protocol/HostToApp { // dev.kstate.core.protocol/Command|null[0]
+    abstract val cmdId // dev.kstate.core.protocol/Command.cmdId|{}cmdId[0]
+        abstract fun <get-cmdId>(): kotlin/String // dev.kstate.core.protocol/Command.cmdId.<get-cmdId>|<get-cmdId>(){}[0]
+    abstract val sourceId // dev.kstate.core.protocol/Command.sourceId|{}sourceId[0]
+        abstract fun <get-sourceId>(): kotlin/String // dev.kstate.core.protocol/Command.sourceId.<get-sourceId>|<get-sourceId>(){}[0]
+}
+
+sealed interface dev.kstate.core.protocol/HostToApp : dev.kstate.core.protocol/Msg { // dev.kstate.core.protocol/HostToApp|null[0]
+    final object Companion : kotlinx.serialization.internal/SerializerFactory { // dev.kstate.core.protocol/HostToApp.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/HostToApp> // dev.kstate.core.protocol/HostToApp.Companion.serializer|serializer(){}[0]
+        final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // dev.kstate.core.protocol/HostToApp.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
+    }
+}
+
+sealed interface dev.kstate.core.protocol/Msg { // dev.kstate.core.protocol/Msg|null[0]
+    final object Companion : kotlinx.serialization.internal/SerializerFactory { // dev.kstate.core.protocol/Msg.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Msg> // dev.kstate.core.protocol/Msg.Companion.serializer|serializer(){}[0]
+        final fun serializer(kotlin/Array<out kotlinx.serialization/KSerializer<*>>...): kotlinx.serialization/KSerializer<*> // dev.kstate.core.protocol/Msg.Companion.serializer|serializer(kotlin.Array<out|kotlinx.serialization.KSerializer<*>>...){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Capabilities { // dev.kstate.core.protocol/Capabilities|null[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // dev.kstate.core.protocol/Capabilities.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+
+    final val decode // dev.kstate.core.protocol/Capabilities.decode|{}decode[0]
+        final fun <get-decode>(): kotlin/Boolean // dev.kstate.core.protocol/Capabilities.decode.<get-decode>|<get-decode>(){}[0]
+    final val overlay // dev.kstate.core.protocol/Capabilities.overlay|{}overlay[0]
+        final fun <get-overlay>(): kotlin/Boolean // dev.kstate.core.protocol/Capabilities.overlay.<get-overlay>|<get-overlay>(){}[0]
+    final val writeThrough // dev.kstate.core.protocol/Capabilities.writeThrough|{}writeThrough[0]
+        final fun <get-writeThrough>(): kotlin/Boolean // dev.kstate.core.protocol/Capabilities.writeThrough.<get-writeThrough>|<get-writeThrough>(){}[0]
+
+    final fun component1(): kotlin/Boolean // dev.kstate.core.protocol/Capabilities.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // dev.kstate.core.protocol/Capabilities.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // dev.kstate.core.protocol/Capabilities.component3|component3(){}[0]
+    final fun copy(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): dev.kstate.core.protocol/Capabilities // dev.kstate.core.protocol/Capabilities.copy|copy(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Capabilities.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Capabilities.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Capabilities.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Capabilities> { // dev.kstate.core.protocol/Capabilities.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Capabilities.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Capabilities.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Capabilities.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Capabilities // dev.kstate.core.protocol/Capabilities.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Capabilities) // dev.kstate.core.protocol/Capabilities.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Capabilities){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Capabilities.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Capabilities> // dev.kstate.core.protocol/Capabilities.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/CommandResult : dev.kstate.core.protocol/AppToHost { // dev.kstate.core.protocol/CommandResult|null[0]
+    constructor <init>(kotlin/String, kotlin/Boolean, kotlin/String? = ..., kotlin/String? = ...) // dev.kstate.core.protocol/CommandResult.<init>|<init>(kotlin.String;kotlin.Boolean;kotlin.String?;kotlin.String?){}[0]
+
+    final val cmdId // dev.kstate.core.protocol/CommandResult.cmdId|{}cmdId[0]
+        final fun <get-cmdId>(): kotlin/String // dev.kstate.core.protocol/CommandResult.cmdId.<get-cmdId>|<get-cmdId>(){}[0]
+    final val error // dev.kstate.core.protocol/CommandResult.error|{}error[0]
+        final fun <get-error>(): kotlin/String? // dev.kstate.core.protocol/CommandResult.error.<get-error>|<get-error>(){}[0]
+    final val errorPath // dev.kstate.core.protocol/CommandResult.errorPath|{}errorPath[0]
+        final fun <get-errorPath>(): kotlin/String? // dev.kstate.core.protocol/CommandResult.errorPath.<get-errorPath>|<get-errorPath>(){}[0]
+    final val ok // dev.kstate.core.protocol/CommandResult.ok|{}ok[0]
+        final fun <get-ok>(): kotlin/Boolean // dev.kstate.core.protocol/CommandResult.ok.<get-ok>|<get-ok>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/CommandResult.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // dev.kstate.core.protocol/CommandResult.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // dev.kstate.core.protocol/CommandResult.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // dev.kstate.core.protocol/CommandResult.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Boolean = ..., kotlin/String? = ..., kotlin/String? = ...): dev.kstate.core.protocol/CommandResult // dev.kstate.core.protocol/CommandResult.copy|copy(kotlin.String;kotlin.Boolean;kotlin.String?;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/CommandResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/CommandResult.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/CommandResult.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/CommandResult> { // dev.kstate.core.protocol/CommandResult.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/CommandResult.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/CommandResult.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/CommandResult.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/CommandResult // dev.kstate.core.protocol/CommandResult.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/CommandResult) // dev.kstate.core.protocol/CommandResult.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.CommandResult){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/CommandResult.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/CommandResult> // dev.kstate.core.protocol/CommandResult.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Envelope { // dev.kstate.core.protocol/Envelope|null[0]
+    constructor <init>(kotlin/Int = ..., kotlin/String, kotlin/Long, dev.kstate.core.protocol/Msg) // dev.kstate.core.protocol/Envelope.<init>|<init>(kotlin.Int;kotlin.String;kotlin.Long;dev.kstate.core.protocol.Msg){}[0]
+
+    final val id // dev.kstate.core.protocol/Envelope.id|{}id[0]
+        final fun <get-id>(): kotlin/String // dev.kstate.core.protocol/Envelope.id.<get-id>|<get-id>(){}[0]
+    final val msg // dev.kstate.core.protocol/Envelope.msg|{}msg[0]
+        final fun <get-msg>(): dev.kstate.core.protocol/Msg // dev.kstate.core.protocol/Envelope.msg.<get-msg>|<get-msg>(){}[0]
+    final val ts // dev.kstate.core.protocol/Envelope.ts|{}ts[0]
+        final fun <get-ts>(): kotlin/Long // dev.kstate.core.protocol/Envelope.ts.<get-ts>|<get-ts>(){}[0]
+    final val v // dev.kstate.core.protocol/Envelope.v|{}v[0]
+        final fun <get-v>(): kotlin/Int // dev.kstate.core.protocol/Envelope.v.<get-v>|<get-v>(){}[0]
+
+    final fun component1(): kotlin/Int // dev.kstate.core.protocol/Envelope.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.kstate.core.protocol/Envelope.component2|component2(){}[0]
+    final fun component3(): kotlin/Long // dev.kstate.core.protocol/Envelope.component3|component3(){}[0]
+    final fun component4(): dev.kstate.core.protocol/Msg // dev.kstate.core.protocol/Envelope.component4|component4(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/String = ..., kotlin/Long = ..., dev.kstate.core.protocol/Msg = ...): dev.kstate.core.protocol/Envelope // dev.kstate.core.protocol/Envelope.copy|copy(kotlin.Int;kotlin.String;kotlin.Long;dev.kstate.core.protocol.Msg){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Envelope.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Envelope.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Envelope.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Envelope> { // dev.kstate.core.protocol/Envelope.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Envelope.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Envelope.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Envelope.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Envelope // dev.kstate.core.protocol/Envelope.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Envelope) // dev.kstate.core.protocol/Envelope.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Envelope){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Envelope.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Envelope> // dev.kstate.core.protocol/Envelope.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Event : dev.kstate.core.protocol/AppToHost { // dev.kstate.core.protocol/Event|null[0]
+    constructor <init>(kotlin/String? = ..., kotlin/String, kotlinx.serialization.json/JsonElement? = ...) // dev.kstate.core.protocol/Event.<init>|<init>(kotlin.String?;kotlin.String;kotlinx.serialization.json.JsonElement?){}[0]
+
+    final val args // dev.kstate.core.protocol/Event.args|{}args[0]
+        final fun <get-args>(): kotlinx.serialization.json/JsonElement? // dev.kstate.core.protocol/Event.args.<get-args>|<get-args>(){}[0]
+    final val name // dev.kstate.core.protocol/Event.name|{}name[0]
+        final fun <get-name>(): kotlin/String // dev.kstate.core.protocol/Event.name.<get-name>|<get-name>(){}[0]
+    final val sourceId // dev.kstate.core.protocol/Event.sourceId|{}sourceId[0]
+        final fun <get-sourceId>(): kotlin/String? // dev.kstate.core.protocol/Event.sourceId.<get-sourceId>|<get-sourceId>(){}[0]
+
+    final fun component1(): kotlin/String? // dev.kstate.core.protocol/Event.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.kstate.core.protocol/Event.component2|component2(){}[0]
+    final fun component3(): kotlinx.serialization.json/JsonElement? // dev.kstate.core.protocol/Event.component3|component3(){}[0]
+    final fun copy(kotlin/String? = ..., kotlin/String = ..., kotlinx.serialization.json/JsonElement? = ...): dev.kstate.core.protocol/Event // dev.kstate.core.protocol/Event.copy|copy(kotlin.String?;kotlin.String;kotlinx.serialization.json.JsonElement?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Event.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Event.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Event.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Event> { // dev.kstate.core.protocol/Event.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Event.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Event.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Event.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Event // dev.kstate.core.protocol/Event.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Event) // dev.kstate.core.protocol/Event.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Event){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Event.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Event> // dev.kstate.core.protocol/Event.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Freeze : dev.kstate.core.protocol/Command { // dev.kstate.core.protocol/Freeze|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/Boolean) // dev.kstate.core.protocol/Freeze.<init>|<init>(kotlin.String;kotlin.String;kotlin.Boolean){}[0]
+
+    final val cmdId // dev.kstate.core.protocol/Freeze.cmdId|{}cmdId[0]
+        final fun <get-cmdId>(): kotlin/String // dev.kstate.core.protocol/Freeze.cmdId.<get-cmdId>|<get-cmdId>(){}[0]
+    final val frozen // dev.kstate.core.protocol/Freeze.frozen|{}frozen[0]
+        final fun <get-frozen>(): kotlin/Boolean // dev.kstate.core.protocol/Freeze.frozen.<get-frozen>|<get-frozen>(){}[0]
+    final val sourceId // dev.kstate.core.protocol/Freeze.sourceId|{}sourceId[0]
+        final fun <get-sourceId>(): kotlin/String // dev.kstate.core.protocol/Freeze.sourceId.<get-sourceId>|<get-sourceId>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/Freeze.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.kstate.core.protocol/Freeze.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // dev.kstate.core.protocol/Freeze.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/Boolean = ...): dev.kstate.core.protocol/Freeze // dev.kstate.core.protocol/Freeze.copy|copy(kotlin.String;kotlin.String;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Freeze.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Freeze.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Freeze.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Freeze> { // dev.kstate.core.protocol/Freeze.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Freeze.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Freeze.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Freeze.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Freeze // dev.kstate.core.protocol/Freeze.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Freeze) // dev.kstate.core.protocol/Freeze.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Freeze){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Freeze.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Freeze> // dev.kstate.core.protocol/Freeze.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Hello : dev.kstate.core.protocol/AppToHost { // dev.kstate.core.protocol/Hello|null[0]
+    constructor <init>(kotlin/String, kotlin/String, dev.kstate.core.protocol/Platform, kotlin/String, kotlin/String, kotlin/String, dev.kstate.core.protocol/ProtocolVersion = ..., kotlin/String? = ...) // dev.kstate.core.protocol/Hello.<init>|<init>(kotlin.String;kotlin.String;dev.kstate.core.protocol.Platform;kotlin.String;kotlin.String;kotlin.String;dev.kstate.core.protocol.ProtocolVersion;kotlin.String?){}[0]
+
+    final val appId // dev.kstate.core.protocol/Hello.appId|{}appId[0]
+        final fun <get-appId>(): kotlin/String // dev.kstate.core.protocol/Hello.appId.<get-appId>|<get-appId>(){}[0]
+    final val appVersion // dev.kstate.core.protocol/Hello.appVersion|{}appVersion[0]
+        final fun <get-appVersion>(): kotlin/String // dev.kstate.core.protocol/Hello.appVersion.<get-appVersion>|<get-appVersion>(){}[0]
+    final val deviceHint // dev.kstate.core.protocol/Hello.deviceHint|{}deviceHint[0]
+        final fun <get-deviceHint>(): kotlin/String // dev.kstate.core.protocol/Hello.deviceHint.<get-deviceHint>|<get-deviceHint>(){}[0]
+    final val osVersion // dev.kstate.core.protocol/Hello.osVersion|{}osVersion[0]
+        final fun <get-osVersion>(): kotlin/String // dev.kstate.core.protocol/Hello.osVersion.<get-osVersion>|<get-osVersion>(){}[0]
+    final val pairingToken // dev.kstate.core.protocol/Hello.pairingToken|{}pairingToken[0]
+        final fun <get-pairingToken>(): kotlin/String? // dev.kstate.core.protocol/Hello.pairingToken.<get-pairingToken>|<get-pairingToken>(){}[0]
+    final val platform // dev.kstate.core.protocol/Hello.platform|{}platform[0]
+        final fun <get-platform>(): dev.kstate.core.protocol/Platform // dev.kstate.core.protocol/Hello.platform.<get-platform>|<get-platform>(){}[0]
+    final val protocolVersion // dev.kstate.core.protocol/Hello.protocolVersion|{}protocolVersion[0]
+        final fun <get-protocolVersion>(): dev.kstate.core.protocol/ProtocolVersion // dev.kstate.core.protocol/Hello.protocolVersion.<get-protocolVersion>|<get-protocolVersion>(){}[0]
+    final val sdkVersion // dev.kstate.core.protocol/Hello.sdkVersion|{}sdkVersion[0]
+        final fun <get-sdkVersion>(): kotlin/String // dev.kstate.core.protocol/Hello.sdkVersion.<get-sdkVersion>|<get-sdkVersion>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/Hello.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.kstate.core.protocol/Hello.component2|component2(){}[0]
+    final fun component3(): dev.kstate.core.protocol/Platform // dev.kstate.core.protocol/Hello.component3|component3(){}[0]
+    final fun component4(): kotlin/String // dev.kstate.core.protocol/Hello.component4|component4(){}[0]
+    final fun component5(): kotlin/String // dev.kstate.core.protocol/Hello.component5|component5(){}[0]
+    final fun component6(): kotlin/String // dev.kstate.core.protocol/Hello.component6|component6(){}[0]
+    final fun component7(): dev.kstate.core.protocol/ProtocolVersion // dev.kstate.core.protocol/Hello.component7|component7(){}[0]
+    final fun component8(): kotlin/String? // dev.kstate.core.protocol/Hello.component8|component8(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., dev.kstate.core.protocol/Platform = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., dev.kstate.core.protocol/ProtocolVersion = ..., kotlin/String? = ...): dev.kstate.core.protocol/Hello // dev.kstate.core.protocol/Hello.copy|copy(kotlin.String;kotlin.String;dev.kstate.core.protocol.Platform;kotlin.String;kotlin.String;kotlin.String;dev.kstate.core.protocol.ProtocolVersion;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Hello.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Hello.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Hello.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Hello> { // dev.kstate.core.protocol/Hello.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Hello.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Hello.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Hello.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Hello // dev.kstate.core.protocol/Hello.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Hello) // dev.kstate.core.protocol/Hello.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Hello){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Hello.Companion|null[0]
+        final val $childSerializers // dev.kstate.core.protocol/Hello.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Hello> // dev.kstate.core.protocol/Hello.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Nav : dev.kstate.core.protocol/AppToHost { // dev.kstate.core.protocol/Nav|null[0]
+    constructor <init>(kotlin.collections/List<kotlin/String>) // dev.kstate.core.protocol/Nav.<init>|<init>(kotlin.collections.List<kotlin.String>){}[0]
+
+    final val stack // dev.kstate.core.protocol/Nav.stack|{}stack[0]
+        final fun <get-stack>(): kotlin.collections/List<kotlin/String> // dev.kstate.core.protocol/Nav.stack.<get-stack>|<get-stack>(){}[0]
+
+    final fun component1(): kotlin.collections/List<kotlin/String> // dev.kstate.core.protocol/Nav.component1|component1(){}[0]
+    final fun copy(kotlin.collections/List<kotlin/String> = ...): dev.kstate.core.protocol/Nav // dev.kstate.core.protocol/Nav.copy|copy(kotlin.collections.List<kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Nav.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Nav.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Nav.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Nav> { // dev.kstate.core.protocol/Nav.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Nav.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Nav.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Nav.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Nav // dev.kstate.core.protocol/Nav.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Nav) // dev.kstate.core.protocol/Nav.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Nav){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Nav.Companion|null[0]
+        final val $childSerializers // dev.kstate.core.protocol/Nav.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Nav> // dev.kstate.core.protocol/Nav.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Ping : dev.kstate.core.protocol/HostToApp { // dev.kstate.core.protocol/Ping|null[0]
+    constructor <init>(kotlin/Long) // dev.kstate.core.protocol/Ping.<init>|<init>(kotlin.Long){}[0]
+
+    final val nonce // dev.kstate.core.protocol/Ping.nonce|{}nonce[0]
+        final fun <get-nonce>(): kotlin/Long // dev.kstate.core.protocol/Ping.nonce.<get-nonce>|<get-nonce>(){}[0]
+
+    final fun component1(): kotlin/Long // dev.kstate.core.protocol/Ping.component1|component1(){}[0]
+    final fun copy(kotlin/Long = ...): dev.kstate.core.protocol/Ping // dev.kstate.core.protocol/Ping.copy|copy(kotlin.Long){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Ping.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Ping.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Ping.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Ping> { // dev.kstate.core.protocol/Ping.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Ping.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Ping.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Ping.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Ping // dev.kstate.core.protocol/Ping.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Ping) // dev.kstate.core.protocol/Ping.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Ping){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Ping.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Ping> // dev.kstate.core.protocol/Ping.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Pong : dev.kstate.core.protocol/AppToHost { // dev.kstate.core.protocol/Pong|null[0]
+    constructor <init>(kotlin/Long) // dev.kstate.core.protocol/Pong.<init>|<init>(kotlin.Long){}[0]
+
+    final val nonce // dev.kstate.core.protocol/Pong.nonce|{}nonce[0]
+        final fun <get-nonce>(): kotlin/Long // dev.kstate.core.protocol/Pong.nonce.<get-nonce>|<get-nonce>(){}[0]
+
+    final fun component1(): kotlin/Long // dev.kstate.core.protocol/Pong.component1|component1(){}[0]
+    final fun copy(kotlin/Long = ...): dev.kstate.core.protocol/Pong // dev.kstate.core.protocol/Pong.copy|copy(kotlin.Long){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Pong.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Pong.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Pong.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Pong> { // dev.kstate.core.protocol/Pong.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Pong.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Pong.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Pong.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Pong // dev.kstate.core.protocol/Pong.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Pong) // dev.kstate.core.protocol/Pong.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Pong){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Pong.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Pong> // dev.kstate.core.protocol/Pong.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/ProtocolVersion { // dev.kstate.core.protocol/ProtocolVersion|null[0]
+    constructor <init>(kotlin/Int, kotlin/Int) // dev.kstate.core.protocol/ProtocolVersion.<init>|<init>(kotlin.Int;kotlin.Int){}[0]
+
+    final val major // dev.kstate.core.protocol/ProtocolVersion.major|{}major[0]
+        final fun <get-major>(): kotlin/Int // dev.kstate.core.protocol/ProtocolVersion.major.<get-major>|<get-major>(){}[0]
+    final val minor // dev.kstate.core.protocol/ProtocolVersion.minor|{}minor[0]
+        final fun <get-minor>(): kotlin/Int // dev.kstate.core.protocol/ProtocolVersion.minor.<get-minor>|<get-minor>(){}[0]
+
+    final fun component1(): kotlin/Int // dev.kstate.core.protocol/ProtocolVersion.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // dev.kstate.core.protocol/ProtocolVersion.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/Int = ...): dev.kstate.core.protocol/ProtocolVersion // dev.kstate.core.protocol/ProtocolVersion.copy|copy(kotlin.Int;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/ProtocolVersion.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/ProtocolVersion.hashCode|hashCode(){}[0]
+    final fun isCompatibleWith(dev.kstate.core.protocol/ProtocolVersion): kotlin/Boolean // dev.kstate.core.protocol/ProtocolVersion.isCompatibleWith|isCompatibleWith(dev.kstate.core.protocol.ProtocolVersion){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/ProtocolVersion.toString|toString(){}[0]
+
+    final object Companion { // dev.kstate.core.protocol/ProtocolVersion.Companion|null[0]
+        final val CURRENT // dev.kstate.core.protocol/ProtocolVersion.Companion.CURRENT|{}CURRENT[0]
+            final fun <get-CURRENT>(): dev.kstate.core.protocol/ProtocolVersion // dev.kstate.core.protocol/ProtocolVersion.Companion.CURRENT.<get-CURRENT>|<get-CURRENT>(){}[0]
+
+        final fun parse(kotlin/String): dev.kstate.core.protocol/ProtocolVersion // dev.kstate.core.protocol/ProtocolVersion.Companion.parse|parse(kotlin.String){}[0]
+        final fun parseOrNull(kotlin/String): dev.kstate.core.protocol/ProtocolVersion? // dev.kstate.core.protocol/ProtocolVersion.Companion.parseOrNull|parseOrNull(kotlin.String){}[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/ProtocolVersion> // dev.kstate.core.protocol/ProtocolVersion.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Release : dev.kstate.core.protocol/Command { // dev.kstate.core.protocol/Release|null[0]
+    constructor <init>(kotlin/String, kotlin/String) // dev.kstate.core.protocol/Release.<init>|<init>(kotlin.String;kotlin.String){}[0]
+
+    final val cmdId // dev.kstate.core.protocol/Release.cmdId|{}cmdId[0]
+        final fun <get-cmdId>(): kotlin/String // dev.kstate.core.protocol/Release.cmdId.<get-cmdId>|<get-cmdId>(){}[0]
+    final val sourceId // dev.kstate.core.protocol/Release.sourceId|{}sourceId[0]
+        final fun <get-sourceId>(): kotlin/String // dev.kstate.core.protocol/Release.sourceId.<get-sourceId>|<get-sourceId>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/Release.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.kstate.core.protocol/Release.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ...): dev.kstate.core.protocol/Release // dev.kstate.core.protocol/Release.copy|copy(kotlin.String;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Release.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Release.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Release.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Release> { // dev.kstate.core.protocol/Release.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Release.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Release.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Release.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Release // dev.kstate.core.protocol/Release.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Release) // dev.kstate.core.protocol/Release.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Release){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Release.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Release> // dev.kstate.core.protocol/Release.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Restore : dev.kstate.core.protocol/Command { // dev.kstate.core.protocol/Restore|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/Long, dev.kstate.core.protocol/OverrideMode) // dev.kstate.core.protocol/Restore.<init>|<init>(kotlin.String;kotlin.String;kotlin.Long;dev.kstate.core.protocol.OverrideMode){}[0]
+
+    final val cmdId // dev.kstate.core.protocol/Restore.cmdId|{}cmdId[0]
+        final fun <get-cmdId>(): kotlin/String // dev.kstate.core.protocol/Restore.cmdId.<get-cmdId>|<get-cmdId>(){}[0]
+    final val mode // dev.kstate.core.protocol/Restore.mode|{}mode[0]
+        final fun <get-mode>(): dev.kstate.core.protocol/OverrideMode // dev.kstate.core.protocol/Restore.mode.<get-mode>|<get-mode>(){}[0]
+    final val seq // dev.kstate.core.protocol/Restore.seq|{}seq[0]
+        final fun <get-seq>(): kotlin/Long // dev.kstate.core.protocol/Restore.seq.<get-seq>|<get-seq>(){}[0]
+    final val sourceId // dev.kstate.core.protocol/Restore.sourceId|{}sourceId[0]
+        final fun <get-sourceId>(): kotlin/String // dev.kstate.core.protocol/Restore.sourceId.<get-sourceId>|<get-sourceId>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/Restore.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.kstate.core.protocol/Restore.component2|component2(){}[0]
+    final fun component3(): kotlin/Long // dev.kstate.core.protocol/Restore.component3|component3(){}[0]
+    final fun component4(): dev.kstate.core.protocol/OverrideMode // dev.kstate.core.protocol/Restore.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/Long = ..., dev.kstate.core.protocol/OverrideMode = ...): dev.kstate.core.protocol/Restore // dev.kstate.core.protocol/Restore.copy|copy(kotlin.String;kotlin.String;kotlin.Long;dev.kstate.core.protocol.OverrideMode){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Restore.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Restore.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Restore.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Restore> { // dev.kstate.core.protocol/Restore.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Restore.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Restore.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Restore.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Restore // dev.kstate.core.protocol/Restore.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Restore) // dev.kstate.core.protocol/Restore.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Restore){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Restore.Companion|null[0]
+        final val $childSerializers // dev.kstate.core.protocol/Restore.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Restore> // dev.kstate.core.protocol/Restore.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/SetState : dev.kstate.core.protocol/Command { // dev.kstate.core.protocol/SetState|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlinx.serialization.json/JsonElement, dev.kstate.core.protocol/OverrideMode) // dev.kstate.core.protocol/SetState.<init>|<init>(kotlin.String;kotlin.String;kotlinx.serialization.json.JsonElement;dev.kstate.core.protocol.OverrideMode){}[0]
+
+    final val cmdId // dev.kstate.core.protocol/SetState.cmdId|{}cmdId[0]
+        final fun <get-cmdId>(): kotlin/String // dev.kstate.core.protocol/SetState.cmdId.<get-cmdId>|<get-cmdId>(){}[0]
+    final val mode // dev.kstate.core.protocol/SetState.mode|{}mode[0]
+        final fun <get-mode>(): dev.kstate.core.protocol/OverrideMode // dev.kstate.core.protocol/SetState.mode.<get-mode>|<get-mode>(){}[0]
+    final val sourceId // dev.kstate.core.protocol/SetState.sourceId|{}sourceId[0]
+        final fun <get-sourceId>(): kotlin/String // dev.kstate.core.protocol/SetState.sourceId.<get-sourceId>|<get-sourceId>(){}[0]
+    final val state // dev.kstate.core.protocol/SetState.state|{}state[0]
+        final fun <get-state>(): kotlinx.serialization.json/JsonElement // dev.kstate.core.protocol/SetState.state.<get-state>|<get-state>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/SetState.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.kstate.core.protocol/SetState.component2|component2(){}[0]
+    final fun component3(): kotlinx.serialization.json/JsonElement // dev.kstate.core.protocol/SetState.component3|component3(){}[0]
+    final fun component4(): dev.kstate.core.protocol/OverrideMode // dev.kstate.core.protocol/SetState.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlinx.serialization.json/JsonElement = ..., dev.kstate.core.protocol/OverrideMode = ...): dev.kstate.core.protocol/SetState // dev.kstate.core.protocol/SetState.copy|copy(kotlin.String;kotlin.String;kotlinx.serialization.json.JsonElement;dev.kstate.core.protocol.OverrideMode){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/SetState.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/SetState.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/SetState.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/SetState> { // dev.kstate.core.protocol/SetState.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/SetState.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/SetState.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/SetState.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/SetState // dev.kstate.core.protocol/SetState.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/SetState) // dev.kstate.core.protocol/SetState.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.SetState){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/SetState.Companion|null[0]
+        final val $childSerializers // dev.kstate.core.protocol/SetState.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/SetState> // dev.kstate.core.protocol/SetState.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/SourceCleared : dev.kstate.core.protocol/AppToHost { // dev.kstate.core.protocol/SourceCleared|null[0]
+    constructor <init>(kotlin/String) // dev.kstate.core.protocol/SourceCleared.<init>|<init>(kotlin.String){}[0]
+
+    final val sourceId // dev.kstate.core.protocol/SourceCleared.sourceId|{}sourceId[0]
+        final fun <get-sourceId>(): kotlin/String // dev.kstate.core.protocol/SourceCleared.sourceId.<get-sourceId>|<get-sourceId>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/SourceCleared.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): dev.kstate.core.protocol/SourceCleared // dev.kstate.core.protocol/SourceCleared.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/SourceCleared.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/SourceCleared.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/SourceCleared.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/SourceCleared> { // dev.kstate.core.protocol/SourceCleared.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/SourceCleared.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/SourceCleared.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/SourceCleared.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/SourceCleared // dev.kstate.core.protocol/SourceCleared.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/SourceCleared) // dev.kstate.core.protocol/SourceCleared.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.SourceCleared){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/SourceCleared.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/SourceCleared> // dev.kstate.core.protocol/SourceCleared.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/SourceRegistered : dev.kstate.core.protocol/AppToHost { // dev.kstate.core.protocol/SourceRegistered|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String, dev.kstate.core.protocol/Capabilities = ..., kotlinx.serialization.json/JsonElement? = ...) // dev.kstate.core.protocol/SourceRegistered.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;dev.kstate.core.protocol.Capabilities;kotlinx.serialization.json.JsonElement?){}[0]
+
+    final val capabilities // dev.kstate.core.protocol/SourceRegistered.capabilities|{}capabilities[0]
+        final fun <get-capabilities>(): dev.kstate.core.protocol/Capabilities // dev.kstate.core.protocol/SourceRegistered.capabilities.<get-capabilities>|<get-capabilities>(){}[0]
+    final val name // dev.kstate.core.protocol/SourceRegistered.name|{}name[0]
+        final fun <get-name>(): kotlin/String // dev.kstate.core.protocol/SourceRegistered.name.<get-name>|<get-name>(){}[0]
+    final val ownerType // dev.kstate.core.protocol/SourceRegistered.ownerType|{}ownerType[0]
+        final fun <get-ownerType>(): kotlin/String // dev.kstate.core.protocol/SourceRegistered.ownerType.<get-ownerType>|<get-ownerType>(){}[0]
+    final val schema // dev.kstate.core.protocol/SourceRegistered.schema|{}schema[0]
+        final fun <get-schema>(): kotlinx.serialization.json/JsonElement? // dev.kstate.core.protocol/SourceRegistered.schema.<get-schema>|<get-schema>(){}[0]
+    final val sourceId // dev.kstate.core.protocol/SourceRegistered.sourceId|{}sourceId[0]
+        final fun <get-sourceId>(): kotlin/String // dev.kstate.core.protocol/SourceRegistered.sourceId.<get-sourceId>|<get-sourceId>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/SourceRegistered.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.kstate.core.protocol/SourceRegistered.component2|component2(){}[0]
+    final fun component3(): kotlin/String // dev.kstate.core.protocol/SourceRegistered.component3|component3(){}[0]
+    final fun component4(): dev.kstate.core.protocol/Capabilities // dev.kstate.core.protocol/SourceRegistered.component4|component4(){}[0]
+    final fun component5(): kotlinx.serialization.json/JsonElement? // dev.kstate.core.protocol/SourceRegistered.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., dev.kstate.core.protocol/Capabilities = ..., kotlinx.serialization.json/JsonElement? = ...): dev.kstate.core.protocol/SourceRegistered // dev.kstate.core.protocol/SourceRegistered.copy|copy(kotlin.String;kotlin.String;kotlin.String;dev.kstate.core.protocol.Capabilities;kotlinx.serialization.json.JsonElement?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/SourceRegistered.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/SourceRegistered.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/SourceRegistered.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/SourceRegistered> { // dev.kstate.core.protocol/SourceRegistered.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/SourceRegistered.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/SourceRegistered.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/SourceRegistered.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/SourceRegistered // dev.kstate.core.protocol/SourceRegistered.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/SourceRegistered) // dev.kstate.core.protocol/SourceRegistered.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.SourceRegistered){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/SourceRegistered.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/SourceRegistered> // dev.kstate.core.protocol/SourceRegistered.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/StateSnapshot : dev.kstate.core.protocol/AppToHost { // dev.kstate.core.protocol/StateSnapshot|null[0]
+    constructor <init>(kotlin/String, kotlin/Long, kotlinx.serialization.json/JsonElement, dev.kstate.core.protocol/Encoding, kotlin/Boolean = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Boolean = ...) // dev.kstate.core.protocol/StateSnapshot.<init>|<init>(kotlin.String;kotlin.Long;kotlinx.serialization.json.JsonElement;dev.kstate.core.protocol.Encoding;kotlin.Boolean;kotlin.collections.List<kotlin.String>;kotlin.Boolean){}[0]
+
+    final val encoding // dev.kstate.core.protocol/StateSnapshot.encoding|{}encoding[0]
+        final fun <get-encoding>(): dev.kstate.core.protocol/Encoding // dev.kstate.core.protocol/StateSnapshot.encoding.<get-encoding>|<get-encoding>(){}[0]
+    final val partial // dev.kstate.core.protocol/StateSnapshot.partial|{}partial[0]
+        final fun <get-partial>(): kotlin/Boolean // dev.kstate.core.protocol/StateSnapshot.partial.<get-partial>|<get-partial>(){}[0]
+    final val redacted // dev.kstate.core.protocol/StateSnapshot.redacted|{}redacted[0]
+        final fun <get-redacted>(): kotlin.collections/List<kotlin/String> // dev.kstate.core.protocol/StateSnapshot.redacted.<get-redacted>|<get-redacted>(){}[0]
+    final val seq // dev.kstate.core.protocol/StateSnapshot.seq|{}seq[0]
+        final fun <get-seq>(): kotlin/Long // dev.kstate.core.protocol/StateSnapshot.seq.<get-seq>|<get-seq>(){}[0]
+    final val sourceId // dev.kstate.core.protocol/StateSnapshot.sourceId|{}sourceId[0]
+        final fun <get-sourceId>(): kotlin/String // dev.kstate.core.protocol/StateSnapshot.sourceId.<get-sourceId>|<get-sourceId>(){}[0]
+    final val state // dev.kstate.core.protocol/StateSnapshot.state|{}state[0]
+        final fun <get-state>(): kotlinx.serialization.json/JsonElement // dev.kstate.core.protocol/StateSnapshot.state.<get-state>|<get-state>(){}[0]
+    final val suppressed // dev.kstate.core.protocol/StateSnapshot.suppressed|{}suppressed[0]
+        final fun <get-suppressed>(): kotlin/Boolean // dev.kstate.core.protocol/StateSnapshot.suppressed.<get-suppressed>|<get-suppressed>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/StateSnapshot.component1|component1(){}[0]
+    final fun component2(): kotlin/Long // dev.kstate.core.protocol/StateSnapshot.component2|component2(){}[0]
+    final fun component3(): kotlinx.serialization.json/JsonElement // dev.kstate.core.protocol/StateSnapshot.component3|component3(){}[0]
+    final fun component4(): dev.kstate.core.protocol/Encoding // dev.kstate.core.protocol/StateSnapshot.component4|component4(){}[0]
+    final fun component5(): kotlin/Boolean // dev.kstate.core.protocol/StateSnapshot.component5|component5(){}[0]
+    final fun component6(): kotlin.collections/List<kotlin/String> // dev.kstate.core.protocol/StateSnapshot.component6|component6(){}[0]
+    final fun component7(): kotlin/Boolean // dev.kstate.core.protocol/StateSnapshot.component7|component7(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Long = ..., kotlinx.serialization.json/JsonElement = ..., dev.kstate.core.protocol/Encoding = ..., kotlin/Boolean = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Boolean = ...): dev.kstate.core.protocol/StateSnapshot // dev.kstate.core.protocol/StateSnapshot.copy|copy(kotlin.String;kotlin.Long;kotlinx.serialization.json.JsonElement;dev.kstate.core.protocol.Encoding;kotlin.Boolean;kotlin.collections.List<kotlin.String>;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/StateSnapshot.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/StateSnapshot.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/StateSnapshot.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/StateSnapshot> { // dev.kstate.core.protocol/StateSnapshot.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/StateSnapshot.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/StateSnapshot.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/StateSnapshot.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/StateSnapshot // dev.kstate.core.protocol/StateSnapshot.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/StateSnapshot) // dev.kstate.core.protocol/StateSnapshot.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.StateSnapshot){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/StateSnapshot.Companion|null[0]
+        final val $childSerializers // dev.kstate.core.protocol/StateSnapshot.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/StateSnapshot> // dev.kstate.core.protocol/StateSnapshot.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Unknown : dev.kstate.core.protocol/Msg { // dev.kstate.core.protocol/Unknown|null[0]
+    constructor <init>(kotlin/String, kotlinx.serialization.json/JsonObject) // dev.kstate.core.protocol/Unknown.<init>|<init>(kotlin.String;kotlinx.serialization.json.JsonObject){}[0]
+
+    final val raw // dev.kstate.core.protocol/Unknown.raw|{}raw[0]
+        final fun <get-raw>(): kotlinx.serialization.json/JsonObject // dev.kstate.core.protocol/Unknown.raw.<get-raw>|<get-raw>(){}[0]
+    final val type // dev.kstate.core.protocol/Unknown.type|{}type[0]
+        final fun <get-type>(): kotlin/String // dev.kstate.core.protocol/Unknown.type.<get-type>|<get-type>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/Unknown.component1|component1(){}[0]
+    final fun component2(): kotlinx.serialization.json/JsonObject // dev.kstate.core.protocol/Unknown.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlinx.serialization.json/JsonObject = ...): dev.kstate.core.protocol/Unknown // dev.kstate.core.protocol/Unknown.copy|copy(kotlin.String;kotlinx.serialization.json.JsonObject){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Unknown.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Unknown.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Unknown.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Unknown> { // dev.kstate.core.protocol/Unknown.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Unknown.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Unknown.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Unknown.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Unknown // dev.kstate.core.protocol/Unknown.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Unknown) // dev.kstate.core.protocol/Unknown.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Unknown){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Unknown.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Unknown> // dev.kstate.core.protocol/Unknown.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class dev.kstate.core.protocol/Welcome : dev.kstate.core.protocol/HostToApp { // dev.kstate.core.protocol/Welcome|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/Long) // dev.kstate.core.protocol/Welcome.<init>|<init>(kotlin.String;kotlin.String;kotlin.Long){}[0]
+
+    final val hostVersion // dev.kstate.core.protocol/Welcome.hostVersion|{}hostVersion[0]
+        final fun <get-hostVersion>(): kotlin/String // dev.kstate.core.protocol/Welcome.hostVersion.<get-hostVersion>|<get-hostVersion>(){}[0]
+    final val serverTimeNanos // dev.kstate.core.protocol/Welcome.serverTimeNanos|{}serverTimeNanos[0]
+        final fun <get-serverTimeNanos>(): kotlin/Long // dev.kstate.core.protocol/Welcome.serverTimeNanos.<get-serverTimeNanos>|<get-serverTimeNanos>(){}[0]
+    final val sessionId // dev.kstate.core.protocol/Welcome.sessionId|{}sessionId[0]
+        final fun <get-sessionId>(): kotlin/String // dev.kstate.core.protocol/Welcome.sessionId.<get-sessionId>|<get-sessionId>(){}[0]
+
+    final fun component1(): kotlin/String // dev.kstate.core.protocol/Welcome.component1|component1(){}[0]
+    final fun component2(): kotlin/String // dev.kstate.core.protocol/Welcome.component2|component2(){}[0]
+    final fun component3(): kotlin/Long // dev.kstate.core.protocol/Welcome.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/Long = ...): dev.kstate.core.protocol/Welcome // dev.kstate.core.protocol/Welcome.copy|copy(kotlin.String;kotlin.String;kotlin.Long){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.core.protocol/Welcome.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.kstate.core.protocol/Welcome.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.kstate.core.protocol/Welcome.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<dev.kstate.core.protocol/Welcome> { // dev.kstate.core.protocol/Welcome.$serializer|null[0]
+        final val descriptor // dev.kstate.core.protocol/Welcome.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // dev.kstate.core.protocol/Welcome.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // dev.kstate.core.protocol/Welcome.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): dev.kstate.core.protocol/Welcome // dev.kstate.core.protocol/Welcome.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, dev.kstate.core.protocol/Welcome) // dev.kstate.core.protocol/Welcome.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;dev.kstate.core.protocol.Welcome){}[0]
+    }
+
+    final object Companion { // dev.kstate.core.protocol/Welcome.Companion|null[0]
+        final fun serializer(): kotlinx.serialization/KSerializer<dev.kstate.core.protocol/Welcome> // dev.kstate.core.protocol/Welcome.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final object dev.kstate.core.protocol/CloseCodes { // dev.kstate.core.protocol/CloseCodes|null[0]
+    final const val VERSION_MISMATCH // dev.kstate.core.protocol/CloseCodes.VERSION_MISMATCH|{}VERSION_MISMATCH[0]
+        final fun <get-VERSION_MISMATCH>(): kotlin/Short // dev.kstate.core.protocol/CloseCodes.VERSION_MISMATCH.<get-VERSION_MISMATCH>|<get-VERSION_MISMATCH>(){}[0]
+}
+
+final object dev.kstate.core.protocol/EnvelopeCodec { // dev.kstate.core.protocol/EnvelopeCodec|null[0]
+    final val json // dev.kstate.core.protocol/EnvelopeCodec.json|{}json[0]
+        final fun <get-json>(): kotlinx.serialization.json/Json // dev.kstate.core.protocol/EnvelopeCodec.json.<get-json>|<get-json>(){}[0]
+
+    final fun decode(kotlin/String): dev.kstate.core.protocol/Envelope // dev.kstate.core.protocol/EnvelopeCodec.decode|decode(kotlin.String){}[0]
+    final fun decodeOrNull(kotlin/String): dev.kstate.core.protocol/Envelope? // dev.kstate.core.protocol/EnvelopeCodec.decodeOrNull|decodeOrNull(kotlin.String){}[0]
+    final fun encode(dev.kstate.core.protocol/Envelope): kotlin/String // dev.kstate.core.protocol/EnvelopeCodec.encode|encode(dev.kstate.core.protocol.Envelope){}[0]
+}
+
+final object dev.kstate.core.protocol/JsonPointer { // dev.kstate.core.protocol/JsonPointer|null[0]
+    final const val ROOT // dev.kstate.core.protocol/JsonPointer.ROOT|{}ROOT[0]
+        final fun <get-ROOT>(): kotlin/String // dev.kstate.core.protocol/JsonPointer.ROOT.<get-ROOT>|<get-ROOT>(){}[0]
+
+    final fun (kotlin/String).child(kotlin/Int): kotlin/String // dev.kstate.core.protocol/JsonPointer.child|child@kotlin.String(kotlin.Int){}[0]
+    final fun (kotlin/String).child(kotlin/String): kotlin/String // dev.kstate.core.protocol/JsonPointer.child|child@kotlin.String(kotlin.String){}[0]
+    final fun get(kotlinx.serialization.json/JsonElement, kotlin/String): kotlinx.serialization.json/JsonElement? // dev.kstate.core.protocol/JsonPointer.get|get(kotlinx.serialization.json.JsonElement;kotlin.String){}[0]
+    final fun replace(kotlinx.serialization.json/JsonElement, kotlin/String, kotlinx.serialization.json/JsonElement): kotlinx.serialization.json/JsonElement // dev.kstate.core.protocol/JsonPointer.replace|replace(kotlinx.serialization.json.JsonElement;kotlin.String;kotlinx.serialization.json.JsonElement){}[0]
+    final fun segments(kotlin/String): kotlin.collections/List<kotlin/String> // dev.kstate.core.protocol/JsonPointer.segments|segments(kotlin.String){}[0]
+}
+
+final object dev.kstate.core.protocol/Ulid { // dev.kstate.core.protocol/Ulid|null[0]
+    final fun generate(kotlin/Long, kotlin.random/Random = ...): kotlin/String // dev.kstate.core.protocol/Ulid.generate|generate(kotlin.Long;kotlin.random.Random){}[0]
+}

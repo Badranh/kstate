@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
-    api(projects.viewer.viewerClient)
-    implementation(projects.session)
+    api(projects.core.data)
+    implementation(projects.core.session)
     api(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.mcp.server)

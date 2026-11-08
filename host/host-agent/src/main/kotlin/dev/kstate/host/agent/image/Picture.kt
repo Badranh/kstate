@@ -1,6 +1,6 @@
 package dev.kstate.host.agent.image
 
-import dev.kstate.viewer.client.VideoFrame
+import dev.kstate.core.model.VideoFrame
 
 /** A screen as RGBA bytes, row by row, as the decoder hands it over. */
 class Picture(

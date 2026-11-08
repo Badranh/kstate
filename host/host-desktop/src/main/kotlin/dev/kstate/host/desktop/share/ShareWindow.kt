@@ -36,13 +36,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberWindowState
+import dev.kstate.core.model.Participant
+import dev.kstate.core.model.Role
 import dev.kstate.host.collab.CollabSession
 import dev.kstate.host.desktop.Sharing
 import dev.kstate.host.desktop.SharingState
 import dev.kstate.host.tunnel.Availability
 import dev.kstate.host.tunnel.TunnelProvider
-import dev.kstate.viewer.client.Participant
-import dev.kstate.viewer.client.Role
 import dev.kstate.viewer.ui.chrome.CopyField
 import dev.kstate.viewer.ui.chrome.HeartbeatDot
 import dev.kstate.viewer.ui.chrome.SectionCard

@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    api(projects.protocol)
+    api(projects.core.protocol)
     api(projects.sdk.sdkCore)
     api(libs.kotlinx.coroutines.core)
     implementation(libs.ktor.server.cio)

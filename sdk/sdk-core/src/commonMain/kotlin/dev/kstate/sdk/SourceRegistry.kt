@@ -1,9 +1,9 @@
 package dev.kstate.sdk
 
-import dev.kstate.protocol.Msg
-import dev.kstate.protocol.Nav
-import dev.kstate.protocol.SourceRegistered
-import dev.kstate.protocol.StateSnapshot
+import dev.kstate.core.protocol.Msg
+import dev.kstate.core.protocol.Nav
+import dev.kstate.core.protocol.SourceRegistered
+import dev.kstate.core.protocol.StateSnapshot
 
 /**
  * What a reconnect must re-send: live sources, their latest snapshot, the latest navigation.

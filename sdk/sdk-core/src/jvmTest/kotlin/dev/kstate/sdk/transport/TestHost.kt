@@ -1,7 +1,7 @@
 package dev.kstate.sdk.transport
 
-import dev.kstate.protocol.EnvelopeCodec
-import dev.kstate.protocol.Msg
+import dev.kstate.core.protocol.EnvelopeCodec
+import dev.kstate.core.protocol.Msg
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.EmbeddedServer

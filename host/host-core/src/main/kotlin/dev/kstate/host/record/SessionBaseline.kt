@@ -1,14 +1,14 @@
 package dev.kstate.host.record
 
-import dev.kstate.protocol.Envelope
-import dev.kstate.protocol.Msg
-import dev.kstate.protocol.Nav
-import dev.kstate.protocol.SourceCleared
-import dev.kstate.protocol.SourceRegistered
-import dev.kstate.session.AppConnection
-import dev.kstate.session.Session
-import dev.kstate.session.SessionInput
-import dev.kstate.session.SourceTrack
+import dev.kstate.core.protocol.Envelope
+import dev.kstate.core.protocol.Msg
+import dev.kstate.core.protocol.Nav
+import dev.kstate.core.protocol.SourceCleared
+import dev.kstate.core.protocol.SourceRegistered
+import dev.kstate.core.session.domain.SessionInput
+import dev.kstate.core.session.model.AppConnection
+import dev.kstate.core.session.model.Session
+import dev.kstate.core.session.model.SourceTrack
 
 /**
  * The inputs that rebuild what a session shows right now. A recording starts with them, so it opens

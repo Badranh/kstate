@@ -1,12 +1,12 @@
 package dev.kstate.sdk.transport
 
-import dev.kstate.protocol.Envelope
-import dev.kstate.protocol.Hello
-import dev.kstate.protocol.Msg
-import dev.kstate.protocol.Nav
-import dev.kstate.protocol.Pong
-import dev.kstate.protocol.SourceRegistered
-import dev.kstate.protocol.StateSnapshot
+import dev.kstate.core.protocol.Envelope
+import dev.kstate.core.protocol.Hello
+import dev.kstate.core.protocol.Msg
+import dev.kstate.core.protocol.Nav
+import dev.kstate.core.protocol.Pong
+import dev.kstate.core.protocol.SourceRegistered
+import dev.kstate.core.protocol.StateSnapshot
 
 /**
  * Messages waiting for the socket. Bounded for state, unbounded for messages that must arrive:

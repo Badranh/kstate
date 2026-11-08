@@ -1,7 +1,7 @@
 package dev.kstate.host.record
 
+import dev.kstate.core.session.data.wire.RecordingFormatException
 import dev.kstate.host.timeline.VideoSample
-import dev.kstate.session.wire.RecordingFormatException
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.writeBytes

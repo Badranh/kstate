@@ -1,6 +1,6 @@
 package dev.kstate.viewer.ui
 
-import dev.kstate.viewer.client.SourceView
+import dev.kstate.core.model.SourceView
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

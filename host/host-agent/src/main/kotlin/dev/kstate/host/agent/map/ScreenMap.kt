@@ -1,11 +1,11 @@
 package dev.kstate.host.agent.map
 
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.SessionView
 import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.settle.Settle
 import dev.kstate.host.agent.settle.SettleTiming
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.SessionSource
-import dev.kstate.viewer.client.SessionView
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged

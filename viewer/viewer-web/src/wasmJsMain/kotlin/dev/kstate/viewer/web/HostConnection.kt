@@ -2,11 +2,11 @@
 
 package dev.kstate.viewer.web
 
-import dev.kstate.session.remote.RemoteSession
-import dev.kstate.session.remote.ViewerLink
-import dev.kstate.session.wire.FromViewer
-import dev.kstate.session.wire.RecordingFormatException
-import dev.kstate.session.wire.ViewWire
+import dev.kstate.core.session.data.remote.RemoteSession
+import dev.kstate.core.session.data.remote.ViewerLink
+import dev.kstate.core.session.data.wire.FromViewer
+import dev.kstate.core.session.data.wire.RecordingFormatException
+import dev.kstate.core.session.data.wire.ViewWire
 import kotlinx.browser.window
 import org.w3c.dom.CloseEvent
 import org.w3c.dom.MessageEvent

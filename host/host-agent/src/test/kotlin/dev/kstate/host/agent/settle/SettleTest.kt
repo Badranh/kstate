@@ -1,6 +1,6 @@
 package dev.kstate.host.agent.settle
 
-import dev.kstate.viewer.client.VideoFrame
+import dev.kstate.core.model.VideoFrame
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch

@@ -1,16 +1,16 @@
 package dev.kstate.host.desktop
 
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.ApplyMode
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.model.SessionKind
+import dev.kstate.core.model.SessionView
+import dev.kstate.core.model.SourceCapabilities
+import dev.kstate.core.model.SourceView
+import dev.kstate.core.model.TimelineView
+import dev.kstate.core.session.mapper.SessionViewMapper
 import dev.kstate.host.record.RecordedSession
-import dev.kstate.session.view.SessionViewMapper
-import dev.kstate.viewer.client.ApplyMode
-import dev.kstate.viewer.client.CommandOutcome
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.SessionKind
-import dev.kstate.viewer.client.SessionSource
-import dev.kstate.viewer.client.SessionView
-import dev.kstate.viewer.client.SourceCapabilities
-import dev.kstate.viewer.client.SourceView
-import dev.kstate.viewer.client.TimelineView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

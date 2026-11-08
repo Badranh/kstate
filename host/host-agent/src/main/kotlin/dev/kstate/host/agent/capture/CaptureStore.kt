@@ -1,11 +1,11 @@
 package dev.kstate.host.agent.capture
 
+import dev.kstate.core.model.SessionView
 import dev.kstate.host.agent.image.Fingerprint
 import dev.kstate.host.agent.image.Fingerprints
 import dev.kstate.host.agent.image.Picture
 import dev.kstate.host.agent.image.Pngs
 import dev.kstate.host.agent.settle.Settled
-import dev.kstate.viewer.client.SessionView
 import kotlinx.serialization.json.JsonElement
 
 /** A settled screen and what produced it: the route and every source's state on that device. */

@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
-    api(projects.protocol)
-    api(projects.session)
+    api(projects.core.protocol)
+    api(projects.core.session)
     api(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.ktor.server.core)

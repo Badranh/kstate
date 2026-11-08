@@ -1,10 +1,10 @@
 package dev.kstate.host.collab
 
-import dev.kstate.session.wire.ViewerCommand
-import dev.kstate.session.wire.ViewerInput
-import dev.kstate.viewer.client.ApplyMode
-import dev.kstate.viewer.client.Role
-import dev.kstate.viewer.client.TouchPhase
+import dev.kstate.core.model.ApplyMode
+import dev.kstate.core.model.Role
+import dev.kstate.core.model.TouchPhase
+import dev.kstate.core.session.data.wire.ViewerCommand
+import dev.kstate.core.session.data.wire.ViewerInput
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals

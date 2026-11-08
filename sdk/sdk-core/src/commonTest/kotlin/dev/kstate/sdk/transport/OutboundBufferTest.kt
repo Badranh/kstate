@@ -1,15 +1,15 @@
 package dev.kstate.sdk.transport
 
-import dev.kstate.protocol.Encoding
-import dev.kstate.protocol.Envelope
-import dev.kstate.protocol.Event
-import dev.kstate.protocol.Hello
-import dev.kstate.protocol.Msg
-import dev.kstate.protocol.Nav
-import dev.kstate.protocol.Platform
-import dev.kstate.protocol.SourceCleared
-import dev.kstate.protocol.SourceRegistered
-import dev.kstate.protocol.StateSnapshot
+import dev.kstate.core.protocol.Encoding
+import dev.kstate.core.protocol.Envelope
+import dev.kstate.core.protocol.Event
+import dev.kstate.core.protocol.Hello
+import dev.kstate.core.protocol.Msg
+import dev.kstate.core.protocol.Nav
+import dev.kstate.core.protocol.Platform
+import dev.kstate.core.protocol.SourceCleared
+import dev.kstate.core.protocol.SourceRegistered
+import dev.kstate.core.protocol.StateSnapshot
 import kotlinx.serialization.json.JsonNull
 import kotlin.test.Test
 import kotlin.test.assertEquals

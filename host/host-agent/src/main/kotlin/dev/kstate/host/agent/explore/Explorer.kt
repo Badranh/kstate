@@ -1,5 +1,11 @@
 package dev.kstate.host.agent.explore
 
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.ApplyMode
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.model.DeviceView
+import dev.kstate.core.model.SourceView
 import dev.kstate.host.agent.AgentFailure
 import dev.kstate.host.agent.SourceLimits
 import dev.kstate.host.agent.capture.Capture
@@ -13,12 +19,6 @@ import dev.kstate.host.agent.settle.VideoLost
 import dev.kstate.host.agent.settle.whileLive
 import dev.kstate.host.agent.variants.SchemaVariants
 import dev.kstate.host.agent.variants.Variant
-import dev.kstate.viewer.client.ApplyMode
-import dev.kstate.viewer.client.CommandOutcome
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.DeviceView
-import dev.kstate.viewer.client.SessionSource
-import dev.kstate.viewer.client.SourceView
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicInteger

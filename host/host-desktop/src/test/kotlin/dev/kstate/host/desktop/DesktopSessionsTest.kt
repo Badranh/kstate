@@ -1,14 +1,14 @@
 package dev.kstate.host.desktop
 
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.SessionKind
+import dev.kstate.core.protocol.Envelope
+import dev.kstate.core.protocol.Hello
+import dev.kstate.core.protocol.Platform
+import dev.kstate.core.session.data.wire.RecordingFormatException
+import dev.kstate.core.session.domain.SessionEngine
 import dev.kstate.host.timeline.VideoSample
 import dev.kstate.host.timeline.VideoTimeline
-import dev.kstate.protocol.Envelope
-import dev.kstate.protocol.Hello
-import dev.kstate.protocol.Platform
-import dev.kstate.session.SessionEngine
-import dev.kstate.session.wire.RecordingFormatException
-import dev.kstate.viewer.client.SessionKind
-import dev.kstate.viewer.client.SessionSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

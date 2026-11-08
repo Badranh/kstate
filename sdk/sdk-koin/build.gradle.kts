@@ -7,7 +7,7 @@ kotlin {
     android { namespace = "dev.kstate.sdk.koin" }
     sourceSets {
         commonMain.dependencies {
-            api(projects.protocol)
+            api(projects.core.protocol)
         }
     }
 }

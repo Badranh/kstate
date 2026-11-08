@@ -1,9 +1,9 @@
 package dev.kstate.host.agent
 
+import dev.kstate.core.model.TouchPhase
 import dev.kstate.host.agent.image.Picture
 import dev.kstate.host.agent.settle.SettleTiming
 import dev.kstate.host.agent.settle.VideoLost
-import dev.kstate.viewer.client.TouchPhase
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -118,7 +118,7 @@ class DeviceDriverTest {
         runTest {
             val (_, agent) = agent(stateDelayMillis = 800)
 
-            val result = agent.setState(FakeApp.KEY, state(7), dev.kstate.viewer.client.ApplyMode.OVERLAY)
+            val result = agent.setState(FakeApp.KEY, state(7), dev.kstate.core.model.ApplyMode.OVERLAY)
 
             assertEquals(state(7), result.capture.states[FakeApp.KEY])
         }

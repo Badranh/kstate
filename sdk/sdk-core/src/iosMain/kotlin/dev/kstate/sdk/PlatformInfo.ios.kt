@@ -1,6 +1,6 @@
 package dev.kstate.sdk
 
-import dev.kstate.protocol.Platform
+import dev.kstate.core.protocol.Platform
 import platform.Foundation.NSBundle
 import platform.Foundation.NSProcessInfo
 import platform.UIKit.UIDevice

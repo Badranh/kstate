@@ -1,10 +1,10 @@
 package dev.kstate.host.gateway
 
-import dev.kstate.protocol.CommandResult
-import dev.kstate.protocol.Msg
-import dev.kstate.protocol.OverrideMode
-import dev.kstate.protocol.Release
-import dev.kstate.protocol.Restore
+import dev.kstate.core.protocol.CommandResult
+import dev.kstate.core.protocol.Msg
+import dev.kstate.core.protocol.OverrideMode
+import dev.kstate.core.protocol.Release
+import dev.kstate.core.protocol.Restore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.advanceTimeBy

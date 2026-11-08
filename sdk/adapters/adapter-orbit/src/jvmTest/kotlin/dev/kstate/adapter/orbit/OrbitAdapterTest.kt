@@ -1,8 +1,8 @@
 package dev.kstate.adapter.orbit
 
-import dev.kstate.protocol.Encoding
-import dev.kstate.protocol.SourceRegistered
-import dev.kstate.protocol.StateSnapshot
+import dev.kstate.core.protocol.Encoding
+import dev.kstate.core.protocol.SourceRegistered
+import dev.kstate.core.protocol.StateSnapshot
 import dev.kstate.sdk.testing.RecordingHost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

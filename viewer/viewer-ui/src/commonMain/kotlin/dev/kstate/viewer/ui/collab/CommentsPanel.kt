@@ -41,8 +41,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.client.Collaboration
-import dev.kstate.viewer.client.Comment
+import dev.kstate.core.data.Collaboration
+import dev.kstate.core.model.Comment
 import dev.kstate.viewer.ui.theme.Kstate
 
 /**

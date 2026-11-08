@@ -1,5 +1,10 @@
 package dev.kstate.host.agent
 
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.model.TouchPhase
+import dev.kstate.core.session.diff.DiffEngine
 import dev.kstate.host.agent.capture.Capture
 import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.map.ScreenMap
@@ -8,11 +13,6 @@ import dev.kstate.host.agent.settle.Settle
 import dev.kstate.host.agent.settle.SettleTiming
 import dev.kstate.host.agent.settle.VideoLost
 import dev.kstate.host.agent.settle.whileLive
-import dev.kstate.session.diff.DiffEngine
-import dev.kstate.viewer.client.CommandOutcome
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.SessionSource
-import dev.kstate.viewer.client.TouchPhase
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

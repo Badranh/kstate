@@ -24,8 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.client.DeviceView
-import dev.kstate.viewer.client.SourceView
+import dev.kstate.core.model.DeviceView
+import dev.kstate.core.model.SourceView
 import dev.kstate.viewer.ui.chrome.HeartbeatDot
 import dev.kstate.viewer.ui.chrome.Skeleton
 import dev.kstate.viewer.ui.chrome.shimmer

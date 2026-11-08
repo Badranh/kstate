@@ -1,6 +1,6 @@
 package dev.kstate.sdk.encoding
 
-import dev.kstate.protocol.Encoding
+import dev.kstate.core.protocol.Encoding
 import dev.kstate.sdk.redaction.Sensitive
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement

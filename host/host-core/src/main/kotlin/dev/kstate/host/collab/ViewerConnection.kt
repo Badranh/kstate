@@ -1,11 +1,11 @@
 package dev.kstate.host.collab
 
-import dev.kstate.session.wire.FromViewer
-import dev.kstate.session.wire.RecordingFormatException
-import dev.kstate.session.wire.ToViewer
-import dev.kstate.session.wire.ViewWire
-import dev.kstate.session.wire.ViewerInput
-import dev.kstate.viewer.client.CommandOutcome
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.session.data.wire.FromViewer
+import dev.kstate.core.session.data.wire.RecordingFormatException
+import dev.kstate.core.session.data.wire.ToViewer
+import dev.kstate.core.session.data.wire.ViewWire
+import dev.kstate.core.session.data.wire.ViewerInput
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.Frame

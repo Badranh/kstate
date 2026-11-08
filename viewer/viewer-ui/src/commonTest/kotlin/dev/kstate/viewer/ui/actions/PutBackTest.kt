@@ -1,7 +1,7 @@
 package dev.kstate.viewer.ui.actions
 
-import dev.kstate.viewer.client.SourceCapabilities
-import dev.kstate.viewer.client.SourceView
+import dev.kstate.core.model.SourceCapabilities
+import dev.kstate.core.model.SourceView
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals

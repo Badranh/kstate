@@ -1,7 +1,7 @@
 package dev.kstate.sdk.testing
 
-import dev.kstate.protocol.EnvelopeCodec
-import dev.kstate.protocol.Msg
+import dev.kstate.core.protocol.EnvelopeCodec
+import dev.kstate.core.protocol.Msg
 import dev.kstate.sdk.Kstate
 import dev.kstate.sdk.KstateConfig
 import io.ktor.server.application.install

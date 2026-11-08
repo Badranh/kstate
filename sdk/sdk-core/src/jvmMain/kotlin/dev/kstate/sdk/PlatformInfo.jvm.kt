@@ -1,6 +1,6 @@
 package dev.kstate.sdk
 
-import dev.kstate.protocol.Platform
+import dev.kstate.core.protocol.Platform
 
 internal actual fun currentPlatformInfo(): PlatformInfo =
     PlatformInfo(

@@ -1,8 +1,8 @@
 package dev.kstate.sdk.transport
 
-import dev.kstate.protocol.CloseCodes
-import dev.kstate.protocol.Envelope
-import dev.kstate.protocol.EnvelopeCodec
+import dev.kstate.core.protocol.CloseCodes
+import dev.kstate.core.protocol.Envelope
+import dev.kstate.core.protocol.EnvelopeCodec
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.webSocket

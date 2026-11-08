@@ -1,12 +1,12 @@
 package dev.kstate.host.desktop
 
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.model.TouchPhase
+import dev.kstate.core.model.VideoFrame
 import dev.kstate.host.timeline.GopSource
 import dev.kstate.host.video.decode.OutputSize
 import dev.kstate.host.video.device.GopFrames
 import dev.kstate.host.video.device.LiveFrame
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.TouchPhase
-import dev.kstate.viewer.client.VideoFrame
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

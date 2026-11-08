@@ -1,12 +1,12 @@
 package dev.kstate.host.collab
 
+import dev.kstate.core.session.data.wire.RecordedInput
+import dev.kstate.core.session.domain.HostClock
+import dev.kstate.core.session.domain.SessionEngine
+import dev.kstate.core.session.domain.SessionInput
+import dev.kstate.core.session.domain.SessionObserver
+import dev.kstate.core.session.model.Session
 import dev.kstate.host.record.SessionBaseline
-import dev.kstate.session.HostClock
-import dev.kstate.session.Session
-import dev.kstate.session.SessionEngine
-import dev.kstate.session.SessionInput
-import dev.kstate.session.SessionObserver
-import dev.kstate.session.wire.RecordedInput
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 

@@ -1,12 +1,12 @@
 package dev.kstate.host.agent.tools
 
+import dev.kstate.core.model.ApplyMode
+import dev.kstate.core.model.CommandOutcome
 import dev.kstate.host.agent.ActionResult
 import dev.kstate.host.agent.KstateAgent
 import dev.kstate.host.agent.mcp.ToolArguments
 import dev.kstate.host.agent.mcp.ToolInputException
 import dev.kstate.host.agent.mcp.ToolSpec
-import dev.kstate.viewer.client.ApplyMode
-import dev.kstate.viewer.client.CommandOutcome
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import kotlinx.serialization.json.addJsonObject

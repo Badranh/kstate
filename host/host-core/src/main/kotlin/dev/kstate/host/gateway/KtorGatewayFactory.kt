@@ -1,8 +1,8 @@
 package dev.kstate.host.gateway
 
-import dev.kstate.session.HostClock
-import dev.kstate.session.SessionEngine
-import dev.kstate.session.wire.JsonLimits
+import dev.kstate.core.session.data.wire.JsonLimits
+import dev.kstate.core.session.domain.HostClock
+import dev.kstate.core.session.domain.SessionEngine
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application

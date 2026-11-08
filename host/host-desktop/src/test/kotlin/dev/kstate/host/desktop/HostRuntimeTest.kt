@@ -1,5 +1,7 @@
 package dev.kstate.host.desktop
 
+import dev.kstate.core.session.domain.HostClock
+import dev.kstate.core.session.domain.SessionEngine
 import dev.kstate.host.adb.Adb
 import dev.kstate.host.adb.AdbDevice
 import dev.kstate.host.adb.AdbException
@@ -8,8 +10,6 @@ import dev.kstate.host.gateway.CommandBus
 import dev.kstate.host.gateway.Gateway
 import dev.kstate.host.gateway.GatewayFactory
 import dev.kstate.host.gateway.HostCommands
-import dev.kstate.session.HostClock
-import dev.kstate.session.SessionEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

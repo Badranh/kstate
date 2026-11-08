@@ -15,8 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.client.Collaboration
-import dev.kstate.viewer.client.Role
+import dev.kstate.core.data.Collaboration
+import dev.kstate.core.model.Role
 
 /**
  * Who is here, and the drive controls that fit this person's role: guests ask to drive or stop

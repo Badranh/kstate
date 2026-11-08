@@ -1,13 +1,13 @@
 package dev.kstate.host.desktop
 
-import dev.kstate.viewer.client.ApplyMode
-import dev.kstate.viewer.client.CommandOutcome
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.DeviceView
-import dev.kstate.viewer.client.SessionSource
-import dev.kstate.viewer.client.SessionView
-import dev.kstate.viewer.client.SourceView
-import dev.kstate.viewer.client.TimelineView
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.ApplyMode
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.model.DeviceView
+import dev.kstate.core.model.SessionView
+import dev.kstate.core.model.SourceView
+import dev.kstate.core.model.TimelineView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.JsonElement

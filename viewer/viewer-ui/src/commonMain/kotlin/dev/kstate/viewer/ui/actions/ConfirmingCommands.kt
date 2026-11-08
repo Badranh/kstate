@@ -3,10 +3,10 @@ package dev.kstate.viewer.ui.actions
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import dev.kstate.viewer.client.ApplyMode
-import dev.kstate.viewer.client.CommandOutcome
-import dev.kstate.viewer.client.SessionKind
-import dev.kstate.viewer.client.SessionSource
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.ApplyMode
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.model.SessionKind
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.serialization.json.JsonElement
 

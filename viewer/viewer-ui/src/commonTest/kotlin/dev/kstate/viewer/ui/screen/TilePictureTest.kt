@@ -1,7 +1,7 @@
 package dev.kstate.viewer.ui.screen
 
 import androidx.compose.runtime.snapshots.Snapshot
-import dev.kstate.viewer.client.VideoFrame
+import dev.kstate.core.model.VideoFrame
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

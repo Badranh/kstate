@@ -1,6 +1,6 @@
 package dev.kstate.viewer.ui
 
-import dev.kstate.viewer.client.SourceView
+import dev.kstate.core.model.SourceView
 
 /** Keeps [current] while it exists, else the first live source, else any source. */
 fun selectSource(

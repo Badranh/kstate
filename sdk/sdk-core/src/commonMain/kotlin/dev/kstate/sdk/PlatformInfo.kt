@@ -1,6 +1,6 @@
 package dev.kstate.sdk
 
-import dev.kstate.protocol.Platform
+import dev.kstate.core.protocol.Platform
 
 /** What the SDK reports about the app and device in Hello. */
 internal data class PlatformInfo(

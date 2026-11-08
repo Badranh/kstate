@@ -1,6 +1,6 @@
 package dev.kstate.sdk.encoding
 
-import dev.kstate.protocol.Encoding
+import dev.kstate.core.protocol.Encoding
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encoding.Encoder

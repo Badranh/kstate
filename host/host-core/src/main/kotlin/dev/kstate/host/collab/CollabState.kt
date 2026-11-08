@@ -1,8 +1,8 @@
 package dev.kstate.host.collab
 
-import dev.kstate.viewer.client.Comment
-import dev.kstate.viewer.client.Participant
-import dev.kstate.viewer.client.Role
+import dev.kstate.core.model.Comment
+import dev.kstate.core.model.Participant
+import dev.kstate.core.model.Role
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

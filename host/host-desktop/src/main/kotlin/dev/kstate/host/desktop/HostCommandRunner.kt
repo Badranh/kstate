@@ -1,13 +1,13 @@
 package dev.kstate.host.desktop
 
+import dev.kstate.core.model.ApplyMode
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.protocol.OverrideMode
+import dev.kstate.core.session.data.wire.ViewerCommand
+import dev.kstate.core.session.domain.SessionEngine
+import dev.kstate.core.session.model.SourceKey
 import dev.kstate.host.collab.ViewerCommands
 import dev.kstate.host.gateway.HostCommands
-import dev.kstate.protocol.OverrideMode
-import dev.kstate.session.SessionEngine
-import dev.kstate.session.SourceKey
-import dev.kstate.session.wire.ViewerCommand
-import dev.kstate.viewer.client.ApplyMode
-import dev.kstate.viewer.client.CommandOutcome
 import dev.kstate.host.gateway.CommandOutcome as HostOutcome
 
 /** Runs a command on a source by its viewer key, for the desktop UI and (role-checked) remote Drivers alike. */

@@ -1,11 +1,11 @@
 package dev.kstate.host.agent.report
 
+import dev.kstate.core.model.CommandOutcome
 import dev.kstate.host.agent.capture.Capture
 import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.explore.ExploreRun
 import dev.kstate.host.agent.explore.VariantResult
 import dev.kstate.host.agent.map.ScreenMapView
-import dev.kstate.viewer.client.CommandOutcome
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import java.nio.file.Files

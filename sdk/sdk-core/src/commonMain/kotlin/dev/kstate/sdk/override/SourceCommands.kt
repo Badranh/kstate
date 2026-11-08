@@ -1,12 +1,12 @@
 package dev.kstate.sdk.override
 
-import dev.kstate.protocol.Command
-import dev.kstate.protocol.CommandResult
-import dev.kstate.protocol.Freeze
-import dev.kstate.protocol.OverrideMode
-import dev.kstate.protocol.Release
-import dev.kstate.protocol.Restore
-import dev.kstate.protocol.SetState
+import dev.kstate.core.protocol.Command
+import dev.kstate.core.protocol.CommandResult
+import dev.kstate.core.protocol.Freeze
+import dev.kstate.core.protocol.OverrideMode
+import dev.kstate.core.protocol.Release
+import dev.kstate.core.protocol.Restore
+import dev.kstate.core.protocol.SetState
 
 /** Runs host commands against one [TrackedSource]. Every command gets exactly one [CommandResult]. */
 internal class SourceCommands<T>(

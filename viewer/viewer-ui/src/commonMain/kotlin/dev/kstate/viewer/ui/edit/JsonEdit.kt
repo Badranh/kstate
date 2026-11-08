@@ -1,6 +1,6 @@
 package dev.kstate.viewer.ui.edit
 
-import dev.kstate.protocol.JsonPointer
+import dev.kstate.core.protocol.JsonPointer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive

@@ -1,6 +1,6 @@
 package dev.kstate.host.collab
 
-import dev.kstate.viewer.client.Comment
+import dev.kstate.core.model.Comment
 
 /**
  * Notes on a moment of the session, signed by their author and kept for everyone who joins later.

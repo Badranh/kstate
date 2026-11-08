@@ -1,8 +1,8 @@
 package dev.kstate.host.agent.settle
 
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.data.SessionSource
 import dev.kstate.host.agent.AgentFailure
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.SessionSource
 
 /**
  * The device's video dropped while its screen was being read, so the last picture it gave is stale.

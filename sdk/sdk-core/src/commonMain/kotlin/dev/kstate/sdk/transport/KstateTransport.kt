@@ -1,6 +1,6 @@
 package dev.kstate.sdk.transport
 
-import dev.kstate.protocol.Envelope
+import dev.kstate.core.protocol.Envelope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 

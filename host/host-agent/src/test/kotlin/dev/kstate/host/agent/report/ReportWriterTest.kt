@@ -1,5 +1,9 @@
 package dev.kstate.host.agent.report
 
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.model.DeviceView
+import dev.kstate.core.model.SessionView
+import dev.kstate.core.model.VideoFrame
 import dev.kstate.host.agent.FakeApp
 import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.explore.ExploreRun
@@ -11,10 +15,6 @@ import dev.kstate.host.agent.map.ScreenMapView
 import dev.kstate.host.agent.settle.Settled
 import dev.kstate.host.agent.variants.Variant
 import dev.kstate.host.agent.variants.VariantKind
-import dev.kstate.viewer.client.CommandOutcome
-import dev.kstate.viewer.client.DeviceView
-import dev.kstate.viewer.client.SessionView
-import dev.kstate.viewer.client.VideoFrame
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import java.nio.file.Files

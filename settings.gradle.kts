@@ -29,8 +29,10 @@ dependencyResolutionManagement {
     }
 }
 
-include(":protocol")
-include(":session")
+include(":core:protocol")
+include(":core:model")
+include(":core:data")
+include(":core:session")
 
 include(":sdk:sdk-core")
 include(":sdk:sdk-noop")
@@ -49,7 +51,6 @@ include(":host:host-agent")
 include(":host:host-desktop")
 
 include(":viewer:viewer-ui")
-include(":viewer:viewer-client")
 include(":viewer:viewer-web")
 
 include(":sample:shared")

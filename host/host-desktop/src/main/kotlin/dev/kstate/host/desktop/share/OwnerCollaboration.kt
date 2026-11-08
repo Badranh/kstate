@@ -1,8 +1,8 @@
 package dev.kstate.host.desktop.share
 
+import dev.kstate.core.data.Collaboration
+import dev.kstate.core.model.CollabView
 import dev.kstate.host.collab.CollabSession
-import dev.kstate.viewer.client.CollabView
-import dev.kstate.viewer.client.Collaboration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

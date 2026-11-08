@@ -1,8 +1,8 @@
 package dev.kstate.sdk.encoding
 
-import dev.kstate.protocol.Encoding
-import dev.kstate.protocol.JsonPointer
-import dev.kstate.protocol.JsonPointer.child
+import dev.kstate.core.protocol.Encoding
+import dev.kstate.core.protocol.JsonPointer
+import dev.kstate.core.protocol.JsonPointer.child
 import dev.kstate.sdk.redaction.Sensitive
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement

@@ -1,6 +1,6 @@
 package dev.kstate.sdk.override
 
-import dev.kstate.protocol.JsonPointer
+import dev.kstate.core.protocol.JsonPointer
 import dev.kstate.sdk.redaction.Redactor
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive

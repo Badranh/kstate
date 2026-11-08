@@ -1,11 +1,11 @@
 package dev.kstate.host.gateway
 
-import dev.kstate.protocol.Envelope
-import dev.kstate.protocol.EnvelopeCodec
-import dev.kstate.protocol.Hello
-import dev.kstate.protocol.Platform
-import dev.kstate.protocol.Welcome
-import dev.kstate.session.SessionEngine
+import dev.kstate.core.protocol.Envelope
+import dev.kstate.core.protocol.EnvelopeCodec
+import dev.kstate.core.protocol.Hello
+import dev.kstate.core.protocol.Platform
+import dev.kstate.core.protocol.Welcome
+import dev.kstate.core.session.domain.SessionEngine
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.websocket.WebSocketException

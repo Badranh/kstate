@@ -3,8 +3,8 @@ package dev.kstate.adapter.mvikotlin
 import com.arkivanov.mvikotlin.core.utils.isAssertOnMainThreadEnabled
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
-import dev.kstate.protocol.SourceRegistered
-import dev.kstate.protocol.StateSnapshot
+import dev.kstate.core.protocol.SourceRegistered
+import dev.kstate.core.protocol.StateSnapshot
 import dev.kstate.sdk.testing.RecordingHost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

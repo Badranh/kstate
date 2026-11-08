@@ -1,7 +1,7 @@
 package dev.kstate.host.collab
 
-import dev.kstate.viewer.client.Participant
-import dev.kstate.viewer.client.Role
+import dev.kstate.core.model.Participant
+import dev.kstate.core.model.Role
 import java.security.SecureRandom
 import java.util.Base64
 

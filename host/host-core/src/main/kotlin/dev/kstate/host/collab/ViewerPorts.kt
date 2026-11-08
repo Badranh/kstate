@@ -1,9 +1,9 @@
 package dev.kstate.host.collab
 
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.session.data.wire.ViewerCommand
+import dev.kstate.core.session.data.wire.ViewerInput
 import dev.kstate.host.timeline.VideoTimeline
-import dev.kstate.session.wire.ViewerCommand
-import dev.kstate.session.wire.ViewerInput
-import dev.kstate.viewer.client.CommandOutcome
 
 // What the view server needs from the rest of the host, so it never touches adb or scrcpy itself.
 

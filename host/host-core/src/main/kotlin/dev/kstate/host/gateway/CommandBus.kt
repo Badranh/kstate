@@ -1,8 +1,8 @@
 package dev.kstate.host.gateway
 
-import dev.kstate.protocol.Command
-import dev.kstate.protocol.CommandResult
-import dev.kstate.protocol.Msg
+import dev.kstate.core.protocol.Command
+import dev.kstate.core.protocol.CommandResult
+import dev.kstate.core.protocol.Msg
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException

@@ -1,16 +1,16 @@
 package dev.kstate.sdk
 
-import dev.kstate.protocol.Encoding
-import dev.kstate.protocol.Envelope
-import dev.kstate.protocol.Event
-import dev.kstate.protocol.Hello
-import dev.kstate.protocol.Nav
-import dev.kstate.protocol.Ping
-import dev.kstate.protocol.Platform
-import dev.kstate.protocol.Pong
-import dev.kstate.protocol.SourceCleared
-import dev.kstate.protocol.SourceRegistered
-import dev.kstate.protocol.StateSnapshot
+import dev.kstate.core.protocol.Encoding
+import dev.kstate.core.protocol.Envelope
+import dev.kstate.core.protocol.Event
+import dev.kstate.core.protocol.Hello
+import dev.kstate.core.protocol.Nav
+import dev.kstate.core.protocol.Ping
+import dev.kstate.core.protocol.Platform
+import dev.kstate.core.protocol.Pong
+import dev.kstate.core.protocol.SourceCleared
+import dev.kstate.core.protocol.SourceRegistered
+import dev.kstate.core.protocol.StateSnapshot
 import dev.kstate.sdk.encoding.EncodedState
 import dev.kstate.sdk.encoding.StateEncoder
 import kotlinx.coroutines.CoroutineScope

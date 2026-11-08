@@ -12,8 +12,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.IntSize
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.VideoFrame
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.model.VideoFrame
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.sync.Mutex

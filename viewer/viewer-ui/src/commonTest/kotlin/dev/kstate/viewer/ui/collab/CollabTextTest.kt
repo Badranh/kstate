@@ -1,9 +1,9 @@
 package dev.kstate.viewer.ui.collab
 
-import dev.kstate.viewer.client.CollabView
-import dev.kstate.viewer.client.Comment
-import dev.kstate.viewer.client.Participant
-import dev.kstate.viewer.client.Role
+import dev.kstate.core.model.CollabView
+import dev.kstate.core.model.Comment
+import dev.kstate.core.model.Participant
+import dev.kstate.core.model.Role
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

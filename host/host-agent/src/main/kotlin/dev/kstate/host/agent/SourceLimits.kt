@@ -1,7 +1,7 @@
 package dev.kstate.host.agent
 
-import dev.kstate.viewer.client.ApplyMode
-import dev.kstate.viewer.client.SourceView
+import dev.kstate.core.model.ApplyMode
+import dev.kstate.core.model.SourceView
 
 /**
  * What a source can't do and why, worded for the agent: told before anything is sent, so a

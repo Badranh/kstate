@@ -1,9 +1,9 @@
 package dev.kstate.host.agent.settle
 
+import dev.kstate.core.model.SessionView
+import dev.kstate.core.model.VideoFrame
 import dev.kstate.host.agent.image.Fingerprints
 import dev.kstate.host.agent.image.Picture
-import dev.kstate.viewer.client.SessionView
-import dev.kstate.viewer.client.VideoFrame
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull

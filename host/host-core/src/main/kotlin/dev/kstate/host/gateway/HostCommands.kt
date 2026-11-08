@@ -1,13 +1,13 @@
 package dev.kstate.host.gateway
 
-import dev.kstate.protocol.Command
-import dev.kstate.protocol.Freeze
-import dev.kstate.protocol.OverrideMode
-import dev.kstate.protocol.Release
-import dev.kstate.protocol.Restore
-import dev.kstate.protocol.SetState
-import dev.kstate.session.SessionEngine
-import dev.kstate.session.SourceKey
+import dev.kstate.core.protocol.Command
+import dev.kstate.core.protocol.Freeze
+import dev.kstate.core.protocol.OverrideMode
+import dev.kstate.core.protocol.Release
+import dev.kstate.core.protocol.Restore
+import dev.kstate.core.protocol.SetState
+import dev.kstate.core.session.domain.SessionEngine
+import dev.kstate.core.session.model.SourceKey
 import kotlinx.serialization.json.JsonElement
 
 /** What the viewer can ask of a source; the session learns whether an override is now active. */

@@ -15,9 +15,9 @@ import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
-import dev.kstate.viewer.client.SessionKind
-import dev.kstate.viewer.client.SessionSource
-import dev.kstate.viewer.client.TimelineView
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.SessionKind
+import dev.kstate.core.model.TimelineView
 import kotlinx.coroutines.delay
 import kotlin.time.TimeSource
 

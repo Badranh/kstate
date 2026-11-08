@@ -2,10 +2,10 @@
 
 package dev.kstate.viewer.web
 
-import dev.kstate.session.wire.RecordingFormatException
-import dev.kstate.session.wire.VideoWire
-import dev.kstate.session.wire.VideoWireFrame
-import dev.kstate.viewer.client.DeviceScreen
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.session.data.wire.RecordingFormatException
+import dev.kstate.core.session.data.wire.VideoWire
+import dev.kstate.core.session.data.wire.VideoWireFrame
 import dev.kstate.viewer.web.video.WebVideoScreen
 import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableStateFlow

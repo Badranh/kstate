@@ -11,7 +11,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.client.TimelineView
+import dev.kstate.core.model.TimelineView
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

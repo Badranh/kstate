@@ -1,6 +1,6 @@
 package dev.kstate.sdk.override
 
-import dev.kstate.protocol.JsonPointer.child
+import dev.kstate.core.protocol.JsonPointer.child
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull

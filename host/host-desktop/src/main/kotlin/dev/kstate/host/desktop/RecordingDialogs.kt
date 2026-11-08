@@ -1,7 +1,7 @@
 package dev.kstate.host.desktop
 
 import androidx.compose.ui.window.FrameWindowScope
-import dev.kstate.session.wire.RecordingFormatException
+import dev.kstate.core.session.data.wire.RecordingFormatException
 import java.awt.Desktop
 import java.awt.FileDialog
 import java.io.IOException

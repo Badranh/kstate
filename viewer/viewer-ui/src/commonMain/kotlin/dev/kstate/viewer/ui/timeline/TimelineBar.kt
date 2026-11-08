@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.client.TimelineView
+import dev.kstate.core.model.TimelineView
 import dev.kstate.viewer.ui.theme.Kstate
 
 private class Lane(

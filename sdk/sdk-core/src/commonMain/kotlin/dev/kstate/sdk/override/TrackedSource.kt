@@ -1,6 +1,6 @@
 package dev.kstate.sdk.override
 
-import dev.kstate.protocol.StateSnapshot
+import dev.kstate.core.protocol.StateSnapshot
 import dev.kstate.sdk.encoding.EncodedState
 import dev.kstate.sdk.encoding.RawStrategy
 import dev.kstate.sdk.encoding.StateEncoder

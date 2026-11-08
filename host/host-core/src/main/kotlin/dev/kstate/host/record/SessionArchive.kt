@@ -1,7 +1,7 @@
 package dev.kstate.host.record
 
-import dev.kstate.session.wire.RecordingFormatException
-import dev.kstate.session.wire.formatCheck
+import dev.kstate.core.session.data.wire.RecordingFormatException
+import dev.kstate.core.session.data.wire.formatCheck
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream

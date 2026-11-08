@@ -1,7 +1,7 @@
 package dev.kstate.host.agent.variants
 
-import dev.kstate.protocol.JsonPointer
-import dev.kstate.protocol.JsonPointer.child
+import dev.kstate.core.protocol.JsonPointer
+import dev.kstate.core.protocol.JsonPointer.child
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull

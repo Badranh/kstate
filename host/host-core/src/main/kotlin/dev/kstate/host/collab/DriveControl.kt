@@ -1,6 +1,6 @@
 package dev.kstate.host.collab
 
-import dev.kstate.viewer.client.Role
+import dev.kstate.core.model.Role
 
 /**
  * Who drives the device: one Driver at a time, chosen by the Owner from the Viewers who asked.

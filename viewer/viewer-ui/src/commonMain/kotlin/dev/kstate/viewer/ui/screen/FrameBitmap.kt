@@ -2,7 +2,7 @@ package dev.kstate.viewer.ui.screen
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
-import dev.kstate.viewer.client.VideoFrame
+import dev.kstate.core.model.VideoFrame
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.ColorType

@@ -1,5 +1,10 @@
 package dev.kstate.host.agent
 
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.ApplyMode
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.model.SessionView
+import dev.kstate.core.model.SourceView
 import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.explore.ExploreRun
 import dev.kstate.host.agent.explore.Explorer
@@ -7,11 +12,6 @@ import dev.kstate.host.agent.map.ScreenMap
 import dev.kstate.host.agent.report.ReportFinding
 import dev.kstate.host.agent.report.ReportWriter
 import dev.kstate.host.agent.settle.SettleTiming
-import dev.kstate.viewer.client.ApplyMode
-import dev.kstate.viewer.client.CommandOutcome
-import dev.kstate.viewer.client.SessionSource
-import dev.kstate.viewer.client.SessionView
-import dev.kstate.viewer.client.SourceView
 import kotlinx.serialization.json.JsonElement
 import java.nio.file.Path
 import kotlin.time.TimeSource

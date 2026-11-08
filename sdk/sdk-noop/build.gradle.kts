@@ -11,7 +11,7 @@ kotlin {
     android { namespace = "dev.kstate.sdk.noop" }
     sourceSets {
         commonMain.dependencies {
-            api(projects.protocol)
+            api(projects.core.protocol)
             api(libs.kotlinx.coroutines.core)
         }
     }

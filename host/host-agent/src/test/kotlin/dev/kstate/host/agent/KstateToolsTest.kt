@@ -1,9 +1,9 @@
 package dev.kstate.host.agent
 
+import dev.kstate.core.model.SourceCapabilities
 import dev.kstate.host.agent.image.Picture
 import dev.kstate.host.agent.settle.SettleTiming
 import dev.kstate.host.agent.settle.VideoLost
-import dev.kstate.viewer.client.SourceCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ImageContent
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent

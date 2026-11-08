@@ -8,7 +8,7 @@ kotlin {
     android { namespace = "dev.kstate.sdk" }
     sourceSets {
         commonMain.dependencies {
-            api(projects.protocol)
+            api(projects.core.protocol)
             api(libs.kotlinx.coroutines.core)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.websockets)

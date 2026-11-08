@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.protocol)
+    implementation(projects.core.protocol)
     api(projects.host.hostCore)
     implementation(libs.bytedeco.ffmpeg)
     implementation(libs.bytedeco.javacpp)

@@ -1,15 +1,15 @@
 package dev.kstate.sdk.transport
 
-import dev.kstate.protocol.CloseCodes
-import dev.kstate.protocol.Encoding
-import dev.kstate.protocol.Envelope
-import dev.kstate.protocol.EnvelopeCodec
-import dev.kstate.protocol.Event
-import dev.kstate.protocol.Hello
-import dev.kstate.protocol.Msg
-import dev.kstate.protocol.Ping
-import dev.kstate.protocol.Platform
-import dev.kstate.protocol.StateSnapshot
+import dev.kstate.core.protocol.CloseCodes
+import dev.kstate.core.protocol.Encoding
+import dev.kstate.core.protocol.Envelope
+import dev.kstate.core.protocol.EnvelopeCodec
+import dev.kstate.core.protocol.Event
+import dev.kstate.core.protocol.Hello
+import dev.kstate.core.protocol.Msg
+import dev.kstate.core.protocol.Ping
+import dev.kstate.core.protocol.Platform
+import dev.kstate.core.protocol.StateSnapshot
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.websocket.WebSockets

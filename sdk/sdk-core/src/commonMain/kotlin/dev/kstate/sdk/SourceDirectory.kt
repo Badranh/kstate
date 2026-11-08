@@ -1,9 +1,9 @@
 package dev.kstate.sdk
 
-import dev.kstate.protocol.Capabilities
-import dev.kstate.protocol.Command
-import dev.kstate.protocol.CommandResult
-import dev.kstate.protocol.SourceRegistered
+import dev.kstate.core.protocol.Capabilities
+import dev.kstate.core.protocol.Command
+import dev.kstate.core.protocol.CommandResult
+import dev.kstate.core.protocol.SourceRegistered
 import dev.kstate.sdk.encoding.StateEncoder
 import dev.kstate.sdk.override.Override
 import dev.kstate.sdk.override.StateDecoder

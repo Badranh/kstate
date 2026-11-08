@@ -1,7 +1,7 @@
 package dev.kstate.sdk
 
-import dev.kstate.protocol.Envelope
-import dev.kstate.protocol.Msg
+import dev.kstate.core.protocol.Envelope
+import dev.kstate.core.protocol.Msg
 import dev.kstate.sdk.transport.ConnectionState
 import dev.kstate.sdk.transport.KstateTransport
 import dev.kstate.sdk.transport.ReplaySource

@@ -1,11 +1,11 @@
 package dev.kstate.viewer.web.video
 
-import dev.kstate.session.wire.AvcCodec
-import dev.kstate.session.wire.DecoderFeed
-import dev.kstate.session.wire.PacketDecoder
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.TouchPhase
-import dev.kstate.viewer.client.VideoFrame
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.model.TouchPhase
+import dev.kstate.core.model.VideoFrame
+import dev.kstate.core.session.data.video.AvcCodec
+import dev.kstate.core.session.data.video.DecoderFeed
+import dev.kstate.core.session.data.video.PacketDecoder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

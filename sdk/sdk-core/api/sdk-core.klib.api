@@ -33,10 +33,10 @@ abstract interface dev.kstate.sdk/SourceHandle { // dev.kstate.sdk/SourceHandle|
 }
 
 final class dev.kstate.sdk.encoding/EncodedState { // dev.kstate.sdk.encoding/EncodedState|null[0]
-    constructor <init>(kotlinx.serialization.json/JsonElement, dev.kstate.protocol/Encoding, kotlin/Boolean = ..., kotlin.collections/List<kotlin/String> = ...) // dev.kstate.sdk.encoding/EncodedState.<init>|<init>(kotlinx.serialization.json.JsonElement;dev.kstate.protocol.Encoding;kotlin.Boolean;kotlin.collections.List<kotlin.String>){}[0]
+    constructor <init>(kotlinx.serialization.json/JsonElement, dev.kstate.core.protocol/Encoding, kotlin/Boolean = ..., kotlin.collections/List<kotlin/String> = ...) // dev.kstate.sdk.encoding/EncodedState.<init>|<init>(kotlinx.serialization.json.JsonElement;dev.kstate.core.protocol.Encoding;kotlin.Boolean;kotlin.collections.List<kotlin.String>){}[0]
 
     final val encoding // dev.kstate.sdk.encoding/EncodedState.encoding|{}encoding[0]
-        final fun <get-encoding>(): dev.kstate.protocol/Encoding // dev.kstate.sdk.encoding/EncodedState.encoding.<get-encoding>|<get-encoding>(){}[0]
+        final fun <get-encoding>(): dev.kstate.core.protocol/Encoding // dev.kstate.sdk.encoding/EncodedState.encoding.<get-encoding>|<get-encoding>(){}[0]
     final val json // dev.kstate.sdk.encoding/EncodedState.json|{}json[0]
         final fun <get-json>(): kotlinx.serialization.json/JsonElement // dev.kstate.sdk.encoding/EncodedState.json.<get-json>|<get-json>(){}[0]
     final val partial // dev.kstate.sdk.encoding/EncodedState.partial|{}partial[0]
@@ -45,10 +45,10 @@ final class dev.kstate.sdk.encoding/EncodedState { // dev.kstate.sdk.encoding/En
         final fun <get-sensitivePaths>(): kotlin.collections/List<kotlin/String> // dev.kstate.sdk.encoding/EncodedState.sensitivePaths.<get-sensitivePaths>|<get-sensitivePaths>(){}[0]
 
     final fun component1(): kotlinx.serialization.json/JsonElement // dev.kstate.sdk.encoding/EncodedState.component1|component1(){}[0]
-    final fun component2(): dev.kstate.protocol/Encoding // dev.kstate.sdk.encoding/EncodedState.component2|component2(){}[0]
+    final fun component2(): dev.kstate.core.protocol/Encoding // dev.kstate.sdk.encoding/EncodedState.component2|component2(){}[0]
     final fun component3(): kotlin/Boolean // dev.kstate.sdk.encoding/EncodedState.component3|component3(){}[0]
     final fun component4(): kotlin.collections/List<kotlin/String> // dev.kstate.sdk.encoding/EncodedState.component4|component4(){}[0]
-    final fun copy(kotlinx.serialization.json/JsonElement = ..., dev.kstate.protocol/Encoding = ..., kotlin/Boolean = ..., kotlin.collections/List<kotlin/String> = ...): dev.kstate.sdk.encoding/EncodedState // dev.kstate.sdk.encoding/EncodedState.copy|copy(kotlinx.serialization.json.JsonElement;dev.kstate.protocol.Encoding;kotlin.Boolean;kotlin.collections.List<kotlin.String>){}[0]
+    final fun copy(kotlinx.serialization.json/JsonElement = ..., dev.kstate.core.protocol/Encoding = ..., kotlin/Boolean = ..., kotlin.collections/List<kotlin/String> = ...): dev.kstate.sdk.encoding/EncodedState // dev.kstate.sdk.encoding/EncodedState.copy|copy(kotlinx.serialization.json.JsonElement;dev.kstate.core.protocol.Encoding;kotlin.Boolean;kotlin.collections.List<kotlin.String>){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.kstate.sdk.encoding/EncodedState.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.kstate.sdk.encoding/EncodedState.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.kstate.sdk.encoding/EncodedState.toString|toString(){}[0]

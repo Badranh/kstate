@@ -6,7 +6,8 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            api(projects.viewer.viewerClient)
+            api(projects.core.data)
+            implementation(projects.core.protocol)
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)

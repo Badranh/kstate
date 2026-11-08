@@ -1,7 +1,7 @@
 package dev.kstate.sdk
 
 import android.os.Build
-import dev.kstate.protocol.Platform
+import dev.kstate.core.protocol.Platform
 
 internal actual fun currentPlatformInfo(): PlatformInfo {
     val context = KstateInitProvider.applicationContext

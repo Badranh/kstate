@@ -14,9 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.client.EventView
-import dev.kstate.viewer.client.SessionSource
-import dev.kstate.viewer.client.SourceView
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.EventView
+import dev.kstate.core.model.SourceView
 import dev.kstate.viewer.ui.actions.SourceActions
 import dev.kstate.viewer.ui.chrome.SkeletonLines
 import dev.kstate.viewer.ui.edit.StateEditor

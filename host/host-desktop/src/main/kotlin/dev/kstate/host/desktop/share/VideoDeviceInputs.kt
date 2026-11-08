@@ -1,9 +1,9 @@
 package dev.kstate.host.desktop.share
 
+import dev.kstate.core.session.data.wire.ViewerInput
 import dev.kstate.host.collab.DeviceInputs
 import dev.kstate.host.video.control.InputTranslator
 import dev.kstate.host.video.device.DeviceVideo
-import dev.kstate.session.wire.ViewerInput
 import kotlinx.coroutines.flow.StateFlow
 import dev.kstate.host.video.control.TouchPhase as HostTouchPhase
 

@@ -22,9 +22,9 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeViewport
-import dev.kstate.session.remote.RemoteSession
-import dev.kstate.session.wire.FromViewer
-import dev.kstate.session.wire.ViewerInput
+import dev.kstate.core.session.data.remote.RemoteSession
+import dev.kstate.core.session.data.wire.FromViewer
+import dev.kstate.core.session.data.wire.ViewerInput
 import dev.kstate.viewer.ui.KstateApp
 import dev.kstate.viewer.ui.theme.KstateTheme
 import dev.kstate.viewer.web.video.WebVideoScreen

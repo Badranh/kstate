@@ -30,11 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.client.Collaboration
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.SessionSource
-import dev.kstate.viewer.client.SessionView
-import dev.kstate.viewer.client.canDrive
+import dev.kstate.core.data.Collaboration
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.model.SessionView
+import dev.kstate.core.model.canDrive
 import dev.kstate.viewer.ui.actions.ConfirmingCommands
 import dev.kstate.viewer.ui.actions.InjectionDialog
 import dev.kstate.viewer.ui.actions.InjectionGate

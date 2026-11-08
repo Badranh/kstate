@@ -1,12 +1,12 @@
 package dev.kstate.host.agent.tools
 
+import dev.kstate.core.model.CommandOutcome
 import dev.kstate.host.agent.capture.Capture
 import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.image.Pngs
 import dev.kstate.host.agent.mcp.ToolArguments
 import dev.kstate.host.agent.mcp.ToolResults
 import dev.kstate.host.agent.mcp.ToolSpec
-import dev.kstate.viewer.client.CommandOutcome
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ContentBlock
 import io.modelcontextprotocol.kotlin.sdk.types.ImageContent

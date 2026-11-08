@@ -1,16 +1,16 @@
 package dev.kstate.host.record
 
+import dev.kstate.core.session.data.wire.RecordedInput
+import dev.kstate.core.session.data.wire.TimelineLines
+import dev.kstate.core.session.domain.HostClock
+import dev.kstate.core.session.domain.SessionEngine
+import dev.kstate.core.session.domain.SessionInput
+import dev.kstate.core.session.domain.SessionObserver
+import dev.kstate.core.session.model.Session
 import dev.kstate.host.timeline.Gop
 import dev.kstate.host.timeline.VideoListener
 import dev.kstate.host.timeline.VideoSample
 import dev.kstate.host.timeline.VideoTimeline
-import dev.kstate.session.HostClock
-import dev.kstate.session.Session
-import dev.kstate.session.SessionEngine
-import dev.kstate.session.SessionInput
-import dev.kstate.session.SessionObserver
-import dev.kstate.session.wire.RecordedInput
-import dev.kstate.session.wire.TimelineLines
 import java.io.BufferedWriter
 import java.io.IOException
 import java.nio.file.Files

@@ -1,16 +1,16 @@
 package dev.kstate.host.gateway
 
-import dev.kstate.protocol.CommandResult
-import dev.kstate.protocol.Envelope
-import dev.kstate.protocol.Freeze
-import dev.kstate.protocol.Hello
-import dev.kstate.protocol.Msg
-import dev.kstate.protocol.OverrideMode
-import dev.kstate.protocol.Platform
-import dev.kstate.protocol.Restore
-import dev.kstate.protocol.SourceRegistered
-import dev.kstate.session.SessionEngine
-import dev.kstate.session.SourceKey
+import dev.kstate.core.protocol.CommandResult
+import dev.kstate.core.protocol.Envelope
+import dev.kstate.core.protocol.Freeze
+import dev.kstate.core.protocol.Hello
+import dev.kstate.core.protocol.Msg
+import dev.kstate.core.protocol.OverrideMode
+import dev.kstate.core.protocol.Platform
+import dev.kstate.core.protocol.Restore
+import dev.kstate.core.protocol.SourceRegistered
+import dev.kstate.core.session.domain.SessionEngine
+import dev.kstate.core.session.model.SourceKey
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

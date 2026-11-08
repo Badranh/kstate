@@ -4,9 +4,9 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.create
 import com.arkivanov.essenty.lifecycle.destroy
-import dev.kstate.protocol.SourceCleared
-import dev.kstate.protocol.SourceRegistered
-import dev.kstate.protocol.StateSnapshot
+import dev.kstate.core.protocol.SourceCleared
+import dev.kstate.core.protocol.SourceRegistered
+import dev.kstate.core.protocol.StateSnapshot
 import dev.kstate.sdk.testing.RecordingHost
 import kotlin.test.Test
 import kotlin.test.assertEquals

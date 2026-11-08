@@ -1,10 +1,10 @@
 package dev.kstate.host.agent.explore
 
+import dev.kstate.core.model.CommandOutcome
 import dev.kstate.host.agent.FakeApp
 import dev.kstate.host.agent.capture.CaptureStore
 import dev.kstate.host.agent.image.Picture
 import dev.kstate.host.agent.settle.SettleTiming
-import dev.kstate.viewer.client.CommandOutcome
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -237,7 +237,7 @@ class ExplorerTest {
     fun aSourceAlreadyShowingAnOverlayIsNotExploredFromIt() =
         runTest {
             val app = app()
-            app.setState(FakeApp.KEY, state, dev.kstate.viewer.client.ApplyMode.OVERLAY)
+            app.setState(FakeApp.KEY, state, dev.kstate.core.model.ApplyMode.OVERLAY)
 
             val error = assertFailsWith<ExploreException> { explorer(app).explore(FakeApp.KEY, limit = 5) }
 

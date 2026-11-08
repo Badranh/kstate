@@ -1,6 +1,6 @@
 package dev.kstate.viewer.ui.actions
 
-import dev.kstate.viewer.client.CommandOutcome
+import dev.kstate.core.model.CommandOutcome
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

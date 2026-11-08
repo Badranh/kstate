@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.client.EventView
+import dev.kstate.core.model.EventView
 
 /** Events, newest first, timed relative to the oldest one shown. */
 @Composable

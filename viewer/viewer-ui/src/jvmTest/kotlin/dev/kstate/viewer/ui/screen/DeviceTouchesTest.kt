@@ -13,9 +13,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.runComposeUiTest
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.TouchPhase
-import dev.kstate.viewer.client.VideoFrame
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.model.TouchPhase
+import dev.kstate.core.model.VideoFrame
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.test.Test
 import kotlin.test.assertEquals

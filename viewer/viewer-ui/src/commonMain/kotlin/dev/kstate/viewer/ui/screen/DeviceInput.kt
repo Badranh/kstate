@@ -10,8 +10,8 @@ import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
-import dev.kstate.viewer.client.DeviceScreen
-import dev.kstate.viewer.client.TouchPhase
+import dev.kstate.core.data.DeviceScreen
+import dev.kstate.core.model.TouchPhase
 
 /** Keys go to the device while the tile has focus: special keys as keycodes, the rest as text. */
 internal fun Modifier.deviceKeys(

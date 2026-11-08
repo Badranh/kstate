@@ -1,9 +1,9 @@
 package dev.kstate.host.record
 
-import dev.kstate.session.wire.JsonLimits
-import dev.kstate.session.wire.RecordingFormatException
-import dev.kstate.session.wire.formatCheck
-import dev.kstate.session.wire.readingOrFail
+import dev.kstate.core.session.data.wire.JsonLimits
+import dev.kstate.core.session.data.wire.RecordingFormatException
+import dev.kstate.core.session.data.wire.formatCheck
+import dev.kstate.core.session.data.wire.readingOrFail
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.int

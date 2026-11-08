@@ -1,0 +1,667 @@
+public abstract interface class dev/kstate/core/protocol/AppToHost : dev/kstate/core/protocol/Msg {
+	public static final field Companion Ldev/kstate/core/protocol/AppToHost$Companion;
+}
+
+public final class dev/kstate/core/protocol/AppToHost$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Capabilities {
+	public static final field Companion Ldev/kstate/core/protocol/Capabilities$Companion;
+	public fun <init> ()V
+	public fun <init> (ZZZ)V
+	public synthetic fun <init> (ZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun component3 ()Z
+	public final fun copy (ZZZ)Ldev/kstate/core/protocol/Capabilities;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Capabilities;ZZZILjava/lang/Object;)Ldev/kstate/core/protocol/Capabilities;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDecode ()Z
+	public final fun getOverlay ()Z
+	public final fun getWriteThrough ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Capabilities$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Capabilities$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Capabilities;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Capabilities;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Capabilities$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/CloseCodes {
+	public static final field INSTANCE Ldev/kstate/core/protocol/CloseCodes;
+	public static final field VERSION_MISMATCH S
+}
+
+public abstract interface class dev/kstate/core/protocol/Command : dev/kstate/core/protocol/HostToApp {
+	public abstract fun getCmdId ()Ljava/lang/String;
+	public abstract fun getSourceId ()Ljava/lang/String;
+}
+
+public final class dev/kstate/core/protocol/CommandResult : dev/kstate/core/protocol/AppToHost {
+	public static final field Companion Ldev/kstate/core/protocol/CommandResult$Companion;
+	public fun <init> (Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)Ldev/kstate/core/protocol/CommandResult;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/CommandResult;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/kstate/core/protocol/CommandResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCmdId ()Ljava/lang/String;
+	public final fun getError ()Ljava/lang/String;
+	public final fun getErrorPath ()Ljava/lang/String;
+	public final fun getOk ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/CommandResult$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/CommandResult$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/CommandResult;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/CommandResult;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/CommandResult$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Encoding : java/lang/Enum {
+	public static final field Companion Ldev/kstate/core/protocol/Encoding$Companion;
+	public static final field RAW Ldev/kstate/core/protocol/Encoding;
+	public static final field REFLECTION Ldev/kstate/core/protocol/Encoding;
+	public static final field SERIALIZER Ldev/kstate/core/protocol/Encoding;
+	public static final field TO_STRING Ldev/kstate/core/protocol/Encoding;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/kstate/core/protocol/Encoding;
+	public static fun values ()[Ldev/kstate/core/protocol/Encoding;
+}
+
+public final class dev/kstate/core/protocol/Encoding$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Envelope {
+	public static final field Companion Ldev/kstate/core/protocol/Envelope$Companion;
+	public fun <init> (ILjava/lang/String;JLdev/kstate/core/protocol/Msg;)V
+	public synthetic fun <init> (ILjava/lang/String;JLdev/kstate/core/protocol/Msg;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()J
+	public final fun component4 ()Ldev/kstate/core/protocol/Msg;
+	public final fun copy (ILjava/lang/String;JLdev/kstate/core/protocol/Msg;)Ldev/kstate/core/protocol/Envelope;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Envelope;ILjava/lang/String;JLdev/kstate/core/protocol/Msg;ILjava/lang/Object;)Ldev/kstate/core/protocol/Envelope;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMsg ()Ldev/kstate/core/protocol/Msg;
+	public final fun getTs ()J
+	public final fun getV ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Envelope$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Envelope$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Envelope;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Envelope;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Envelope$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/EnvelopeCodec {
+	public static final field INSTANCE Ldev/kstate/core/protocol/EnvelopeCodec;
+	public final fun decode (Ljava/lang/String;)Ldev/kstate/core/protocol/Envelope;
+	public final fun decodeOrNull (Ljava/lang/String;)Ldev/kstate/core/protocol/Envelope;
+	public final fun encode (Ldev/kstate/core/protocol/Envelope;)Ljava/lang/String;
+	public final fun getJson ()Lkotlinx/serialization/json/Json;
+}
+
+public final class dev/kstate/core/protocol/Event : dev/kstate/core/protocol/AppToHost {
+	public static final field Companion Ldev/kstate/core/protocol/Event$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)Ldev/kstate/core/protocol/Event;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Event;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;ILjava/lang/Object;)Ldev/kstate/core/protocol/Event;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArgs ()Lkotlinx/serialization/json/JsonElement;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getSourceId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Event$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Event$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Event;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Event;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Event$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Freeze : dev/kstate/core/protocol/Command {
+	public static final field Companion Ldev/kstate/core/protocol/Freeze$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Ldev/kstate/core/protocol/Freeze;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Freeze;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Ldev/kstate/core/protocol/Freeze;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getCmdId ()Ljava/lang/String;
+	public final fun getFrozen ()Z
+	public fun getSourceId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Freeze$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Freeze$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Freeze;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Freeze;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Freeze$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Hello : dev/kstate/core/protocol/AppToHost {
+	public static final field Companion Ldev/kstate/core/protocol/Hello$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/Platform;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/ProtocolVersion;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/Platform;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/ProtocolVersion;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ldev/kstate/core/protocol/Platform;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ldev/kstate/core/protocol/ProtocolVersion;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/Platform;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/ProtocolVersion;Ljava/lang/String;)Ldev/kstate/core/protocol/Hello;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Hello;Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/Platform;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/ProtocolVersion;Ljava/lang/String;ILjava/lang/Object;)Ldev/kstate/core/protocol/Hello;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAppId ()Ljava/lang/String;
+	public final fun getAppVersion ()Ljava/lang/String;
+	public final fun getDeviceHint ()Ljava/lang/String;
+	public final fun getOsVersion ()Ljava/lang/String;
+	public final fun getPairingToken ()Ljava/lang/String;
+	public final fun getPlatform ()Ldev/kstate/core/protocol/Platform;
+	public final fun getProtocolVersion ()Ldev/kstate/core/protocol/ProtocolVersion;
+	public final fun getSdkVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Hello$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Hello$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Hello;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Hello;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Hello$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class dev/kstate/core/protocol/HostToApp : dev/kstate/core/protocol/Msg {
+	public static final field Companion Ldev/kstate/core/protocol/HostToApp$Companion;
+}
+
+public final class dev/kstate/core/protocol/HostToApp$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/JsonPointer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/JsonPointer;
+	public static final field ROOT Ljava/lang/String;
+	public final fun child (Ljava/lang/String;I)Ljava/lang/String;
+	public final fun child (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public final fun get (Lkotlinx/serialization/json/JsonElement;Ljava/lang/String;)Lkotlinx/serialization/json/JsonElement;
+	public final fun replace (Lkotlinx/serialization/json/JsonElement;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;)Lkotlinx/serialization/json/JsonElement;
+	public final fun segments (Ljava/lang/String;)Ljava/util/List;
+}
+
+public abstract interface class dev/kstate/core/protocol/Msg {
+	public static final field Companion Ldev/kstate/core/protocol/Msg$Companion;
+}
+
+public final class dev/kstate/core/protocol/Msg$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Nav : dev/kstate/core/protocol/AppToHost {
+	public static final field Companion Ldev/kstate/core/protocol/Nav$Companion;
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Ldev/kstate/core/protocol/Nav;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Nav;Ljava/util/List;ILjava/lang/Object;)Ldev/kstate/core/protocol/Nav;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStack ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Nav$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Nav$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Nav;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Nav;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Nav$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/OverrideMode : java/lang/Enum {
+	public static final field Companion Ldev/kstate/core/protocol/OverrideMode$Companion;
+	public static final field OVERLAY Ldev/kstate/core/protocol/OverrideMode;
+	public static final field WRITE_THROUGH Ldev/kstate/core/protocol/OverrideMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/kstate/core/protocol/OverrideMode;
+	public static fun values ()[Ldev/kstate/core/protocol/OverrideMode;
+}
+
+public final class dev/kstate/core/protocol/OverrideMode$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Ping : dev/kstate/core/protocol/HostToApp {
+	public static final field Companion Ldev/kstate/core/protocol/Ping$Companion;
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Ldev/kstate/core/protocol/Ping;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Ping;JILjava/lang/Object;)Ldev/kstate/core/protocol/Ping;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNonce ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Ping$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Ping$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Ping;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Ping;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Ping$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Platform : java/lang/Enum {
+	public static final field ANDROID Ldev/kstate/core/protocol/Platform;
+	public static final field Companion Ldev/kstate/core/protocol/Platform$Companion;
+	public static final field IOS Ldev/kstate/core/protocol/Platform;
+	public static final field JVM Ldev/kstate/core/protocol/Platform;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/kstate/core/protocol/Platform;
+	public static fun values ()[Ldev/kstate/core/protocol/Platform;
+}
+
+public final class dev/kstate/core/protocol/Platform$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Pong : dev/kstate/core/protocol/AppToHost {
+	public static final field Companion Ldev/kstate/core/protocol/Pong$Companion;
+	public fun <init> (J)V
+	public final fun component1 ()J
+	public final fun copy (J)Ldev/kstate/core/protocol/Pong;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Pong;JILjava/lang/Object;)Ldev/kstate/core/protocol/Pong;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNonce ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Pong$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Pong$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Pong;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Pong;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Pong$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/ProtocolVersion {
+	public static final field Companion Ldev/kstate/core/protocol/ProtocolVersion$Companion;
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Ldev/kstate/core/protocol/ProtocolVersion;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/ProtocolVersion;IIILjava/lang/Object;)Ldev/kstate/core/protocol/ProtocolVersion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMajor ()I
+	public final fun getMinor ()I
+	public fun hashCode ()I
+	public final fun isCompatibleWith (Ldev/kstate/core/protocol/ProtocolVersion;)Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/kstate/core/protocol/ProtocolVersion$Companion {
+	public final fun getCURRENT ()Ldev/kstate/core/protocol/ProtocolVersion;
+	public final fun parse (Ljava/lang/String;)Ldev/kstate/core/protocol/ProtocolVersion;
+	public final fun parseOrNull (Ljava/lang/String;)Ldev/kstate/core/protocol/ProtocolVersion;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Release : dev/kstate/core/protocol/Command {
+	public static final field Companion Ldev/kstate/core/protocol/Release$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/kstate/core/protocol/Release;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Release;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/kstate/core/protocol/Release;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getCmdId ()Ljava/lang/String;
+	public fun getSourceId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Release$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Release$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Release;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Release;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Release$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Restore : dev/kstate/core/protocol/Command {
+	public static final field Companion Ldev/kstate/core/protocol/Restore$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;JLdev/kstate/core/protocol/OverrideMode;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()J
+	public final fun component4 ()Ldev/kstate/core/protocol/OverrideMode;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;JLdev/kstate/core/protocol/OverrideMode;)Ldev/kstate/core/protocol/Restore;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Restore;Ljava/lang/String;Ljava/lang/String;JLdev/kstate/core/protocol/OverrideMode;ILjava/lang/Object;)Ldev/kstate/core/protocol/Restore;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getCmdId ()Ljava/lang/String;
+	public final fun getMode ()Ldev/kstate/core/protocol/OverrideMode;
+	public final fun getSeq ()J
+	public fun getSourceId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Restore$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Restore$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Restore;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Restore;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Restore$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/SetState : dev/kstate/core/protocol/Command {
+	public static final field Companion Ldev/kstate/core/protocol/SetState$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Ldev/kstate/core/protocol/OverrideMode;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component4 ()Ldev/kstate/core/protocol/OverrideMode;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Ldev/kstate/core/protocol/OverrideMode;)Ldev/kstate/core/protocol/SetState;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/SetState;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonElement;Ldev/kstate/core/protocol/OverrideMode;ILjava/lang/Object;)Ldev/kstate/core/protocol/SetState;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getCmdId ()Ljava/lang/String;
+	public final fun getMode ()Ldev/kstate/core/protocol/OverrideMode;
+	public fun getSourceId ()Ljava/lang/String;
+	public final fun getState ()Lkotlinx/serialization/json/JsonElement;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/SetState$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/SetState$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/SetState;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/SetState;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/SetState$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/SourceCleared : dev/kstate/core/protocol/AppToHost {
+	public static final field Companion Ldev/kstate/core/protocol/SourceCleared$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/kstate/core/protocol/SourceCleared;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/SourceCleared;Ljava/lang/String;ILjava/lang/Object;)Ldev/kstate/core/protocol/SourceCleared;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSourceId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/SourceCleared$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/SourceCleared$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/SourceCleared;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/SourceCleared;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/SourceCleared$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/SourceRegistered : dev/kstate/core/protocol/AppToHost {
+	public static final field Companion Ldev/kstate/core/protocol/SourceRegistered$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/Capabilities;Lkotlinx/serialization/json/JsonElement;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/Capabilities;Lkotlinx/serialization/json/JsonElement;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ldev/kstate/core/protocol/Capabilities;
+	public final fun component5 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/Capabilities;Lkotlinx/serialization/json/JsonElement;)Ldev/kstate/core/protocol/SourceRegistered;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/SourceRegistered;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ldev/kstate/core/protocol/Capabilities;Lkotlinx/serialization/json/JsonElement;ILjava/lang/Object;)Ldev/kstate/core/protocol/SourceRegistered;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCapabilities ()Ldev/kstate/core/protocol/Capabilities;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getOwnerType ()Ljava/lang/String;
+	public final fun getSchema ()Lkotlinx/serialization/json/JsonElement;
+	public final fun getSourceId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/SourceRegistered$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/SourceRegistered$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/SourceRegistered;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/SourceRegistered;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/SourceRegistered$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/StateSnapshot : dev/kstate/core/protocol/AppToHost {
+	public static final field Companion Ldev/kstate/core/protocol/StateSnapshot$Companion;
+	public fun <init> (Ljava/lang/String;JLkotlinx/serialization/json/JsonElement;Ldev/kstate/core/protocol/Encoding;ZLjava/util/List;Z)V
+	public synthetic fun <init> (Ljava/lang/String;JLkotlinx/serialization/json/JsonElement;Ldev/kstate/core/protocol/Encoding;ZLjava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()J
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component4 ()Ldev/kstate/core/protocol/Encoding;
+	public final fun component5 ()Z
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Z
+	public final fun copy (Ljava/lang/String;JLkotlinx/serialization/json/JsonElement;Ldev/kstate/core/protocol/Encoding;ZLjava/util/List;Z)Ldev/kstate/core/protocol/StateSnapshot;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/StateSnapshot;Ljava/lang/String;JLkotlinx/serialization/json/JsonElement;Ldev/kstate/core/protocol/Encoding;ZLjava/util/List;ZILjava/lang/Object;)Ldev/kstate/core/protocol/StateSnapshot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEncoding ()Ldev/kstate/core/protocol/Encoding;
+	public final fun getPartial ()Z
+	public final fun getRedacted ()Ljava/util/List;
+	public final fun getSeq ()J
+	public final fun getSourceId ()Ljava/lang/String;
+	public final fun getState ()Lkotlinx/serialization/json/JsonElement;
+	public final fun getSuppressed ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/StateSnapshot$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/StateSnapshot$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/StateSnapshot;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/StateSnapshot;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/StateSnapshot$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Ulid {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Ulid;
+	public final fun generate (JLkotlin/random/Random;)Ljava/lang/String;
+	public static synthetic fun generate$default (Ldev/kstate/core/protocol/Ulid;JLkotlin/random/Random;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class dev/kstate/core/protocol/Unknown : dev/kstate/core/protocol/Msg {
+	public static final field Companion Ldev/kstate/core/protocol/Unknown$Companion;
+	public fun <init> (Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun copy (Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;)Ldev/kstate/core/protocol/Unknown;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Unknown;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Ldev/kstate/core/protocol/Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRaw ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Unknown$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Unknown$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Unknown;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Unknown;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Unknown$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Welcome : dev/kstate/core/protocol/HostToApp {
+	public static final field Companion Ldev/kstate/core/protocol/Welcome$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;J)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;J)Ldev/kstate/core/protocol/Welcome;
+	public static synthetic fun copy$default (Ldev/kstate/core/protocol/Welcome;Ljava/lang/String;Ljava/lang/String;JILjava/lang/Object;)Ldev/kstate/core/protocol/Welcome;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHostVersion ()Ljava/lang/String;
+	public final fun getServerTimeNanos ()J
+	public final fun getSessionId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/kstate/core/protocol/Welcome$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/kstate/core/protocol/Welcome$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/kstate/core/protocol/Welcome;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/kstate/core/protocol/Welcome;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/kstate/core/protocol/Welcome$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+

@@ -1,5 +1,9 @@
 package dev.kstate.host.desktop
 
+import dev.kstate.core.data.Collaboration
+import dev.kstate.core.data.SessionSource
+import dev.kstate.core.session.domain.HostClock
+import dev.kstate.core.session.domain.SessionEngine
 import dev.kstate.host.adb.Adb
 import dev.kstate.host.collab.DeviceInputs
 import dev.kstate.host.collab.RemoteVideoSource
@@ -14,10 +18,6 @@ import dev.kstate.host.video.device.DeviceVideos
 import dev.kstate.host.video.device.RemoteVideos
 import dev.kstate.host.video.scrcpy.ScrcpyLauncher
 import dev.kstate.host.video.scrcpy.VideoProfile
-import dev.kstate.session.HostClock
-import dev.kstate.session.SessionEngine
-import dev.kstate.viewer.client.Collaboration
-import dev.kstate.viewer.client.SessionSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin

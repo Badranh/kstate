@@ -1,10 +1,10 @@
 package dev.kstate.host.collab
 
+import dev.kstate.core.session.data.wire.VideoWire
+import dev.kstate.core.session.data.wire.VideoWireFrame
 import dev.kstate.host.timeline.Gop
 import dev.kstate.host.timeline.VideoListener
 import dev.kstate.host.timeline.VideoSample
-import dev.kstate.session.wire.VideoWire
-import dev.kstate.session.wire.VideoWireFrame
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.Frame

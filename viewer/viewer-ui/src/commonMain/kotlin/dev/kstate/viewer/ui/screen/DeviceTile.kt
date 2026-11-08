@@ -28,7 +28,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import dev.kstate.viewer.client.DeviceScreen
+import dev.kstate.core.data.DeviceScreen
 import dev.kstate.viewer.ui.chrome.shimmer
 import dev.kstate.viewer.ui.theme.Kstate
 import kotlin.math.roundToInt

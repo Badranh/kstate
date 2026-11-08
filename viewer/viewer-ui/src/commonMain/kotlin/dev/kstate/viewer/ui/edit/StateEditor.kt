@@ -26,10 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import dev.kstate.viewer.client.ApplyMode
-import dev.kstate.viewer.client.CommandOutcome
-import dev.kstate.viewer.client.SourceCapabilities
-import dev.kstate.viewer.client.SourceView
+import dev.kstate.core.model.ApplyMode
+import dev.kstate.core.model.CommandOutcome
+import dev.kstate.core.model.SourceCapabilities
+import dev.kstate.core.model.SourceView
 import dev.kstate.viewer.ui.actions.outcomeText
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement

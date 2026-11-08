@@ -17,7 +17,7 @@ kotlin {
     sourceSets {
         wasmJsMain.dependencies {
             implementation(projects.viewer.viewerUi)
-            implementation(projects.session)
+            implementation(projects.core.session)
             implementation(libs.compose.ui)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
