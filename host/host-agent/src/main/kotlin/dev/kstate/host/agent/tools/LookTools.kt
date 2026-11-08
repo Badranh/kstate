@@ -146,6 +146,7 @@ internal class LookTools(
                             }
                         }
                     }
+                    view.problem?.let { put("problem", it) }
                     putJsonArray("steps") {
                         view.transitions.forEach { t ->
                             addJsonObject {

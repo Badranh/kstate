@@ -6,6 +6,7 @@ import dev.kstate.host.agent.settle.SettleTiming
 import dev.kstate.viewer.client.DeviceScreen
 import dev.kstate.viewer.client.SessionSource
 import dev.kstate.viewer.client.SessionView
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -39,6 +40,8 @@ data class MapTransition(
 data class ScreenMapView(
     val nodes: List<MapNode>,
     val transitions: List<MapTransition>,
+    /** The last time a screen couldn't be mapped, and why; mapping goes on after it. */
+    val problem: String? = null,
 )
 
 /**
@@ -59,9 +62,10 @@ class ScreenMap(
     private val notes = mutableListOf<Note>()
     private var noted = 0L
     private var pausedDepth = 0
+    private var problem: String? = null
 
     @Synchronized
-    fun view(): ScreenMapView = ScreenMapView(nodes.values.toList(), transitions.values.toList())
+    fun view(): ScreenMapView = ScreenMapView(nodes.values.toList(), transitions.values.toList(), problem)
 
     /** Something the agent did, the cause of whatever changes next. */
     @Synchronized
@@ -81,9 +85,15 @@ class ScreenMap(
     /**
      * Watches every device with video until cancelled. A device whose video reconnects gets a new
      * screen object; its watcher follows it, since the old one never sends a picture again.
+     * The screens seen before stay mapped, but where each device was and what the agent did are
+     * forgotten: the app went on while nobody watched, so no step is drawn across that gap.
      */
     suspend fun run(): Unit =
         supervisorScope {
+            synchronized(this@ScreenMap) {
+                last.clear()
+                notes.clear()
+            }
             val watchers = mutableMapOf<String, Pair<DeviceScreen, Job>>()
             source.screens.collect { screens ->
                 (watchers.keys - screens.keys).forEach { id -> watchers.remove(id)?.second?.cancel() }
@@ -101,7 +111,7 @@ class ScreenMap(
         deviceId: String,
         screen: DeviceScreen,
     ) {
-        record(deviceId, screen)
+        recordOrReport(deviceId, screen)
         while (true) {
             merge(
                 screen.frames.drop(1).map { },
@@ -111,7 +121,23 @@ class ScreenMap(
                     .drop(1)
                     .map { },
             ).first()
+            recordOrReport(deviceId, screen)
+        }
+    }
+
+    /** One screen that can't be mapped is reported in the view; the device is still watched. */
+    private suspend fun recordOrReport(
+        deviceId: String,
+        screen: DeviceScreen,
+    ) {
+        try {
             record(deviceId, screen)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (
+            @Suppress("TooGenericExceptionCaught") failure: Exception,
+        ) {
+            synchronized(this) { problem = "$deviceId: ${failure::class.simpleName}: ${failure.message}" }
         }
     }
 

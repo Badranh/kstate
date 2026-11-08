@@ -65,6 +65,11 @@ class FakeApp(
         screenMap.value = mapOf(DEVICE to screen)
     }
 
+    /** A picture whose pixels don't match its size, as a decoder bug could send. */
+    fun sendBrokenFrame() {
+        screen.frames.value = VideoFrame(90, 160, ByteArray(4), hostTs = 0)
+    }
+
     /** The state channel drops while the video keeps going, as when adb loses its reverse rule. */
     fun dropStateChannel() {
         connected = false

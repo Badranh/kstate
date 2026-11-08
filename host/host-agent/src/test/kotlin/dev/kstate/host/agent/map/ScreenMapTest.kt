@@ -122,6 +122,49 @@ class ScreenMapTest {
         }
 
     @Test
+    fun aScreenThatCantBeReadIsReportedAndTheMapKeepsGoing() =
+        runTest {
+            val (app, map) = start()
+
+            app.sendBrokenFrame()
+            settle()
+            app.emit(state(2))
+            settle()
+
+            assertEquals(2, map.view().nodes.size)
+            assertTrue(
+                map
+                    .view()
+                    .problem
+                    .orEmpty()
+                    .isNotEmpty(),
+                "the failure was swallowed",
+            )
+        }
+
+    @Test
+    fun turnedOffAndOnAgainTheMapDoesNotLinkTheOldScreenToTheNewOne() =
+        runTest {
+            val app = FakeApp(backgroundScope, state(0), schema = null, render = ::render, route = listOf("Counter"))
+            val map = ScreenMap(app, captures, timing, testScheduler.timeSource)
+            val first = backgroundScope.launch { map.run() }
+            settle()
+            map.note("tap 0.50, 0.80")
+            first.cancel()
+            settle()
+
+            app.emit(state(3))
+            backgroundScope.launch { map.run() }
+            settle()
+            app.emit(state(4))
+            settle()
+
+            val steps = map.view().transitions
+            assertEquals(1, steps.size, "linked across the gap: $steps")
+            assertEquals(emptyList(), steps.single().causes, "a cause from before the gap was kept")
+        }
+
+    @Test
     fun comingBackToAScreenRevisitsItsNode() =
         runTest {
             val (app, map) = start()
