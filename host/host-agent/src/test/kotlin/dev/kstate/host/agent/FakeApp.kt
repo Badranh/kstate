@@ -44,6 +44,12 @@ class FakeApp(
 ) : SessionSource {
     var onTap: (x: Float, y: Float) -> Unit = { _, _ -> }
 
+    /** Called with each state the app accepts, before it is drawn. */
+    var onShow: (JsonElement) -> Unit = {}
+
+    /** Called when an overlay is released, before the app's own state is drawn again. */
+    var onRelease: () -> Unit = {}
+
     /** Every touch phase the device received, in order. */
     val touches = mutableListOf<TouchPhase>()
 
@@ -67,6 +73,12 @@ class FakeApp(
     fun reconnectVideo() {
         screen = Screen()
         screenMap.value = mapOf(DEVICE to screen)
+    }
+
+    /** The video drops and hasn't come back yet: the old screen keeps its last picture, as a dead stream does. */
+    fun loseVideo() {
+        screen = Screen()
+        screenMap.value = emptyMap()
     }
 
     /** The same picture sent again, as a blinking caret or an animation does: no state changes. */
@@ -133,6 +145,7 @@ class FakeApp(
 
             else -> {
                 applied += state
+                onShow(state)
                 if (crashesOn(state)) {
                     connected = false
                 } else if (mode == ApplyMode.OVERLAY) {
@@ -152,6 +165,7 @@ class FakeApp(
 
     override suspend fun release(sourceKey: String): CommandOutcome {
         releases++
+        onRelease()
         overlay = null
         publish()
         return CommandOutcome.Ok

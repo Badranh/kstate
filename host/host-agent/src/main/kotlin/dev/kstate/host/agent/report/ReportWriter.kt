@@ -168,11 +168,14 @@ class ReportWriter(
         ) {
             body.append("<h2>Explored ${run.sourceKey.esc()} on ${run.route.joinToString(" › ").esc()}</h2>")
             run.stoppedEarly?.let { body.append("<p class=warn>${it.esc()}</p>") }
-            if (!run.restored &&
-                run.stoppedEarly == null
-            ) {
+            if (run.restored == false && run.stoppedEarly == null) {
                 body.append(
                     "<p class=warn>The screen did not come back to how it was after the overlay was released.</p>",
+                )
+            }
+            if (run.restored == null && run.stoppedEarly == null) {
+                body.append(
+                    "<p class=warn>The device's video dropped before Kstate could check the screen came back.</p>",
                 )
             }
             body.append("<div class=grid>")

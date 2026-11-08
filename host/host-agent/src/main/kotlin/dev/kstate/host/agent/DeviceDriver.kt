@@ -6,6 +6,8 @@ import dev.kstate.host.agent.map.ScreenMap
 import dev.kstate.host.agent.settle.DeviceMark
 import dev.kstate.host.agent.settle.Settle
 import dev.kstate.host.agent.settle.SettleTiming
+import dev.kstate.host.agent.settle.VideoLost
+import dev.kstate.host.agent.settle.whileLive
 import dev.kstate.session.diff.DiffEngine
 import dev.kstate.viewer.client.CommandOutcome
 import dev.kstate.viewer.client.DeviceScreen
@@ -137,7 +139,15 @@ class DeviceDriver(
         val mark = DeviceMark.of(view, id)
         map.note(note)
         action(screen)
-        val settled = Settle.afterChange(screen.frames, source.session, id, mark, timing, time)
+        val settled =
+            try {
+                source.whileLive(
+                    id,
+                    screen,
+                ) { Settle.afterChange(screen.frames, source.session, id, mark, timing, time) }
+            } catch (_: VideoLost) {
+                throw VideoLost(id, sent = note)
+            }
         val capture = captures.take(source.session.value, id, settled) ?: throw AgentFailure("No picture from $id yet")
         val beforeStates = before?.sources.orEmpty().associate { it.key to it.state }
         val connected =
@@ -171,7 +181,11 @@ class DeviceDriver(
         deviceId: String,
         screen: DeviceScreen,
     ): Capture =
-        captures.take(source.session.value, deviceId, Settle.await(screen.frames, timing, time))
+        captures.take(
+            source.session.value,
+            deviceId,
+            source.whileLive(deviceId, screen) { Settle.await(screen.frames, timing, time) },
+        )
             ?: throw AgentFailure("No picture from $deviceId yet")
 
     private fun screen(deviceId: String?): Pair<String, DeviceScreen> {
@@ -180,7 +194,10 @@ class DeviceDriver(
             return deviceId to
                 (
                     screens[deviceId]
-                        ?: throw AgentFailure("No video from $deviceId. Devices: ${screens.keys.joinToString()}")
+                        ?: throw AgentFailure(
+                            "No video from $deviceId right now; it may be reconnecting, so try again in a moment. " +
+                                "Devices with video: ${screens.keys.joinToString().ifEmpty { "none" }}",
+                        )
                 )
         }
         val only = screens.entries.singleOrNull() ?: throw AgentFailure(whichDevice(screens.keys))
@@ -197,7 +214,7 @@ class DeviceDriver(
 
 private fun whichDevice(devices: Set<String>): String =
     if (devices.isEmpty()) {
-        "No device is streaming yet"
+        "No device has video right now; one whose video is reconnecting is back in a moment, so try again shortly"
     } else {
         "Several devices: say which one (${devices.joinToString()})"
     }

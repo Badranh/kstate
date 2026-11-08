@@ -6,6 +6,7 @@ import dev.kstate.host.agent.image.Picture
 import dev.kstate.host.agent.settle.SettleTiming
 import dev.kstate.viewer.client.CommandOutcome
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -97,7 +98,7 @@ class ExplorerTest {
             assertEquals(run.results.map { it.variant.state }, app.applied)
             assertTrue(run.results.all { it.capture != null })
             assertEquals(1, app.releases)
-            assertTrue(run.restored)
+            assertEquals(true, run.restored)
             assertEquals(listOf("Checkout"), run.route)
         }
 
@@ -167,6 +168,50 @@ class ExplorerTest {
             assertTrue(run.results.none { Flag.REJECTED in it.flags })
             assertNotNull(run.stoppedEarly)
         }
+
+    @Test
+    fun aVideoThatDropsMidRunStopsItInsteadOfReportingTheFrozenPicture() =
+        runTest {
+            val app = app()
+            // The stream dies while the screen is settling, as it did live.
+            app.onShow = { if (it.jsonObject["mode"] == JsonPrimitive("DARK")) dropLater { app.loseVideo() } }
+
+            val run = explorer(app).explore(FakeApp.KEY, limit = 50)
+            val dark = run.result("/mode → DARK")
+
+            assertEquals(setOf(Flag.VIDEO_LOST), dark.flags)
+            assertNull(dark.capture, "a dead stream's last picture was kept as this variant's")
+            assertEquals(
+                "/mode → DARK",
+                run.results
+                    .last()
+                    .variant.label,
+            )
+            assertTrue("video" in run.stoppedEarly.orEmpty(), run.stoppedEarly)
+            assertEquals(1, app.releases, "the overlay was left showing")
+            assertNull(run.restored, "whether the app came back can't be told without its video")
+        }
+
+    @Test
+    fun aVideoThatReconnectsMidRunAlsoStopsIt() =
+        runTest {
+            val app = app()
+            app.onShow = { if (it.jsonObject["mode"] == JsonPrimitive("DARK")) dropLater { app.reconnectVideo() } }
+
+            val run = explorer(app).explore(FakeApp.KEY, limit = 50)
+
+            assertEquals(setOf(Flag.VIDEO_LOST), run.result("/mode → DARK").flags)
+            assertNull(run.result("/mode → DARK").capture)
+            assertNotNull(run.stoppedEarly)
+        }
+
+    /** Drops the video once the screen has begun settling: after the new picture, before it is quiet. */
+    private fun TestScope.dropLater(drop: () -> Unit) {
+        backgroundScope.launch {
+            delay(timing.quietMillis / 3)
+            drop()
+        }
+    }
 
     @Test
     fun aCancelledRunStillPutsTheAppBack() =

@@ -9,6 +9,8 @@ import dev.kstate.host.agent.image.Pngs
 import dev.kstate.host.agent.settle.DeviceMark
 import dev.kstate.host.agent.settle.Settle
 import dev.kstate.host.agent.settle.SettleTiming
+import dev.kstate.host.agent.settle.VideoLost
+import dev.kstate.host.agent.settle.whileLive
 import dev.kstate.host.agent.variants.SchemaVariants
 import dev.kstate.host.agent.variants.Variant
 import dev.kstate.viewer.client.ApplyMode
@@ -34,6 +36,7 @@ enum class Flag(
     BLANK("almost nothing on screen"),
     STILL_MOVING("the screen was still moving when captured"),
     DUPLICATE("looks the same as another variant"),
+    VIDEO_LOST("the device's video dropped while this state was shown, so there is no picture of it"),
 }
 
 data class VariantResult(
@@ -51,8 +54,8 @@ data class ExploreRun(
     val route: List<String>,
     val baseline: Capture,
     val results: List<VariantResult>,
-    /** The screen came back to the baseline once the overlay was released. */
-    val restored: Boolean,
+    /** The screen came back to the baseline once the overlay was released; null when the video dropped first. */
+    val restored: Boolean?,
     val stoppedEarly: String?,
 )
 
@@ -93,17 +96,17 @@ class Explorer(
                 val result = tryVariant(sourceKey, variant, device.id, screen, baseline, results)
                 results += result
                 onVariant(results.size, variants.size, variant.label)
-                if (Flag.CRASHED in result.flags || result.outcome == CommandOutcome.NotConnected) {
-                    stopped = "The app disconnected after ${variant.label}; the rest were not tried."
-                    break
-                }
+                stopped = whyStop(result, device.id)
+                if (stopped != null) break
             }
             finished = true
         } finally {
             // Cancelled or failed half way: never leave the app showing a made-up state.
             if (!finished) withContext(NonCancellable) { source.release(sourceKey) }
         }
-        val restored = stopped == null && restore(sourceKey, device.id, screen, baseline)
+        // A run stopped by the video still has its overlay up; one stopped by the app has no app to put back.
+        val lostVideo = results.lastOrNull()?.let { Flag.VIDEO_LOST in it.flags } == true
+        val restored = if (stopped == null || lostVideo) restore(sourceKey, device.id, screen, baseline) else false
         return ExploreRun(
             "r${runs.incrementAndGet()}",
             sourceKey,
@@ -131,8 +134,37 @@ class Explorer(
         ) {
             return VariantResult(variant, outcome, capture = null, flags = setOf(failureFlag(outcome)))
         }
-        val settled = Settle.afterChange(screen.frames, source.session, deviceId, mark, timing, time)
-        val capture = captures.take(source.session.value, deviceId, settled)
+        val settled =
+            try {
+                source.whileLive(deviceId, screen) {
+                    Settle.afterChange(screen.frames, source.session, deviceId, mark, timing, time)
+                }
+            } catch (_: VideoLost) {
+                null
+            }
+        return if (settled == null) {
+            VariantResult(variant, outcome, capture = null, flags = setOf(Flag.VIDEO_LOST))
+        } else {
+            judge(
+                sourceKey,
+                variant,
+                outcome,
+                captures.take(source.session.value, deviceId, settled),
+                baseline,
+                earlier,
+            )
+        }
+    }
+
+    /** What can be told about a variant's screen without looking at it. */
+    private fun judge(
+        sourceKey: String,
+        variant: Variant,
+        outcome: CommandOutcome,
+        capture: Capture?,
+        baseline: Capture,
+        earlier: List<VariantResult>,
+    ): VariantResult {
         val alive = live(sourceKey)
         val flags = mutableSetOf<Flag>()
         var duplicateOf: String? = null
@@ -160,21 +192,48 @@ class Explorer(
         deviceId: String,
         screen: DeviceScreen,
         baseline: Capture,
-    ): Boolean {
+    ): Boolean? {
         source.release(sourceKey)
-        val after = capture(deviceId, screen) ?: return false
-        // Lenient on purpose: a caret caught in its other phase must not read as "did not come back".
-        return Fingerprints.sameScreen(after.fingerprint, baseline.fingerprint) ||
-            Fingerprints.isSmallMotion(after.fingerprint, baseline.fingerprint)
+        return try {
+            val after = capture(deviceId, screen)
+            // Lenient on purpose: a caret caught in its other phase must not read as "did not come back".
+            after != null &&
+                (
+                    Fingerprints.sameScreen(after.fingerprint, baseline.fingerprint) ||
+                        Fingerprints.isSmallMotion(after.fingerprint, baseline.fingerprint)
+                )
+        } catch (_: VideoLost) {
+            null
+        }
     }
 
     private suspend fun capture(
         deviceId: String,
         screen: DeviceScreen,
     ): Capture? {
-        val settled = Settle.await(screen.frames, timing, time)
+        val settled = source.whileLive(deviceId, screen) { Settle.await(screen.frames, timing, time) }
         return captures.take(source.session.value, deviceId, settled)
     }
+
+    /** Why the run can't go on after [result], if it can't. */
+    private fun whyStop(
+        result: VariantResult,
+        deviceId: String,
+    ): String? =
+        when {
+            Flag.CRASHED in result.flags || result.outcome == CommandOutcome.NotConnected -> {
+                "The app disconnected after ${result.variant.label}; the rest were not tried."
+            }
+
+            Flag.VIDEO_LOST in result.flags -> {
+                "The video from $deviceId dropped while ${result.variant.label} was shown; the rest were not " +
+                    "tried. Explore again once overview lists its video again."
+            }
+
+            else -> {
+                null
+            }
+        }
 
     private fun live(sourceKey: String): Boolean =
         source.session.value.devices

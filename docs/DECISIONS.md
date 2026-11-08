@@ -485,3 +485,19 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 - Any other past state is sent as it is, with `setState`, which needs a decoder and no hidden
   values; otherwise the UI says why it can't be put back. Recordings use the same path, which also
   removes their own seq ambiguity.
+
+## 2026-11-08: A video that drops while the agent reads the screen
+- A dead stream keeps its last picture and sends no more, which looks exactly like a screen that
+  settled at once. Every read the agent makes (tap, screenshot, explore variant, baseline, restore
+  check) therefore checks the device's video is still the same stream before and after settling,
+  and fails with `VideoLost` otherwise. Found live: an explore across a reconnect reported the
+  "huge" variant as `ok` with the previous variant's frozen picture, flagged as a duplicate.
+- An explore stops at the variant whose video dropped rather than waiting for the stream to come
+  back: the new stream can take seconds, and the agent can explore again. The overlay is still
+  released; `restored` is null because there is no picture to check it against.
+- A tap, key or text whose video drops while the screen settles was already sent. Its error says
+  so and asks the agent to look before sending it again: a blind retry could type or pay twice.
+- The map does not check: its watcher is cancelled when the stream goes, and the last picture it
+  recorded was real when it was shown.
+- Limit: the check is only as fresh as the device's video list, which drops a stream when its
+  reader sees it end. A stream that stalls without ending still looks settled.

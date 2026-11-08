@@ -136,6 +136,13 @@ internal class TestTools(
             put("route", run.route.route())
             put("baseline", run.baseline.id)
             put("restored", run.restored)
+            if (run.restored == null && run.stoppedEarly == null) {
+                put(
+                    "restoredUnknown",
+                    "The video dropped before Kstate could check the screen came back; the overlay was released. " +
+                        "Take a screenshot once overview lists the video again.",
+                )
+            }
             run.stoppedEarly?.let { put("stoppedEarly", it) }
             putJsonArray("variants") {
                 run.results.forEach { r ->

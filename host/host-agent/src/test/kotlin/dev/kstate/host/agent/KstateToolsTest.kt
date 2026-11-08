@@ -2,11 +2,13 @@ package dev.kstate.host.agent
 
 import dev.kstate.host.agent.image.Picture
 import dev.kstate.host.agent.settle.SettleTiming
+import dev.kstate.host.agent.settle.VideoLost
 import dev.kstate.viewer.client.SourceCapabilities
 import io.modelcontextprotocol.kotlin.sdk.types.CallToolResult
 import io.modelcontextprotocol.kotlin.sdk.types.ImageContent
 import io.modelcontextprotocol.kotlin.sdk.types.TextContent
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -23,6 +25,7 @@ import kotlin.io.path.exists
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 /** The tools end to end: JSON-RPC in, the fake app reacting, text and pictures out. */
@@ -387,16 +390,34 @@ class KstateToolsTest {
                     SettleTiming(quietMillis = 300, graceMillis = 600, timeoutMillis = 3_000),
                     testScheduler.timeSource,
                 )
-            val exploring = async { agent.explore(FakeApp.KEY, limit = 2) }
+            val exploring = async { runCatching { agent.explore(FakeApp.KEY, limit = 2) } }
             runCurrent()
             val tapping = async { agent.driver.tap(null, 0.5f, 0.8f) }
             runCurrent()
 
             app.reconnectVideo()
-            exploring.await()
+            // The explore was reading its first picture when the video went: it has none to go on.
+            assertIs<VideoLost>(exploring.await().exceptionOrNull())
             tapping.await()
 
             assertEquals(setOf(2), app.touchedScreens.toSet(), "the tap went to the dead screen")
+        }
+
+    @Test
+    fun anExploreThatCouldNotCheckTheAppCameBackSaysWhy() =
+        runTest {
+            val (app, server) = server()
+            app.onRelease = {
+                backgroundScope.launch {
+                    delay(100)
+                    app.loseVideo()
+                }
+            }
+
+            val text = server.call("explore", """{"source":"${FakeApp.KEY}"}""").texts().single()
+
+            assertTrue("\"restored\":null" in text, text)
+            assertTrue("restoredUnknown" in text, text)
         }
 
     @Test
