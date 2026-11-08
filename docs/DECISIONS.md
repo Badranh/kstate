@@ -582,3 +582,13 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   Measured, not changed: 0.4 ms per rebuild with 36,000 states over 10 sources (an hour at 10
   states a second), about 0.4% of a core at that rate. Incremental lane lists would cost more in
   code than they save. Revisit if sessions grow by orders of magnitude.
+
+## 2026-11-08: Archives that fail or are too big, and chords on the tile
+- Export writes beside the target and moves over it whole: one that fails half way leaves no
+  truncated .kstate and an earlier export at that name as it was. Import counts bytes against
+  the smaller of its limit and what leaves 1 GiB free on the disk, so a small archive that
+  unpacks to a lot stops before the disk is full.
+- On a focused device tile, Command chords stay with Kstate (its shortcuts; Command+R typed an "r"
+  on the phone), Ctrl+letter goes to the device as that key with Ctrl held (select all, copy,
+  paste), and a control character is never typed: since text a key can't type is now pasted,
+  Ctrl+A's U+0001 would otherwise land in the field.

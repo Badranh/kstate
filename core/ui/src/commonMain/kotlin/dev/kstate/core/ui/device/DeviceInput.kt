@@ -3,6 +3,8 @@ package dev.kstate.core.ui.device
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
@@ -13,18 +15,17 @@ import androidx.compose.ui.input.pointer.pointerInput
 import dev.kstate.core.data.DeviceScreen
 import dev.kstate.core.model.TouchPhase
 
-/** Keys go to the device while the tile has focus: special keys as keycodes, the rest as text. */
+/** Keys go to the device while the tile has focus, as [deviceKey] decides; the rest stay with Kstate. */
 internal fun Modifier.deviceKeys(
     screen: DeviceScreen,
     enabled: Boolean,
 ): Modifier =
     onKeyEvent { event ->
         if (!enabled || event.type != KeyEventType.KeyDown) return@onKeyEvent false
-        val keycode = androidKeycode(event.key)
-        when {
-            keycode != null -> screen.key(keycode)
-            event.utf16CodePoint > 0 -> screen.text(event.utf16CodePoint.toChar().toString())
-            else -> return@onKeyEvent false
+        when (val action = deviceKey(event.key, event.utf16CodePoint, event.isMetaPressed, event.isCtrlPressed)) {
+            is DeviceKey.Press -> screen.key(action.keycode, action.metaState)
+            is DeviceKey.Text -> screen.text(action.text)
+            null -> return@onKeyEvent false
         }
         true
     }
