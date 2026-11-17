@@ -625,3 +625,34 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   and its text one word per line. When the stack can't give the device pane 280 dp and the
   details 320 dp, it keeps those heights and scrolls instead. Checked by measuring the real
   layout at 700x450 and by rendering it offscreen.
+
+## 2026-11-16: Three known defects
+- A turned device was squashed: viewers asked the decoder for a width and a height, and the tile
+  only asked again when the decoded size changed, which a fixed size never does. A viewer now asks
+  for a width only (`DeviceScreen.setOutputWidth`) and the decoder takes the height from each
+  frame's own shape. No request can stretch a picture, live, scrubbing across a turn or in a
+  recording, and since the decoded shape now changes with the device, the tile asks again for its
+  new width by itself. Live video on the host is still asked for at no less than the agent's 480
+  wide; a recording being replayed is asked for at the tile's width. The decoder never makes a
+  picture wider than the video: right after a turn the width asked for is still the other way's,
+  and a wide tile's width on an upright video would be a picture several times the video's size.
+  Tested on a stream recorded from the emulator while it was turned
+  (`scrcpy-v5.0.1-h264-rotation.bin`, 12 pictures upright then 14 on its side), live and scrubbing
+  back across the turn.
+  Known and left: a paused picture stays at the width it was decoded at until the next frame or
+  seek (drawn scaled, never stretched), and the tile and decoder may settle a pixel apart for some
+  tile sizes, which a review modelled but nobody has seen.
+- A command's send is inside its timeout. A socket whose peer stopped reading never finishes a
+  send, and the caller (the UI, or the agent holding a tool call) waited on it without limit.
+  The three seconds now cover the send and the answer together.
+- The web viewer listens for `hashchange`. An invite opened in a tab that already has the viewer
+  changes only the fragment, so the page was not loaded again and stayed on "Your access ended".
+  The tab now shows what its address says, as a fresh load of that address would: a token starts
+  the join over, whatever the tab showed, and Back away from an invite returns to the viewer with
+  whatever access it still has. Opening an invite while watching does close the live view first;
+  keeping it open until the new join succeeds needs the join screen drawn over a running viewer,
+  and Back is the cheaper way out of a bad link. A join still on its way for the invite being left
+  is cancelled. A join request that gets no answer says so instead of throwing: the exception used
+  to cancel the scope every later join runs in. `app/web` has no test source set (wasm UI tests
+  need a webpack bundle), so these were checked by hand in a browser: the reused tab and the
+  unanswered request before and after, Back from an invite after only.
