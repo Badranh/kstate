@@ -1,6 +1,8 @@
 # Latest stable versions resolved from Maven Central / Google Maven / Gradle Plugin Portal on 2026-11-05.
 # detekt is the one pre-release: see docs/DECISIONS.md.
 [versions]
+# Kstate's own version: the SDK, protocol and adapters are published under it.
+kstate = "0.1.0-SNAPSHOT"
 kotlin = "2.4.21"
 agp = "9.5.0"
 compose-multiplatform = "1.12.2"
@@ -98,6 +100,7 @@ gradle-android = { module = "com.android.tools.build:gradle", version.ref = "agp
 gradle-detekt = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 gradle-ktlint = { module = "org.jlleitschuh.gradle.ktlint:org.jlleitschuh.gradle.ktlint.gradle.plugin", version.ref = "ktlint-gradle" }
 gradle-bcv = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "binary-compatibility-validator" }
+gradle-maven-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "maven-publish" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -107,7 +110,6 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
 kstate-lint = { id = "kstate.lint" }
 kstate-kmp-library = { id = "kstate.kmp-library" }
 kstate-kmp-android-library = { id = "kstate.kmp-android-library" }

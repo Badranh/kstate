@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.gradle.detekt)
     implementation(libs.gradle.ktlint)
     implementation(libs.gradle.bcv)
+    implementation(libs.gradle.maven.publish)
     testImplementation(libs.kotlin.test)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

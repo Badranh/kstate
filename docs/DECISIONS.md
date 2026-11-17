@@ -656,3 +656,22 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   to cancel the scope every later join runs in. `app/web` has no test source set (wasm UI tests
   need a webpack bundle), so these were checked by hand in a browser: the reused tab and the
   unanswered request before and after, Back from an invite after only.
+
+## 2026-11-17: The SDK gets Maven coordinates
+- `kstate.kmp-sdk`, already the plugin of every public module, now also gives it coordinates
+  `dev.kstate:<module>` at the catalog's `kstate` version (`0.1.0-SNAPSHOT`) through the vanniktech
+  plugin, so `publishToMavenLocal` works and an app outside this repository can use the SDK. No
+  signing and no Maven Central yet: `dev.kstate` there needs proof of the `kstate.dev` domain, and
+  the namespace is the owner's call. Checked with two apps outside the repository built against
+  the published artifacts: a JVM one that runs, and an Android one whose debug build reported its
+  state to Kstate on the emulator while its release build held no SDK classes but sdk-noop's.
+- `sdk-koin` is no longer published or API-checked: it has no code yet, and an empty artifact
+  would only mislead. It comes back when its helpers are built.
+- Apps need Kotlin 2.3 or newer. The SDK is built with 2.4, whose metadata a 2.2 compiler can't
+  read (AGP 9.5's built-in Kotlin defaults to 2.2 and fails); 2.3.0 works. Supporting 2.2 would
+  mean building the SDK against older Kotlin, coroutines and serialization.
+- The README tells apps to depend on `sdk-core` with `implementation` and swap it for `sdk-noop` on
+  every release classpath, rather than `debugImplementation`/`releaseImplementation`: adapters and
+  shared modules carry `sdk-core` through `api`, which the split can't take out (a review caught
+  it). The swap uses the guard plugin's own pattern so flavored release builds are covered; checked
+  with an outside app using adapter-orbit and a `prod` flavor.
