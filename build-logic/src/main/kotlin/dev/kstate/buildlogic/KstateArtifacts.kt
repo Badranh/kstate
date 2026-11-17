@@ -2,7 +2,10 @@ package dev.kstate.buildlogic
 
 /** Recognises Kstate's debug SDK among resolved dependencies, written as `project :path` or `group:module`. */
 object KstateArtifacts {
-    private val PUBLISHED_SDK_CORE = Regex("""^dev\.kstate:sdk-core(-[a-z0-9]+)?$""")
+    /** The Maven group every published Kstate module is under: Maven Central's namespace for the owner's GitHub account. */
+    const val GROUP = "io.github.badranh"
+
+    private val PUBLISHED_SDK_CORE = Regex("""^${Regex.escape(GROUP)}:sdk-core(-[a-z0-9]+)?$""")
 
     fun isSdkCore(component: String): Boolean =
         PUBLISHED_SDK_CORE.matches(component) || (component.startsWith("project ") && component.endsWith(":sdk-core"))

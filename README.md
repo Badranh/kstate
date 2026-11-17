@@ -59,7 +59,7 @@ higher. Take only Kstate from `mavenLocal()`:
 // settings.gradle.kts
 dependencyResolutionManagement {
     repositories {
-        mavenLocal { content { includeGroup("dev.kstate") } }
+        mavenLocal { content { includeGroup("io.github.badranh") } }
         google()
         mavenCentral()
     }
@@ -73,14 +73,14 @@ still build, with none of the SDK inside:
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation("dev.kstate:sdk-core:0.1.0-SNAPSHOT")
+    implementation("io.github.badranh:sdk-core:0.1.0-SNAPSHOT")
 }
 
 // Every release classpath, flavored or not, gets sdk-noop instead of sdk-core.
 val releaseClasspath = Regex("(^release|Release)\\w*(Runtime|Compile)Classpath$")
 configurations.matching { releaseClasspath.containsMatchIn(it.name) }.configureEach {
     resolutionStrategy.dependencySubstitution {
-        substitute(module("dev.kstate:sdk-core")).using(module("dev.kstate:sdk-noop:0.1.0-SNAPSHOT"))
+        substitute(module("io.github.badranh:sdk-core")).using(module("io.github.badranh:sdk-noop:0.1.0-SNAPSHOT"))
     }
 }
 ```
@@ -111,11 +111,11 @@ above covers it.
 
 | Library | Artifact | Call |
 | --- | --- | --- |
-| Orbit | `dev.kstate:adapter-orbit` | `inspect("Name")` inside a `ContainerHost` |
-| MVIKotlin | `dev.kstate:adapter-mvikotlin` | `store.inspect(scope, "Name")` |
-| Decompose | `dev.kstate:adapter-decompose` | `value.inspect(lifecycle, "Name")` |
-| LiveData | `dev.kstate:adapter-livedata` | `liveData.inspect(owner, "Name")` |
-| RxJava 3 | `dev.kstate:adapter-rx` | `observable.inspect(scope, "Name")` |
+| Orbit | `io.github.badranh:adapter-orbit` | `inspect("Name")` inside a `ContainerHost` |
+| MVIKotlin | `io.github.badranh:adapter-mvikotlin` | `store.inspect(scope, "Name")` |
+| Decompose | `io.github.badranh:adapter-decompose` | `value.inspect(lifecycle, "Name")` |
+| LiveData | `io.github.badranh:adapter-livedata` | `liveData.inspect(owner, "Name")` |
+| RxJava 3 | `io.github.badranh:adapter-rx` | `observable.inspect(scope, "Name")` |
 
 ## Agent testing
 

@@ -10,9 +10,9 @@ class KstateArtifactsTest {
             listOf(true, true, true, true),
             listOf(
                 KstateArtifacts.isSdkCore("project :sdk:sdk-core"),
-                KstateArtifacts.isSdkCore("dev.kstate:sdk-core"),
-                KstateArtifacts.isSdkCore("dev.kstate:sdk-core-android"),
-                KstateArtifacts.isSdkCore("dev.kstate:sdk-core-jvm"),
+                KstateArtifacts.isSdkCore("io.github.badranh:sdk-core"),
+                KstateArtifacts.isSdkCore("io.github.badranh:sdk-core-android"),
+                KstateArtifacts.isSdkCore("io.github.badranh:sdk-core-jvm"),
             ),
         )
     }
@@ -23,8 +23,8 @@ class KstateArtifactsTest {
             listOf(false, false, false, false),
             listOf(
                 KstateArtifacts.isSdkCore("project :sdk:sdk-noop"),
-                KstateArtifacts.isSdkCore("dev.kstate:sdk-noop-android"),
-                KstateArtifacts.isSdkCore("dev.kstate:adapter-orbit"),
+                KstateArtifacts.isSdkCore("io.github.badranh:sdk-noop-android"),
+                KstateArtifacts.isSdkCore("io.github.badranh:adapter-orbit"),
                 KstateArtifacts.isSdkCore("com.example:sdk-core"),
             ),
         )

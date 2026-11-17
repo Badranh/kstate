@@ -659,10 +659,13 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
 
 ## 2026-11-17: The SDK gets Maven coordinates
 - `kstate.kmp-sdk`, already the plugin of every public module, now also gives it coordinates
-  `dev.kstate:<module>` at the catalog's `kstate` version (`0.1.0-SNAPSHOT`) through the vanniktech
-  plugin, so `publishToMavenLocal` works and an app outside this repository can use the SDK. No
-  signing and no Maven Central yet: `dev.kstate` there needs proof of the `kstate.dev` domain, and
-  the namespace is the owner's call. Checked with two apps outside the repository built against
+  `io.github.badranh:<module>` at the catalog's `kstate` version (`0.1.0-SNAPSHOT`) through the
+  vanniktech plugin, so `publishToMavenLocal` works and an app outside this repository can use the
+  SDK. The group is Maven Central's namespace for the owner's GitHub account: `dev.kstate` would
+  need the `kstate.dev` domain, which the owner doesn't have. Only the group changed; the Kotlin
+  packages stay `dev.kstate`, since Central checks the group alone. `KstateArtifacts.GROUP` is the
+  one definition, used both to publish and by the release guard to spot a published `sdk-core`.
+  No signing and no Maven Central upload yet. Checked with two apps outside the repository built against
   the published artifacts: a JVM one that runs, and an Android one whose debug build reported its
   state to Kstate on the emulator while its release build held no SDK classes but sdk-noop's.
 - `sdk-koin` is no longer published or API-checked: it has no code yet, and an empty artifact

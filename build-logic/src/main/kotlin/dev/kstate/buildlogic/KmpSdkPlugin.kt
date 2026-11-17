@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 /**
  * Public, published KMP API: explicit API mode, binary-compatibility dumps, and Maven coordinates
- * `dev.kstate:<module name>` at the catalog's `kstate` version. Apply next to a target plugin such
+ * `io.github.badranh:<module name>` at the catalog's `kstate` version. Apply next to a target plugin such
  * as kstate.kmp-library.
  */
 class KmpSdkPlugin : Plugin<Project> {
@@ -27,14 +27,14 @@ class KmpSdkPlugin : Plugin<Project> {
             publish()
         }
 
-    // Only coordinates and a POM for now: no signing and no Maven Central until the project has a
-    // namespace it can publish under there. publishToMavenLocal works as it is.
+    // Only coordinates and a POM for now: no signing and no Maven Central yet. publishToMavenLocal
+    // works as it is.
     private fun Project.publish() {
         pluginManager.apply("com.vanniktech.maven.publish")
         // Taken out here: inside pom {} a bare `name` is the POM's own property, not the module's.
         val module = name
         extensions.configure<MavenPublishBaseExtension> {
-            coordinates(GROUP, module, libs.version("kstate"))
+            coordinates(KstateArtifacts.GROUP, module, libs.version("kstate"))
             pom {
                 name.set("Kstate $module")
                 description.set("Kstate's debug SDK for Kotlin Multiplatform apps: $module.")
@@ -48,9 +48,5 @@ class KmpSdkPlugin : Plugin<Project> {
                 }
             }
         }
-    }
-
-    private companion object {
-        const val GROUP = "dev.kstate"
     }
 }
