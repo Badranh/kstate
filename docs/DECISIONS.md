@@ -237,8 +237,9 @@ refuses to start on a physical device unless `allowPhysicalDevice` is set.
   them, and the timeline draws them as their own (red) ticks.
 - Paused on a past state, the detail pane offers "Show this state" (overlay) and "Write this
   state" (write-through); live, Freeze or Release. Only what the source advertises is offered.
-- The Edit tab (⌘E) builds a form from the schema (text, numbers, booleans, enums; nested values
-  and lists as JSON fields) and falls back to raw JSON without one. Redacted fields are read-only,
+- The Edit tab (⌘E) builds a form from the schema (text, numbers, booleans, enums; nested classes
+  as their own fields; lists, maps and sealed values as JSON fields) and falls back to raw JSON
+  without one. Redacted fields are read-only,
   input is validated before sending, and the app's refusal is shown with its path.
 
 ## 2026-11-05: M4 acceptance, measured
