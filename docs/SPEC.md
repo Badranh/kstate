@@ -1,6 +1,6 @@
 # Kstate: Technical Spec & Claude Code Handover
 
-Nov 5, 2026 · @Hassan Badran
+Nov 5, 2026
 
 Kstate is an open-source macOS app that streams Android emulators (later iOS Simulators) side by side with the live UI state of the app under test, on one scrubbable timeline, with state revert/edit and remote collaboration. It works with any architecture that exposes state as a Flow. The project name is Kstate (package root `dev.kstate`), renamed from the working name "Statecast" on 2026-11-05.
 
