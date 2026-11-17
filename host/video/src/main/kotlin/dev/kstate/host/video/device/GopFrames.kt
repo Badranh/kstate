@@ -2,7 +2,6 @@ package dev.kstate.host.video.device
 
 import dev.kstate.host.server.timeline.GopSource
 import dev.kstate.host.video.decode.FfmpegDecoder
-import dev.kstate.host.video.decode.OutputSize
 import dev.kstate.host.video.decode.VideoDecoder
 
 /** The picture a video shows at a time, live or recorded: decoded with a fresh decoder from the key frame before it. */
@@ -13,11 +12,11 @@ class GopFrames(
     fun frameAt(
         source: GopSource,
         hostTs: Long,
-        outputSize: OutputSize?,
+        outputWidth: Int?,
     ): LiveFrame? {
         val gop = source.gopAt(hostTs) ?: return null
         return decoders().use { decoder ->
-            decoder.outputSize = outputSize
+            decoder.outputWidth = outputWidth
             val config = gop.config ?: ByteArray(0)
             // Only the last frame is shown, so the others are decoded without making pictures of them.
             var shownAt: Long? = null

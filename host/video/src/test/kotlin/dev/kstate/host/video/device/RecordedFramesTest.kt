@@ -41,7 +41,7 @@ class RecordedFramesTest {
         assertEquals(video.timeline.frameTimes(), recorded.frameTimes())
         recorded.frameTimes().forEach { at ->
             val live = checkNotNull(video.frameAt(at))
-            val replayed = checkNotNull(frames.frameAt(recorded, at, outputSize = null))
+            val replayed = checkNotNull(frames.frameAt(recorded, at, outputWidth = null))
             assertEquals(live.hostTs, replayed.hostTs)
             assertContentEquals(live.frame.rgba, replayed.frame.rgba, "frame at $at")
         }

@@ -7,7 +7,6 @@ import dev.kstate.host.video.control.ControlMessage
 import dev.kstate.host.video.control.ControlMessageWriter
 import dev.kstate.host.video.decode.DecodedFrame
 import dev.kstate.host.video.decode.FfmpegDecoder
-import dev.kstate.host.video.decode.OutputSize
 import dev.kstate.host.video.decode.VideoDecoder
 import dev.kstate.host.video.scrcpy.VideoConnection
 import dev.kstate.host.video.stream.ConfigMerger
@@ -66,9 +65,9 @@ class DeviceVideo(
     val deviceName: StateFlow<String?> = name.asStateFlow()
     val state: StateFlow<VideoState> = streamState.asStateFlow()
 
-    /** Pixel size to decode into, usually the tile's; null keeps the video's own size. */
+    /** How wide pictures are decoded, usually the tile's width; null keeps the video's own size. */
     @Volatile
-    var outputSize: OutputSize? = null
+    var outputWidth: Int? = null
 
     fun start(): Thread = thread(name = "kstate-video", isDaemon = true) { stream() }
 
@@ -97,7 +96,7 @@ class DeviceVideo(
     private val scrubbing = GopFrames(decoders)
 
     /** The picture showing at [hostTs]: decoded from the key frame before it. Null before the first one. */
-    fun frameAt(hostTs: Long): LiveFrame? = scrubbing.frameAt(timeline, hostTs, outputSize)
+    fun frameAt(hostTs: Long): LiveFrame? = scrubbing.frameAt(timeline, hostTs, outputWidth)
 
     /** Sends input to the device. Dropped when the connection is already gone. */
     fun send(message: ControlMessage) {
@@ -148,7 +147,7 @@ class DeviceVideo(
         hostTs: Long,
     ) {
         merged ?: return
-        decoder.outputSize = outputSize
+        decoder.outputWidth = outputWidth
         decoder.decode(merged.data, hostTs).lastOrNull()?.let { live.value = LiveFrame(hostTs, it) }
     }
 }

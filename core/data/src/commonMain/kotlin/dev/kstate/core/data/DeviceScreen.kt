@@ -12,11 +12,11 @@ interface DeviceScreen {
     /** The picture showing at [hostTs]. Blocking: call it off the UI thread. */
     fun frameAt(hostTs: Long): VideoFrame?
 
-    /** The pixel size the viewer draws at, so frames are scaled once, on the decode thread. */
-    fun setOutputSize(
-        width: Int,
-        height: Int,
-    )
+    /**
+     * How many pixels wide the viewer draws the picture, so frames are scaled once, on the decode
+     * thread. Only a width: the height is the picture's own, whichever way the device is turned.
+     */
+    fun setOutputWidth(width: Int)
 
     fun touch(
         phase: TouchPhase,

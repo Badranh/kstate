@@ -4,7 +4,6 @@ import dev.kstate.host.server.timeline.Gop
 import dev.kstate.host.server.timeline.GopSource
 import dev.kstate.host.server.timeline.VideoSample
 import dev.kstate.host.video.decode.DecodedFrame
-import dev.kstate.host.video.decode.OutputSize
 import dev.kstate.host.video.decode.VideoDecoder
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,7 +18,7 @@ class GopFramesTest {
         var pictures = 0
         private var newest: Long? = null
         private var skimmed = 0
-        override var outputSize: OutputSize? = null
+        override var outputWidth: Int? = null
 
         override fun decode(
             data: ByteArray,
@@ -78,7 +77,7 @@ class GopFramesTest {
     fun aSeekMakesOnePictureHoweverFarItIsFromTheKeyFrame() {
         val decoder = CountingDecoder()
 
-        val shown = assertNotNull(GopFrames { decoder }.frameAt(source, hostTs = 1_059L, outputSize = null))
+        val shown = assertNotNull(GopFrames { decoder }.frameAt(source, hostTs = 1_059L, outputWidth = null))
 
         assertEquals(1, decoder.pictures)
         assertEquals(1_059L, shown.hostTs)
@@ -88,7 +87,7 @@ class GopFramesTest {
     fun aFrameThatOnlyComesOutOnFlushIsShownAtTheLastSample() {
         val decoder = CountingDecoder(held = 2)
 
-        val shown = assertNotNull(GopFrames { decoder }.frameAt(source, hostTs = 1_059L, outputSize = null))
+        val shown = assertNotNull(GopFrames { decoder }.frameAt(source, hostTs = 1_059L, outputWidth = null))
 
         assertEquals(1, decoder.pictures)
         assertEquals(1_059L, shown.hostTs)

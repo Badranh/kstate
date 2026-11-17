@@ -83,10 +83,7 @@ class KstateAppTest {
 
         override fun frameAt(hostTs: Long): VideoFrame? = null
 
-        override fun setOutputSize(
-            width: Int,
-            height: Int,
-        ) = Unit
+        override fun setOutputWidth(width: Int) = Unit
 
         override fun touch(
             phase: TouchPhase,

@@ -4,7 +4,6 @@ import dev.kstate.core.data.DeviceScreen
 import dev.kstate.core.model.TouchPhase
 import dev.kstate.core.model.VideoFrame
 import dev.kstate.host.server.timeline.GopSource
-import dev.kstate.host.video.decode.OutputSize
 import dev.kstate.host.video.device.GopFrames
 import dev.kstate.host.video.device.LiveFrame
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,17 +15,14 @@ class RecordedScreen(
     private val decoding: GopFrames = GopFrames(),
 ) : DeviceScreen {
     @Volatile
-    private var outputSize: OutputSize? = null
+    private var outputWidth: Int? = null
 
     override val frames: StateFlow<VideoFrame?> = MutableStateFlow(null)
 
-    override fun frameAt(hostTs: Long): VideoFrame? = decoding.frameAt(video, hostTs, outputSize)?.toViewer()
+    override fun frameAt(hostTs: Long): VideoFrame? = decoding.frameAt(video, hostTs, outputWidth)?.toViewer()
 
-    override fun setOutputSize(
-        width: Int,
-        height: Int,
-    ) {
-        outputSize = OutputSize(width, height)
+    override fun setOutputWidth(width: Int) {
+        outputWidth = width
     }
 
     override fun touch(

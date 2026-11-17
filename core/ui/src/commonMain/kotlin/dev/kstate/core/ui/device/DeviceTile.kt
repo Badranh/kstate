@@ -119,20 +119,23 @@ private fun Screen(
                 )
             }
         } else {
-            LaunchedEffect(frameSize, box) { requestOutputSize(screen, frameSize, box) }
+            LaunchedEffect(frameSize, box) { requestOutputWidth(screen, frameSize, box) }
             VideoCanvas(picture)
         }
     }
 }
 
-/** Decode straight to the pixels the tile shows, so nothing is scaled twice. */
-private fun requestOutputSize(
+/**
+ * Decode straight to the pixels the tile shows, so nothing is scaled twice. Asked again whenever the
+ * picture changes shape, as when the device turns: the phone on screen turns with it.
+ */
+private fun requestOutputWidth(
     screen: DeviceScreen,
     frame: IntSize,
     box: IntSize,
 ) {
     val rect = fit(frame.width, frame.height, box.width.toFloat(), box.height.toFloat())
-    if (rect.width >= 1f && rect.height >= 1f) screen.setOutputSize(rect.width.roundToInt(), rect.height.roundToInt())
+    if (rect.width >= 1f && rect.height >= 1f) screen.setOutputWidth(rect.width.roundToInt())
 }
 
 @Composable

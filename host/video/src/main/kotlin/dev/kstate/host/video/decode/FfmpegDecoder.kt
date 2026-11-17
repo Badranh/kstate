@@ -25,7 +25,7 @@ class FfmpegDecoder : VideoDecoder {
     private var scaler: SwsContext? = null
     private var output: RgbaBuffer? = null
 
-    override var outputSize: OutputSize? = null
+    override var outputWidth: Int? = null
 
     override fun decode(
         data: ByteArray,
@@ -88,7 +88,9 @@ class FfmpegDecoder : VideoDecoder {
     }
 
     private fun toRgba(frame: AVFrame): DecodedFrame {
-        val target = outputSize ?: OutputSize(frame.width(), frame.height())
+        val target =
+            outputWidth?.let { scaledSize(frame.width(), frame.height(), it) }
+                ?: OutputSize(frame.width(), frame.height())
         scaler =
             swscale.sws_getCachedContext(
                 scaler,

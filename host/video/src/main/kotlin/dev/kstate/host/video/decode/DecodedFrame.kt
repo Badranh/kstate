@@ -8,15 +8,31 @@ class DecodedFrame(
     val rgba: ByteArray,
 )
 
-data class OutputSize(
+internal data class OutputSize(
     val width: Int,
     val height: Int,
 )
 
+/**
+ * A [width] x [height] picture made [outputWidth] wide, or left as it is when that would enlarge it.
+ * The height follows from the picture itself, so nothing a viewer asks for can stretch it: a device
+ * that turns keeps its shape.
+ */
+internal fun scaledSize(
+    width: Int,
+    height: Int,
+    outputWidth: Int,
+): OutputSize {
+    if (width <= 0 || height <= 0) return outputWidth.coerceAtLeast(1).let { OutputSize(it, it) }
+    val wide = outputWidth.coerceIn(1, width)
+    val tall = (height.toLong() * wide + width / 2) / width
+    return OutputSize(wide, tall.coerceIn(1, Int.MAX_VALUE.toLong()).toInt())
+}
+
 /** Turns encoded access units into pictures. Not thread-safe: one per device, on its own thread. */
 interface VideoDecoder : AutoCloseable {
-    /** Null keeps the video's own size. */
-    var outputSize: OutputSize?
+    /** How wide pictures are made, each keeping its own shape. Null keeps the video's own size. */
+    var outputWidth: Int?
 
     /** Every picture this packet completes; empty for packets that don't, or can't be decoded. */
     fun decode(

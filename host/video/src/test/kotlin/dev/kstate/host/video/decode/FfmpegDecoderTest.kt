@@ -91,8 +91,8 @@ class FfmpegDecoderTest {
     }
 
     @Test
-    fun scalesToTheRequestedOutputSize() {
-        decoder.outputSize = OutputSize(71, 160)
+    fun scalesToTheRequestedWidthKeepingThePicturesShape() {
+        decoder.outputWidth = 71
 
         val frame = decodeAll().first()
 

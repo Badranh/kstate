@@ -3,10 +3,6 @@ package dev.kstate.host.video.device
 import dev.kstate.host.video.control.ControlMessage
 import dev.kstate.host.video.control.ControlMessageWriter
 import dev.kstate.host.video.control.Position
-import dev.kstate.host.video.decode.OutputSize
-import dev.kstate.host.video.scrcpy.VideoConnection
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -16,17 +12,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 class DeviceVideoTest {
-    private class FixtureConnection : VideoConnection {
-        override val video: InputStream =
-            checkNotNull(javaClass.getResourceAsStream("/fixtures/scrcpy-v5.0.1-h264-142x320.bin")).apply { read() }
-        override val control = ByteArrayOutputStream()
-        var closed = false
-
-        override fun close() {
-            closed = true
-        }
-    }
-
     private val connection = FixtureConnection()
     private var now = 0L
     private val video =
@@ -104,8 +89,8 @@ class DeviceVideoTest {
     }
 
     @Test
-    fun liveFramesUseTheRequestedOutputSize() {
-        video.outputSize = OutputSize(71, 160)
+    fun liveFramesUseTheRequestedWidth() {
+        video.outputWidth = 71
 
         video.stream()
 
@@ -115,6 +100,17 @@ class DeviceVideoTest {
                 ?.frame
                 ?.width,
         )
+    }
+
+    /** A tile wider than the video draws it larger itself; the decoder never makes pixels up. */
+    @Test
+    fun aWidthBeyondTheVideosOwnKeepsTheVideosSize() {
+        video.outputWidth = 320
+
+        video.stream()
+
+        val frame = checkNotNull(video.frames.value).frame
+        assertEquals(142 to 320, frame.width to frame.height)
     }
 
     @Test
