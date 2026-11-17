@@ -7,8 +7,9 @@ import dev.kstate.core.protocol.Release
 import dev.kstate.core.protocol.Restore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
@@ -54,6 +55,23 @@ class CommandBusTest {
             assertEquals(CommandOutcome.TimedOut, outcome.await())
         }
 
+    /** A socket whose peer stopped reading never finishes a send: the caller must not wait on it forever. */
+    @Test
+    fun aSendThatStallsIsATimeout() =
+        runTest {
+            bus.attach("emulator-5554", connectionId = 1) { awaitCancellation() }
+
+            val outcome = async { bus.send("emulator-5554") { id -> Release(id, "Counter-1") } }
+            advanceTimeBy(3.1.seconds)
+
+            try {
+                assertTrue(outcome.isCompleted, "the command is still waiting on the stalled send")
+                assertEquals(CommandOutcome.TimedOut, outcome.await())
+            } finally {
+                outcome.cancel()
+            }
+        }
+
     @Test
     fun aConnectionThatClosedUnderASendIsNotConnected() =
         runTest {
@@ -81,13 +99,14 @@ class CommandBusTest {
     @Test
     fun aCallerCancelledWhileWaitingIsStillCancelled() =
         runTest {
+            lateinit var caller: Job
             bus.attach("emulator-5554", connectionId = 1) {
                 // The socket dies as the caller is cancelled: only the caller's cancellation may win.
-                currentCoroutineContext().cancel()
+                caller.cancel()
                 throw CancellationException("session cancelled")
             }
             var carriedOn = false
-            val caller =
+            caller =
                 launch {
                     bus.send("emulator-5554") { id -> Release(id, "Counter-1") }
                     carriedOn = true

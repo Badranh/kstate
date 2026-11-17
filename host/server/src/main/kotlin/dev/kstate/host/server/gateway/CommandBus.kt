@@ -20,7 +20,7 @@ sealed interface CommandOutcome {
         val result: CommandResult,
     ) : CommandOutcome
 
-    /** The app didn't answer within the bus timeout. */
+    /** The command wasn't sent and answered within the bus timeout. */
     data object TimedOut : CommandOutcome
 
     /** No app is connected on that device, or its connection closed before it answered. */
@@ -76,8 +76,11 @@ class CommandBus(
         pending[cmdId] = answer
         link.pending += cmdId
         return try {
-            link.send(build(cmdId))
-            withTimeoutOrNull(timeout) { answer.await() } ?: CommandOutcome.TimedOut
+            // The send is inside the timeout too: a socket whose peer stopped reading never finishes one.
+            withTimeoutOrNull(timeout) {
+                link.send(build(cmdId))
+                answer.await()
+            } ?: CommandOutcome.TimedOut
         } catch (_: IOException) {
             CommandOutcome.NotConnected
         } catch (_: ClosedSendChannelException) {
