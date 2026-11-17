@@ -28,8 +28,10 @@ import dev.kstate.app.web.data.HostConnection
 import dev.kstate.app.web.data.VideoConnections
 import dev.kstate.app.web.data.video.WebVideoScreen
 import dev.kstate.app.web.data.video.webCodecsAvailable
+import dev.kstate.app.web.platform.UNREACHABLE
 import dev.kstate.app.web.platform.forgetJoinToken
 import dev.kstate.app.web.platform.joinTokenFromHash
+import dev.kstate.app.web.platform.onAddressChanged
 import dev.kstate.app.web.platform.postJoin
 import dev.kstate.app.web.resources.Res
 import dev.kstate.app.web.resources.noto_color_emoji
@@ -41,6 +43,7 @@ import dev.kstate.core.session.data.remote.RemoteSession
 import dev.kstate.core.session.data.wire.FromViewer
 import dev.kstate.core.session.data.wire.ViewerInput
 import dev.kstate.feature.inspector.ui.KstateApp
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.buildJsonObject
@@ -94,26 +97,41 @@ private fun WebViewer(token: String?) {
     var phase by remember { mutableStateOf<Phase>(token?.let { Phase.Join(it) } ?: Phase.Viewing) }
     var busy by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    var joining by remember { mutableStateOf<Job?>(null) }
+    // The tab shows what its address says, as a fresh load of that address would: an invite opened
+    // here asks to join with it, whatever the tab was showing, so a guest whose access ended isn't
+    // stuck on that message until they think to reload; Back away from an invite that didn't work
+    // returns to the viewer, which still has whatever access it had.
+    DisposableEffect(Unit) {
+        onAddressChanged { newToken ->
+            if (newToken == null && phase !is Phase.Join) return@onAddressChanged
+            // An answer still on its way belongs to the invite being left.
+            joining?.cancel()
+            busy = false
+            phase = newToken?.let { Phase.Join(it) } ?: Phase.Viewing
+        }
+        onDispose { onAddressChanged(null) }
+    }
     when (val current = phase) {
         is Phase.Join -> {
             JoinScreen(current.error, busy) { name ->
                 busy = true
-                scope.launch {
-                    val body =
-                        buildJsonObject {
-                            put("token", current.token)
-                            put("name", name)
-                        }.toString()
-                    val status = postJoin(body).await<JsNumber>().toInt()
-                    busy = false
-                    if (status == HTTP_OK) {
-                        forgetJoinToken()
-                        phase = Phase.Viewing
-                    } else {
-                        phase =
-                            current.copy(error = "This invite link is no longer valid. Ask the owner for a new one.")
+                joining =
+                    scope.launch {
+                        val body =
+                            buildJsonObject {
+                                put("token", current.token)
+                                put("name", name)
+                            }.toString()
+                        val status = postJoin(body).await<JsNumber>().toInt()
+                        busy = false
+                        if (status == HTTP_OK) {
+                            forgetJoinToken()
+                            phase = Phase.Viewing
+                        } else {
+                            phase = current.copy(error = joinError(status))
+                        }
                     }
-                }
             }
         }
 
@@ -126,6 +144,13 @@ private fun WebViewer(token: String?) {
         }
     }
 }
+
+private fun joinError(status: Int): String =
+    if (status == UNREACHABLE) {
+        "Couldn't reach the host. Check your connection and try again."
+    } else {
+        "This invite link is no longer valid. Ask the owner for a new one."
+    }
 
 @Composable
 private fun Viewing(onAccessEnded: () -> Unit) {

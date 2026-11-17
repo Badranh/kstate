@@ -22,10 +22,27 @@ internal fun joinTokenFromHash(): String? =
         ?.removePrefix("join=")
         ?.takeIf { it.isNotBlank() }
 
-/** Removes the token from the address bar and history once used, so it isn't shared by copying the URL. */
+/**
+ * Calls [onToken] when the address changes in this tab after the page has loaded, with the invite
+ * token now in it or null when there is none: an invite link opened here, or Back away from one.
+ * Only the fragment changes then, so the browser doesn't load the page again and
+ * [joinTokenFromHash] at start never sees it. Null stops listening.
+ */
+internal fun onAddressChanged(onToken: ((String?) -> Unit)?) {
+    window.onhashchange = onToken?.let { notify -> { notify(joinTokenFromHash()) } }
+}
+
+/**
+ * Removes the token from the address bar once used, so it isn't shared by copying the URL. Only this
+ * history entry is rewritten, and without a `hashchange`.
+ */
 internal fun forgetJoinToken(): Unit = js("history.replaceState(null, '', location.pathname + location.search)")
 
-/** Posts the token and name; resolves to the HTTP status. The cookie comes back HttpOnly. */
+/**
+ * Posts the token and name; resolves to the HTTP status, or [UNREACHABLE] when the request never
+ * got an answer. It never rejects: a failed join is something to tell the guest, not an exception.
+ * The cookie comes back HttpOnly.
+ */
 @Suppress("UNUSED_PARAMETER")
 internal fun postJoin(body: String): Promise<JsNumber> =
     js(
@@ -34,5 +51,8 @@ internal fun postJoin(body: String): Promise<JsNumber> =
             headers: { 'Content-Type': 'application/json' },
             body: body,
             credentials: 'same-origin',
-        }).then(r => r.status)""",
+        }).then(r => r.status, () => 0)""",
     )
+
+/** What [postJoin] resolves to when the host couldn't be reached at all. */
+internal const val UNREACHABLE = 0
